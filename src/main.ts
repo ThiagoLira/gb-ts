@@ -1,6 +1,16 @@
-function greeter(person: string) {
-    return "Hello, " + person;
+import { CPU } from "./cpu"
+import { RegisterSet } from "./registerset"
+
+
+
+
+
+
+
+
+function main() {
+
+
+    let cpu = new CPU(new RegisterSet());
+
 }
-
-let user = "Jane User";
-

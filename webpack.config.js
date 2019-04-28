@@ -6,10 +6,7 @@ module.exports = {
     path: __dirname + '/lib',
     filename: 'index_bundle.js'
   },
-  target: 'node',
-//  node: {
-//  fs: "empty"
-//  },
+  target: 'web',
   plugins: [
     new HtmlWebpackPlugin()
   ]

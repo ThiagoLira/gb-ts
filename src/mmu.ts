@@ -27,6 +27,20 @@ export class MMU {
 
     rom: number[] = [];
 
+    vram: number[] = [];
+
+    iram: number[] = [];
+
+
+
+
+
+
+
+
+
+
+
     readLocalFile(filePath: string) {
         var fileRequest = new XMLHttpRequest();
 

@@ -1,4 +1,4 @@
-import { RegisterSet } from "./registerset"
+import { Registers } from "./registers"
 
 
 
@@ -7,24 +7,17 @@ import { RegisterSet } from "./registerset"
 
 export class CPU {
 
-    registers: RegisterSet;
 
+    registers: Registers;
 
-
-    constructor(registers: RegisterSet) {
+    constructor(registers: Registers) {
 
         this.registers = registers;
-
     }
-
-
-
 
     // reset CPU
     reset() {
-
-        // All registers return to default value
-        this.registers = new RegisterSet();
+        this.registers = new Registers();
 
     }
 

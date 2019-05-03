@@ -1,6 +1,6 @@
 import { CPU } from "./cpu"
-import { RegisterSet } from "./registerset"
-import { MMU } from "./romreader"
+import { Registers } from "./registers"
+import { MMU } from "./mmu"
 import { readBinFile } from "./utilities"
 
 
@@ -10,7 +10,7 @@ import { readBinFile } from "./utilities"
 function main() {
 
 
-    let cpu = new CPU(new RegisterSet());
+    let cpu = new CPU(new Registers());
     let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
 }
 

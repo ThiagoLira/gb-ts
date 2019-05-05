@@ -1,8 +1,7 @@
 import { CPU } from "./cpu"
 import { Registers } from "./registers"
 import { MMU } from "./mmu"
-import { readBinFile } from "./utilities"
-
+import { Instructions } from "./instructions"
 
 
 
@@ -12,6 +11,35 @@ function main() {
 
     let cpu = new CPU(new Registers());
     let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
+
+    // https://www.typescriptlang.org/docs/handbook/classes.html
+    let instructions_runner = Instructions;
+
+    let gameRunning = true;
+
+
+
+
+
+
+
+    while (gameRunning) {
+
+        let op = 0;
+        let arg = 0;
+
+
+        instructions_runner.RunOperation(op, arg, cpu, mmu);
+
+
+
+        gameRunning = false;
+
+    };
+
+
+
+
 }
 
 main();

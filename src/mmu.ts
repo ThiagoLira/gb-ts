@@ -33,9 +33,17 @@ export class MMU {
 
 
 
+    getByte(address: number): number {
+
+        return 0;
+
+    }
+
+    setByte(address: number, val: number) {
 
 
 
+    }
 
 
 

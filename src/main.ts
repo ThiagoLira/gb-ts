@@ -13,7 +13,7 @@ function main() {
     let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
 
     // https://www.typescriptlang.org/docs/handbook/classes.html
-    let instructions_runner = Instructions;
+    let InstructionsRunner = Instructions;
 
     let gameRunning = true;
 
@@ -29,7 +29,7 @@ function main() {
         let arg = 0;
 
 
-        instructions_runner.RunOperation(op, arg, cpu, mmu);
+        InstructionsRunner.RunOperation(op, arg, cpu, mmu);
 
 
 

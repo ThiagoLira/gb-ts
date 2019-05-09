@@ -3,44 +3,83 @@ import { MMU } from "./mmu"
 
 
 
-export class Instructions {
+// type of anonymous function arguments used on the classes on this file
+type op_args = { arg: number, cpu: CPU, mmu: MMU }
+
+
+export interface InstructionConfig {
+
+    op: (args: op_args) => void;
+    cycles: number;
+    // how many cells in memory are the args occuping?
+    // e.g 1 -> arg has 1 byte => program counter incremented by 2
+    //     2 -> arg has 2 bytes => program counter incremented by 3
+    arg_number: number;
+    help_string?: string;
+
+
+}
+
+
+
+
+export class InstructionGetter {
 
     // no no
     private constructor() { };
 
 
-    public static RunOperation(opcode: number, arg: number, cpu: CPU, mmu: MMU) {
+    public static GetInstruction(opcode: number): InstructionConfig {
 
 
         switch (opcode) {
 
 
-            // LD B,n
-            case 0x06: { cpu.registers.b = arg; break }
+            case 0x06: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.b = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD B,n"
+                }
+            }
+            case 0x0E: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.c = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD C,n"
+                }
+            }
 
-            // LD C,n
-            case 0x0E: { cpu.registers.c = arg; break; }
+            case 0x31: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.sp = args.arg; },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "LD SP,nn"
+                }
+            }
 
-            // LD D,n
-            case 0x16: { cpu.registers.d = arg; break; }
-
-            // LD E,n
-            case 0x1E: { cpu.registers.e = arg; break; }
-
-            // LD H,n
-            case 0x26: { cpu.registers.h = arg; break; }
-
-            // LD L,n
-            case 0x2E: { cpu.registers.l = arg; break; }
-
-
-
-            // LD A,A
-            case 0x7F: { cpu.registers.a = cpu.registers.a; break; }
+            case 0xAF: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.a ^ args.cpu.registers.a; },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "XOR A"
+                }
+            }
 
 
 
+        }
 
+
+        return {
+            op: function(args: op_args) { },
+            cycles: 0,
+            arg_number: 0,
+            help_string: "UNINPLEMENTED OPCODE"
         }
 
 

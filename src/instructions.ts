@@ -1,4 +1,5 @@
 import { CPU } from "./cpu"
+import { RegisterSet } from "./registerset"
 import { MMU } from "./mmu"
 
 
@@ -11,7 +12,7 @@ export interface InstructionConfig {
 
     op: (args: op_args) => void;
     cycles: number;
-    // how many cells in memory are the args occuping?
+    // how many cells (bytes) in memory are the args occuping?
     // e.g 1 -> arg has 1 byte => program counter incremented by 2
     //     2 -> arg has 2 bytes => program counter incremented by 3
     arg_number: number;
@@ -21,6 +22,25 @@ export interface InstructionConfig {
 }
 
 
+
+export class OpTemplate {
+
+    // LD r1,r2
+    static LDr1r2(reg1: number, reg2: number): InstructionConfig {
+
+        return {
+            op: function(args: op_args) { reg1 = reg2; },
+            cycles: 4,
+            arg_number: 1,
+            help_string: "LD B,n"
+        }
+
+    };
+
+
+
+
+}
 
 
 export class InstructionGetter {
@@ -43,12 +63,67 @@ export class InstructionGetter {
                     help_string: "LD B,n"
                 }
             }
-            case 0x0E: {
+
+            case 0x0e: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.c = args.arg; },
                     cycles: 4,
                     arg_number: 1,
                     help_string: "LD C,n"
+                }
+            }
+
+            case 0x16: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.d = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD D,n"
+                }
+            }
+
+            case 0x1E: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.e = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD D,n"
+                }
+            }
+
+            case 0x26: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.h = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD H,n"
+                }
+            }
+
+            case 0x2E: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.l = args.arg; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD L,n"
+                }
+            }
+
+            case 0x7F: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.a; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD A,A"
+                }
+            }
+
+            case 0x78: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.b; },
+                    cycles: 4,
+                    arg_number: 1,
+                    help_string: "LD A,B"
                 }
             }
 
@@ -58,6 +133,15 @@ export class InstructionGetter {
                     cycles: 12,
                     arg_number: 2,
                     help_string: "LD SP,nn"
+                }
+            }
+
+            case 0x21: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.hl = args.arg; },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "LD HL,nn"
                 }
             }
 

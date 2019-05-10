@@ -17,19 +17,19 @@ function main() {
     // https://www.typescriptlang.org/docs/handbook/classes.html
     let IGetter = InstructionGetter;
 
-    let gameRunning = true;
 
 
 
     let op = 0;
 
 
-    while (gameRunning) {
+    let numOps = 10;
 
+    while (numOps > 0) {
+        numOps--;
 
         // fetch opcode
         op = mmu.bios[cpu.registers.pc]
-        console.log(op);
         // fetch Instruction
         var inst = IGetter.GetInstruction(op);
 
@@ -37,15 +37,25 @@ function main() {
 
         switch (inst.arg_number) {
 
-            case 0: { cpu.registers.pc++; break; }
-            case 1: { cpu.registers.pc += 2; arg = mmu.bios[cpu.registers.pc + 1] }
-            case 2: { cpu.registers.pc += 3; arg = mmu.bios[cpu.registers.pc + 1] + mmu.bios[cpu.registers.pc + 2] << 8 }
+            case 0: {
+                cpu.registers.pc++;
+                break;
+            }
+            case 1: {
+                arg = mmu.bios[cpu.registers.pc + 1];
+                cpu.registers.pc += 2;
+                break;
+            }
+            case 2: {
+                arg = (mmu.bios[cpu.registers.pc + 1] + (mmu.bios[cpu.registers.pc + 2] << 8));
+                cpu.registers.pc += 3;
+                break;
+            }
         }
 
-        console.log(arg);
-        console.log(op);
-
-        gameRunning = false;
+        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString());
+        // run op
+        inst.op({ arg, cpu, mmu });
 
     };
 

@@ -35,8 +35,16 @@ export class MMU {
 
     getByte(address: number): number {
 
-        return 0;
+        switch (true) {
 
+            // boot rom range
+            case (address < 0x100):
+                return this.bios[address];
+            case (address > 0x100):
+
+
+        }
+        return 0;
     }
 
     setByte(address: number, val: number) {
@@ -79,7 +87,7 @@ export class MMU {
     constructor(path: string) {
         // use chromium with this function for now!
         // open -a Chromium --args --disable-web-security --user-data-dir
-        this.readLocalFile(path);
+        // this.readLocalFile(path);
 
 
     }

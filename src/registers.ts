@@ -1,5 +1,9 @@
 export class Registers {
 
+    // we can access any member with a index string
+    // will be useful to create templates for cpu operations
+    // https://basarat.gitbooks.io/typescript/docs/types/index-signatures.html
+    [key: string]: number;
 
     public a: number = 0;
     public b: number = 0;

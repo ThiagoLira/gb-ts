@@ -2,6 +2,13 @@
 
 export class MMU {
 
+    constructor(path: string) {
+        // use chromium with this function for now!
+        // open -a Chromium --args --disable-web-security --user-data-dir
+        // this.readLocalFile(path);
+
+
+    }
 
 
     bios: number[] = [
@@ -24,30 +31,53 @@ export class MMU {
     ];
 
 
-
+    // rom has 32 kbs
     rom: number[] = [];
 
-    vram: number[] = [];
+    // vram has 8kbs (i.e. 64 words)
+    vram: number[] = Array(64).fill(0xFF);
 
-    iram: number[] = [];
+    // iram has 8kbs
+    iram: number[] = Array(64).fill(0xFF);
 
+    // echo iram
+    //  do I just copy the reference to the iram?
+    echo_iram: number[] = this.iram;
 
 
     getByte(address: number): number {
 
+        let address_without_offset = address;
         switch (true) {
+
 
             // boot rom range
             case (address < 0x100):
-                return this.bios[address];
+                return this.bios[address_without_offset];
+
             case (address > 0x100):
 
+            //vram
+            case ((0xA000 > address) && (address > 0x8000)):
+                address_without_offset = 0xA000 - address;
+                return this.vram[address_without_offset];
+
+            // iram	
+            case ((0xE000 > address) && (address > 0xC000)):
+                address_without_offset = 0xE000 - address;
+                return this.iram[address_without_offset];
+
+            // iram echo	
+            case ((0xFE00 > address) && (address > 0xE000)):
+                address_without_offset = 0xFE00 - address;
+                return this.echo_iram[address_without_offset];
 
         }
         return 0;
     }
 
-    setByte(address: number, val: number) {
+    setByte(address: number, val: number): void {
+
 
 
 
@@ -84,13 +114,6 @@ export class MMU {
     }
 
 
-    constructor(path: string) {
-        // use chromium with this function for now!
-        // open -a Chromium --args --disable-web-security --user-data-dir
-        // this.readLocalFile(path);
-
-
-    }
 
 
 

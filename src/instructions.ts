@@ -55,7 +55,7 @@ export class InstructionGetter {
 
         switch (opcode) {
 
-
+            // 8-bit loads
             case 0x06: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.b = args.arg; },
@@ -110,9 +110,6 @@ export class InstructionGetter {
                 }
             }
 
-
-
-
             // LD r1,r2 template
             case 0x7F: {
                 OpTemplate.LDr1r2("a", "a");
@@ -142,7 +139,12 @@ export class InstructionGetter {
             }
 
             case 0x7E: {
-                // LD A, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD A,(HL)"
+                }
             };
 
 
@@ -172,6 +174,12 @@ export class InstructionGetter {
 
             case 0x46: {
                 // LD B, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.b = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD B,(HL)"
+                }
             }
 
 
@@ -201,6 +209,12 @@ export class InstructionGetter {
 
             case 0x4E: {
                 // LD C, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.c = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD C,(HL)"
+                }
             }
 
             case 0x50: {
@@ -229,6 +243,12 @@ export class InstructionGetter {
 
             case 0x56: {
                 // LD D, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.d = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD D,(HL)"
+                }
             }
 
 
@@ -258,6 +278,12 @@ export class InstructionGetter {
 
             case 0x5E: {
                 // LD E, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.e = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD E,(HL)"
+                }
             }
 
 
@@ -287,6 +313,12 @@ export class InstructionGetter {
 
             case 0x66: {
                 // LD H, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.h = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD H,(HL)"
+                }
             }
 
             case 0x68: {
@@ -314,7 +346,13 @@ export class InstructionGetter {
             }
 
             case 0x6E: {
-                // LD H, (HL)
+                // LD L, (HL)
+                return {
+                    op: function(args: op_args) { args.cpu.registers.l = args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD L,(HL)"
+                }
             }
 
             case 0x70: { };

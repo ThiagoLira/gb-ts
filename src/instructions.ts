@@ -138,6 +138,24 @@ export class InstructionGetter {
                 OpTemplate.LDr1r2("a", "l");
             }
 
+            case 0x0A: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.bc); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD A,(BC)"
+                }
+            };
+
+            case 0x1A: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.de); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD A,(DE)"
+                }
+            };
+
             case 0x7E: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.hl); },
@@ -147,7 +165,70 @@ export class InstructionGetter {
                 }
             };
 
+            case 0xFA: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.arg); },
+                    cycles: 16,
+                    arg_number: 2,
+                    help_string: "LD A,(nn)"
+                }
+            };
 
+            case 0xF2: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + args.cpu.registers.c); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD A,(C)"
+                }
+            };
+
+            case 0xE2: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + args.cpu.registers.c, args.cpu.registers.a); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD (C),A"
+                }
+            };
+
+            case 0x02: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.bc, args.cpu.registers.a); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD (BC), A"
+                }
+            };
+
+            case 0x12: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.de, args.cpu.registers.a); },
+
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD (DE),A"
+                }
+            };
+
+            case 0x77: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.a); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LD (HL),A"
+
+                }
+            };
+
+            case 0xEA: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.arg, args.cpu.registers.a); },
+                    cycles: 16,
+                    arg_number: 2,
+                    help_string: "LD (nn),A"
+                }
+            };
             case 0x40: {
                 OpTemplate.LDr1r2("b", "b");
             }
@@ -183,6 +264,9 @@ export class InstructionGetter {
             }
 
 
+            case 0x47: {
+                OpTemplate.LDr1r2("b", "a");
+            }
             case 0x48: {
                 OpTemplate.LDr1r2("c", "b");
             }
@@ -217,6 +301,9 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x4F: {
+                OpTemplate.LDr1r2("c", "a");
+            }
             case 0x50: {
                 OpTemplate.LDr1r2("d", "b");
             }
@@ -252,6 +339,9 @@ export class InstructionGetter {
             }
 
 
+            case 0x57: {
+                OpTemplate.LDr1r2("d", "a");
+            }
             case 0x58: {
                 OpTemplate.LDr1r2("e", "b");
             }
@@ -286,6 +376,9 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x5F: {
+                OpTemplate.LDr1r2("e", "a");
+            }
 
             case 0x60: {
                 OpTemplate.LDr1r2("h", "b");
@@ -321,6 +414,9 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x67: {
+                OpTemplate.LDr1r2("h", "a");
+            }
             case 0x68: {
                 OpTemplate.LDr1r2("l", "b");
             }
@@ -355,6 +451,9 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x6F: {
+                OpTemplate.LDr1r2("l", "a");
+            }
             case 0x70: { };
             case 0x71: { };
             case 0x72: { };

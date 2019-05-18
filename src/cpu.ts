@@ -17,6 +17,11 @@ export class CPU {
 
     registers: Registers;
 
+    flag_z: boolean = false;
+    flag_n: boolean = false;
+    flag_h: boolean = false;
+    flag_c: boolean = false;
+
     constructor(registers: Registers) {
 
         this.registers = registers;
@@ -25,6 +30,12 @@ export class CPU {
     // reset CPU
     reset() {
         this.registers = new Registers();
+
+
+        this.flag_z = false;
+        this.flag_n = false;
+        this.flag_h = false;
+        this.flag_c = false;
 
     }
 

@@ -464,6 +464,81 @@ export class InstructionGetter {
 
             case 0x36: { };
 
+            case 0x3A: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.hl--); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LDD A,(HL)"
+                }
+            }
+
+            case 0x32: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl--, args.cpu.registers.a); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LDD (HL),A"
+                }
+            }
+            case 0x2A: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(args.cpu.registers.hl++); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LDI A,(HL)"
+                }
+            }
+
+            case 0x22: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl++, args.cpu.registers.a); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "LDI (HL),A"
+                }
+            }
+
+
+
+
+
+            case 0xE0: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + args.arg, args.cpu.registers.a); },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "LDH (n),A"
+                }
+            }
+
+
+            case 0xF0: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + args.arg); },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "LDH A,(n)"
+                }
+            }
+
+            case 0x01: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.bc = args.arg; },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "LDH BC,nn"
+                }
+            }
+
+            case 0x11: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.de = args.arg; },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "LDH DE,nn"
+                }
+            }
 
             case 0x31: {
                 return {
@@ -483,6 +558,34 @@ export class InstructionGetter {
                 }
             }
 
+
+            case 0xF9: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.sp = args.cpu.registers.hl; },
+                    cycles: 12,
+                    arg_number: 0,
+                    help_string: "LD SP,HL"
+                }
+            }
+
+
+            case 0xF8: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.hl = args.arg + args.cpu.registers.sp },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "LDHL SP,n"
+                }
+            }
+
+            case 0x08: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.arg, args.cpu.registers.sp); },
+                    cycles: 20,
+                    arg_number: 2,
+                    help_string: "LD (nn),SP"
+                }
+            }
             case 0xAF: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.a ^ args.cpu.registers.a; },

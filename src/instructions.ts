@@ -38,8 +38,44 @@ export class OpTemplate {
 
     };
 
+    static PUSH(reg: string): InstructionConfig {
 
 
+        return {
+            op: function(args: op_args) {
+                args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers[reg] & 0xFF);
+                args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers[reg] >> 8);
+                args.cpu.registers.sp -= 2;
+            },
+            cycles: 16,
+            arg_number: 0,
+            help_string: "PUSH " + reg.toUpperCase()
+        }
+
+
+
+
+    };
+
+    static POP(reg: string): InstructionConfig {
+
+
+        return {
+            op: function(args: op_args) {
+                // if reg is "af" reg[0] is "a" and reg[1] is "f"
+                args.cpu.registers[reg[1]] = args.mmu.getByte(args.cpu.registers.sp);
+                args.cpu.registers[reg[0]] = args.mmu.getByte(args.cpu.registers.sp + 1);
+                args.cpu.registers.sp += 2;
+            },
+            cycles: 12,
+            arg_number: 0,
+            help_string: "POP " + reg.toUpperCase()
+        }
+
+
+
+
+    };
 
 }
 
@@ -586,6 +622,37 @@ export class InstructionGetter {
                     help_string: "LD (nn),SP"
                 }
             }
+
+
+
+            // Stack functions	
+            case 0xF5: {
+                OpTemplate.PUSH('af');
+            }
+            case 0xC5: {
+                OpTemplate.PUSH('bc');
+            }
+            case 0xD5: {
+                OpTemplate.PUSH('de');
+            }
+            case 0xE5: {
+                OpTemplate.PUSH('hl');
+            }
+
+            case 0xF1: {
+                OpTemplate.POP('af');
+            }
+            case 0xC1: {
+                OpTemplate.POP('bc');
+            }
+            case 0xD1: {
+                OpTemplate.POP('de');
+            }
+            case 0xE1: {
+                OpTemplate.POP('hl');
+            }
+
+
             case 0xAF: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.a ^ args.cpu.registers.a; },
@@ -607,7 +674,7 @@ export class InstructionGetter {
             op: function(args: op_args) { },
             cycles: 0,
             arg_number: 0,
-            help_string: "UNINPLEMENTED OPCODE"
+            help_string: "UNINPLEMENTED OPCODE: " + opcode.toString(16)
         }
 
 

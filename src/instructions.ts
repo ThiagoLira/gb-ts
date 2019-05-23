@@ -51,10 +51,6 @@ export class OpTemplate {
             arg_number: 0,
             help_string: "PUSH " + reg.toUpperCase()
         }
-
-
-
-
     };
 
     static POP(reg: string): InstructionConfig {
@@ -71,11 +67,44 @@ export class OpTemplate {
             arg_number: 0,
             help_string: "POP " + reg.toUpperCase()
         }
+    };
 
 
+    // ADD A,n (n is A,B,C,D,E,H,L)
+    static ADD(reg: string): InstructionConfig {
 
+        return {
+            op: function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+
+                args.cpu.registers.a += args.cpu.registers[reg];
+                // check overflow 7-th bit
+                if (args.cpu.registers.a > 255) {
+                    // set C
+                    args.cpu.registers.f = 0x10;
+                    // if value was greater than 0xff throw away extra bits
+                    args.cpu.registers.a &= 255;
+                }
+                if (args.cpu.registers.a == 0) {
+                    // set Z
+                    args.cpu.registers.f |= 0x80;
+                }
+                // check carry on 3-th bit
+                if ((args.cpu.registers.a ^ args.cpu.registers[reg] ^ a) & 0x10) {
+                    //set H
+                    args.cpu.registers.f |= 0x20;
+
+                }
+            },
+            cycles: 4,
+            arg_number: 0,
+            help_string: "ADD A," + reg.toUpperCase()
+        }
 
     };
+
+
 
 }
 
@@ -651,6 +680,55 @@ export class InstructionGetter {
             case 0xE1: {
                 OpTemplate.POP('hl');
             }
+
+            // Arith
+            case 0x87: {
+                OpTemplate.ADD('a');
+            }
+
+            case 0x80: {
+                OpTemplate.ADD('b');
+            }
+
+            case 0x81: {
+                OpTemplate.ADD('c');
+            }
+
+            case 0x82: {
+                OpTemplate.ADD('d');
+            }
+
+            case 0x83: {
+                OpTemplate.ADD('e');
+            }
+
+            case 0x84: {
+                OpTemplate.ADD('h');
+            }
+
+            case 0x85: {
+                OpTemplate.ADD('l');
+            }
+
+            case 0x86: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl); },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADD A,(HL)"
+                }
+            }
+
+            case 0xC6: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a += args.arg },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "ADD A,#"
+                }
+            }
+
+
 
 
             case 0xAF: {

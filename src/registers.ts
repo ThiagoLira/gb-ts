@@ -12,6 +12,8 @@ export class Registers {
     public e: number = 0;
     public h: number = 0;
     public l: number = 0;
+    // flag register
+    // Z N H C 0 0 0 0 
     public f: number = 0;
     // default value for program counter and stack counter
     // remember those two values are *adresses*
@@ -19,8 +21,6 @@ export class Registers {
     public sp: number = 0xfffe;
 
 
-
-    public flag_reg: number = 0;
 
 
 

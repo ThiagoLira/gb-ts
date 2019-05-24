@@ -87,31 +87,31 @@ export class MMU {
 
 
 
-    readLocalFile(filePath: string) {
-        var fileRequest = new XMLHttpRequest();
+    // readLocalFile(filePath: string) {
+    // var fileRequest = new XMLHttpRequest();
 
-        //  Simulating a request against our local system
-        fileRequest.open("GET", filePath, false);
-        fileRequest.onreadystatechange = () => {
-            if (fileRequest.readyState === 4) {
-                if (fileRequest.status === 200 || fileRequest.status == 0) {
-                    var buff = fileRequest.response;
-                    // convert string to bytes array
-                    var bytes: number[] = [];
-                    var charCode;
-                    for (var i = 0; i < buff.length; ++i) {
-                        charCode = buff.charCodeAt(i);
-                        bytes.push((charCode & 0xFF00) >> 8);
-                        bytes.push(charCode & 0xFF);
-                    }
+    //  Simulating a request against our local system
+    // fileRequest.open("GET", filePath, false);
+    // fileRequest.onreadystatechange = () => {
+    // if (fileRequest.readyState === 4) {
+    // if (fileRequest.status === 200 || fileRequest.status == 0) {
+    // var buff = fileRequest.response;
+    // convert string to bytes array
+    // var bytes: number[] = [];
+    // var charCode;
+    // for (var i = 0; i < buff.length; ++i) {
+    // charCode = buff.charCodeAt(i);
+    // bytes.push((charCode & 0xFF00) >> 8);
+    // bytes.push(charCode & 0xFF);
+    // }
 
-                    this.rom = bytes.slice(0);
-                }
-            }
-        }
+    // this.rom = bytes.slice(0);
+    // }
+    // }
+    // }
 
-        fileRequest.send(null);
-    }
+    // fileRequest.send(null);
+    // }
 
 
 

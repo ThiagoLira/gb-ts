@@ -70,6 +70,30 @@ export class OpTemplate {
     };
 
 
+    // call AFTER summation to check and set flags 
+    static SetFlagsAddition(reg: string, args: op_args, reg_a_before: number) {
+
+        // check overflow 7-th bit
+        if (args.cpu.registers.a > 255) {
+            // set C
+            args.cpu.registers.f = 0x10;
+            // if value was greater than 0xff throw away extra bits
+            args.cpu.registers.a &= 255;
+        }
+        if (args.cpu.registers.a == 0) {
+            // set Z
+            args.cpu.registers.f |= 0x80;
+        }
+        // check carry on 3-th bit
+        if ((args.cpu.registers.a ^ args.cpu.registers[reg] ^ reg_a_before) & 0x10) {
+            //set H
+            args.cpu.registers.f |= 0x20;
+
+        }
+
+
+    }
+
     // ADD A,n (n is A,B,C,D,E,H,L)
     static ADD(reg: string): InstructionConfig {
 
@@ -79,23 +103,9 @@ export class OpTemplate {
                 var a = args.cpu.registers.a;
 
                 args.cpu.registers.a += args.cpu.registers[reg];
-                // check overflow 7-th bit
-                if (args.cpu.registers.a > 255) {
-                    // set C
-                    args.cpu.registers.f = 0x10;
-                    // if value was greater than 0xff throw away extra bits
-                    args.cpu.registers.a &= 255;
-                }
-                if (args.cpu.registers.a == 0) {
-                    // set Z
-                    args.cpu.registers.f |= 0x80;
-                }
-                // check carry on 3-th bit
-                if ((args.cpu.registers.a ^ args.cpu.registers[reg] ^ a) & 0x10) {
-                    //set H
-                    args.cpu.registers.f |= 0x20;
 
-                }
+                OpTemplate.SetFlagsAddition(reg, args, a);
+
             },
             cycles: 4,
             arg_number: 0,

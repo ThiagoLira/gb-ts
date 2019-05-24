@@ -20,21 +20,35 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
     "@babel/preset-env": "^7.4.1",
     "@babel/preset-typescript": "^7.3.3",
+    "@babel/register": "^7.4.4",
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^11.13.8",
+    "chai": "^4.2.0",
     "fs": "0.0.1-security",
     "html-webpack-plugin": "^4.0.0-beta.5",
+    "mocha": "^6.1.4",
+    "mocha-typescript": "^1.1.17",
     "npx": "^10.2.0",
-    "typescript": "^3.3.3",
+    "nyc": "^14.1.1",
+    "source-map-support": "^0.5.12",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.5",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.1"
   },
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
+
+    "test:pack": "webpack --config test-webpack.config.js",
+      
+      "test:mocha": "mocha  lib/test_bundle.js",
+      "test": "npm run build:types && npm run build:js && npm run test:pack && npm run test:mocha",
     "build": "npm run build:types && npm run build:js && npm run build:pack",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "build:pack": "webpack"
+    "build:pack": "webpack --config prod-webpack.config.js"
   },
   "dependencies": {
     "fs": "0.0.1-security",

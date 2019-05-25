@@ -187,30 +187,30 @@ export class InstructionGetter {
 
             // LD r1,r2 template
             case 0x7F: {
-                OpTemplate.LDr1r2("a", "a");
+                return OpTemplate.LDr1r2("a", "a");
             }
 
             case 0x78: {
-                OpTemplate.LDr1r2("a", "b");
+                return OpTemplate.LDr1r2("a", "b");
             }
 
             case 0x79: {
-                OpTemplate.LDr1r2("a", "c");
+                return OpTemplate.LDr1r2("a", "c");
             }
 
             case 0x7A: {
-                OpTemplate.LDr1r2("a", "d");
+                return OpTemplate.LDr1r2("a", "d");
             }
 
             case 0x7B: {
-                OpTemplate.LDr1r2("a", "e");
+                return OpTemplate.LDr1r2("a", "e");
             }
 
             case 0x7C: {
-                OpTemplate.LDr1r2("a", "h");
+                return OpTemplate.LDr1r2("a", "h");
             }
             case 0x7D: {
-                OpTemplate.LDr1r2("a", "l");
+                return OpTemplate.LDr1r2("a", "l");
             }
 
             case 0x0A: {
@@ -305,27 +305,27 @@ export class InstructionGetter {
                 }
             };
             case 0x40: {
-                OpTemplate.LDr1r2("b", "b");
+                return OpTemplate.LDr1r2("b", "b");
             }
 
             case 0x41: {
-                OpTemplate.LDr1r2("b", "c");
+                return OpTemplate.LDr1r2("b", "c");
             }
 
             case 0x42: {
-                OpTemplate.LDr1r2("b", "d");
+                return OpTemplate.LDr1r2("b", "d");
             }
 
             case 0x43: {
-                OpTemplate.LDr1r2("b", "e");
+                return OpTemplate.LDr1r2("b", "e");
             }
 
             case 0x44: {
-                OpTemplate.LDr1r2("b", "h");
+                return OpTemplate.LDr1r2("b", "h");
             }
 
             case 0x45: {
-                OpTemplate.LDr1r2("b", "l");
+                return OpTemplate.LDr1r2("b", "l");
             }
 
             case 0x46: {
@@ -340,30 +340,30 @@ export class InstructionGetter {
 
 
             case 0x47: {
-                OpTemplate.LDr1r2("b", "a");
+                return OpTemplate.LDr1r2("b", "a");
             }
             case 0x48: {
-                OpTemplate.LDr1r2("c", "b");
+                return OpTemplate.LDr1r2("c", "b");
             }
 
             case 0x49: {
-                OpTemplate.LDr1r2("c", "c");
+                return OpTemplate.LDr1r2("c", "c");
             }
 
             case 0x4A: {
-                OpTemplate.LDr1r2("c", "d");
+                return OpTemplate.LDr1r2("c", "d");
             }
 
             case 0x4B: {
-                OpTemplate.LDr1r2("c", "e");
+                return OpTemplate.LDr1r2("c", "e");
             }
 
             case 0x4C: {
-                OpTemplate.LDr1r2("c", "h");
+                return OpTemplate.LDr1r2("c", "h");
             }
 
             case 0x4D: {
-                OpTemplate.LDr1r2("c", "l");
+                return OpTemplate.LDr1r2("c", "l");
             }
 
             case 0x4E: {
@@ -377,30 +377,30 @@ export class InstructionGetter {
             }
 
             case 0x4F: {
-                OpTemplate.LDr1r2("c", "a");
+                return OpTemplate.LDr1r2("c", "a");
             }
             case 0x50: {
-                OpTemplate.LDr1r2("d", "b");
+                return OpTemplate.LDr1r2("d", "b");
             }
 
             case 0x51: {
-                OpTemplate.LDr1r2("d", "c");
+                return OpTemplate.LDr1r2("d", "c");
             }
 
             case 0x52: {
-                OpTemplate.LDr1r2("d", "d");
+                return OpTemplate.LDr1r2("d", "d");
             }
 
             case 0x53: {
-                OpTemplate.LDr1r2("d", "e");
+                return OpTemplate.LDr1r2("d", "e");
             }
 
             case 0x54: {
-                OpTemplate.LDr1r2("d", "h");
+                return OpTemplate.LDr1r2("d", "h");
             }
 
             case 0x55: {
-                OpTemplate.LDr1r2("d", "l");
+                return OpTemplate.LDr1r2("d", "l");
             }
 
             case 0x56: {
@@ -415,30 +415,30 @@ export class InstructionGetter {
 
 
             case 0x57: {
-                OpTemplate.LDr1r2("d", "a");
+                return OpTemplate.LDr1r2("d", "a");
             }
             case 0x58: {
-                OpTemplate.LDr1r2("e", "b");
+                return OpTemplate.LDr1r2("e", "b");
             }
 
             case 0x59: {
-                OpTemplate.LDr1r2("e", "c");
+                return OpTemplate.LDr1r2("e", "c");
             }
 
             case 0x5A: {
-                OpTemplate.LDr1r2("e", "d");
+                return OpTemplate.LDr1r2("e", "d");
             }
 
             case 0x5B: {
-                OpTemplate.LDr1r2("e", "e");
+                return OpTemplate.LDr1r2("e", "e");
             }
 
             case 0x5C: {
-                OpTemplate.LDr1r2("e", "h");
+                return OpTemplate.LDr1r2("e", "h");
             }
 
             case 0x5D: {
-                OpTemplate.LDr1r2("e", "l");
+                return OpTemplate.LDr1r2("e", "l");
             }
 
             case 0x5E: {
@@ -452,31 +452,31 @@ export class InstructionGetter {
             }
 
             case 0x5F: {
-                OpTemplate.LDr1r2("e", "a");
+                return OpTemplate.LDr1r2("e", "a");
             }
 
             case 0x60: {
-                OpTemplate.LDr1r2("h", "b");
+                return OpTemplate.LDr1r2("h", "b");
             }
 
             case 0x61: {
-                OpTemplate.LDr1r2("h", "c");
+                return OpTemplate.LDr1r2("h", "c");
             }
 
             case 0x62: {
-                OpTemplate.LDr1r2("h", "d");
+                return OpTemplate.LDr1r2("h", "d");
             }
 
             case 0x63: {
-                OpTemplate.LDr1r2("h", "e");
+                return OpTemplate.LDr1r2("h", "e");
             }
 
             case 0x64: {
-                OpTemplate.LDr1r2("h", "h");
+                return OpTemplate.LDr1r2("h", "h");
             }
 
             case 0x65: {
-                OpTemplate.LDr1r2("h", "l");
+                return OpTemplate.LDr1r2("h", "l");
             }
 
             case 0x66: {
@@ -490,30 +490,30 @@ export class InstructionGetter {
             }
 
             case 0x67: {
-                OpTemplate.LDr1r2("h", "a");
+                return OpTemplate.LDr1r2("h", "a");
             }
             case 0x68: {
-                OpTemplate.LDr1r2("l", "b");
+                return OpTemplate.LDr1r2("l", "b");
             }
 
             case 0x69: {
-                OpTemplate.LDr1r2("l", "c");
+                return OpTemplate.LDr1r2("l", "c");
             }
 
             case 0x6A: {
-                OpTemplate.LDr1r2("l", "d");
+                return OpTemplate.LDr1r2("l", "d");
             }
 
             case 0x6B: {
-                OpTemplate.LDr1r2("l", "e");
+                return OpTemplate.LDr1r2("l", "e");
             }
 
             case 0x6C: {
-                OpTemplate.LDr1r2("l", "h");
+                return OpTemplate.LDr1r2("l", "h");
             }
 
             case 0x6D: {
-                OpTemplate.LDr1r2("l", "l");
+                return OpTemplate.LDr1r2("l", "l");
             }
 
             case 0x6E: {
@@ -527,7 +527,7 @@ export class InstructionGetter {
             }
 
             case 0x6F: {
-                OpTemplate.LDr1r2("l", "a");
+                return OpTemplate.LDr1r2("l", "a");
             }
             case 0x70: { };
             case 0x71: { };
@@ -666,58 +666,58 @@ export class InstructionGetter {
 
             // Stack functions	
             case 0xF5: {
-                OpTemplate.PUSH('af');
+                return OpTemplate.PUSH('af');
             }
             case 0xC5: {
-                OpTemplate.PUSH('bc');
+                return OpTemplate.PUSH('bc');
             }
             case 0xD5: {
-                OpTemplate.PUSH('de');
+                return OpTemplate.PUSH('de');
             }
             case 0xE5: {
-                OpTemplate.PUSH('hl');
+                return OpTemplate.PUSH('hl');
             }
 
             case 0xF1: {
-                OpTemplate.POP('af');
+                return OpTemplate.POP('af');
             }
             case 0xC1: {
-                OpTemplate.POP('bc');
+                return OpTemplate.POP('bc');
             }
             case 0xD1: {
-                OpTemplate.POP('de');
+                return OpTemplate.POP('de');
             }
             case 0xE1: {
-                OpTemplate.POP('hl');
+                return OpTemplate.POP('hl');
             }
 
             // Arith
             case 0x87: {
-                OpTemplate.ADD('a');
+                return OpTemplate.ADD('a');
             }
 
             case 0x80: {
-                OpTemplate.ADD('b');
+                return OpTemplate.ADD('b');
             }
 
             case 0x81: {
-                OpTemplate.ADD('c');
+                return OpTemplate.ADD('c');
             }
 
             case 0x82: {
-                OpTemplate.ADD('d');
+                return OpTemplate.ADD('d');
             }
 
             case 0x83: {
-                OpTemplate.ADD('e');
+                return OpTemplate.ADD('e');
             }
 
             case 0x84: {
-                OpTemplate.ADD('h');
+                return OpTemplate.ADD('h');
             }
 
             case 0x85: {
-                OpTemplate.ADD('l');
+                return OpTemplate.ADD('l');
             }
 
             case 0x86: {

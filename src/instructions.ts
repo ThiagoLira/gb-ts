@@ -71,7 +71,7 @@ export class OpTemplate {
 
 
     // call AFTER summation to check and set flags 
-    static SetFlagsAddition(reg: string, args: op_args, reg_a_before: number) {
+    static SetFlagsAddition(reg_a_before: number, n: number, args: op_args) {
 
         // check overflow 7-th bit
         if (args.cpu.registers.a > 255) {
@@ -85,7 +85,7 @@ export class OpTemplate {
             args.cpu.registers.f |= 0x80;
         }
         // check carry on 3-th bit
-        if ((args.cpu.registers.a ^ args.cpu.registers[reg] ^ reg_a_before) & 0x10) {
+        if ((n + reg_a_before) & 0x10) {
             //set H
             args.cpu.registers.f |= 0x20;
 
@@ -101,10 +101,11 @@ export class OpTemplate {
             op: function(args: op_args) {
 
                 var a = args.cpu.registers.a;
+                var n = args.cpu.registers[reg];
 
                 args.cpu.registers.a += args.cpu.registers[reg];
 
-                OpTemplate.SetFlagsAddition(reg, args, a);
+                OpTemplate.SetFlagsAddition(a, n, args);
 
             },
             cycles: 4,
@@ -690,7 +691,6 @@ export class InstructionGetter {
             case 0xE1: {
                 return OpTemplate.POP('hl');
             }
-
             // Arith
             case 0x87: {
                 return OpTemplate.ADD('a');
@@ -722,7 +722,12 @@ export class InstructionGetter {
 
             case 0x86: {
                 return {
-                    op: function(args: op_args) { args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl); },
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.cpu.registers.hl;
+                        args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl);
+                        OpTemplate.SetFlagsAddition(a, n, args);
+                    },
                     cycles: 8,
                     arg_number: 0,
                     help_string: "ADD A,(HL)"
@@ -731,7 +736,11 @@ export class InstructionGetter {
 
             case 0xC6: {
                 return {
-                    op: function(args: op_args) { args.cpu.registers.a += args.arg },
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        args.cpu.registers.a += args.arg
+                        OpTemplate.SetFlagsAddition(a, args.arg, args);
+                    },
                     cycles: 8,
                     arg_number: 1,
                     help_string: "ADD A,#"

@@ -43,11 +43,50 @@ describe('add', function() {
 
         // test ADD A,B
         var inst = IGetter.GetInstruction(0x80);
-        console.log(inst.help_string);
         inst.op({ arg, cpu, mmu });
 
         expect(cpu.registers.a).to.equal(0x3);
     });
 
+    it('0xFF + 0x10 (ADD A,B) should flag an overflow', function() {
+
+
+
+        cpu.registers.b = 0xFF;
+        cpu.registers.a = 0x10;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test ADD A,B
+        var inst = IGetter.GetInstruction(0x80);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0x0F);
+        expect(cpu.registers.f).to.equal(0b00010000);
+
+    });
+
+    it('A + direct # with underflow on lower nibble', function() {
+
+
+
+        cpu.registers.a = 0xF;
+
+        var arg = 0xF;
+
+
+        let IGetter = InstructionGetter;
+
+        // test ADD A,B
+        var inst = IGetter.GetInstruction(0xC6);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0x1E);
+        expect(cpu.registers.f).to.equal(0b00100000);
+
+    });
 
 });

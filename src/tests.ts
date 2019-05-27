@@ -14,7 +14,7 @@ describe('add', function() {
     let cpu: CPU;
     let mmu: MMU;
 
-    before("init", function() {
+    beforeEach("init", function() {
 
         cpu = new CPU(new Registers());
         // load bootrom on MMU
@@ -88,5 +88,49 @@ describe('add', function() {
         expect(cpu.registers.f).to.equal(0b00100000);
 
     });
+
+});
+
+describe('sub', function() {
+
+    let cpu: CPU;
+    let mmu: MMU;
+
+    beforeEach("init", function() {
+
+        cpu = new CPU(new Registers());
+        // load bootrom on MMU
+        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
+
+    });
+
+    afterEach("memory dump", function() {
+        if (this.currentTest!.state === 'failed') {
+            console.log(cpu.registers);
+        }
+
+    });
+
+
+    it('0x6E - 0x37 == 0x37', function() {
+
+
+        cpu.registers.b = 0x37;
+        cpu.registers.a = 0x6E;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test ADD A,B
+        var inst = IGetter.GetInstruction(0x90);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0x37);
+        expect(cpu.registers.f).to.equal(0b01000000);
+
+    });
+
 
 });

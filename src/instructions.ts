@@ -115,6 +115,96 @@ export class OpTemplate {
 
     };
 
+    // ADC A,n (n is A,B,C,D,E,H,L) 
+    static ADD_C(reg: string): InstructionConfig {
+
+        return {
+            op: function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers[reg] + args.cpu.registers.carry_flag;
+
+                args.cpu.registers.a += n;
+
+                OpTemplate.SetFlagsAddition(a, n, args);
+
+            },
+            cycles: 4,
+            arg_number: 0,
+            help_string: "ADC A," + reg.toUpperCase()
+        }
+
+    };
+
+    // call AFTER summation to check and set flags 
+    static SetFlagsSubtraction(reg_a_before: number, n: number, args: op_args) {
+
+        // set subtraction flag
+        args.cpu.registers.f = 0x40;
+
+        // check borrow 
+        if (args.cpu.registers.a < 0) {
+            // set C
+            args.cpu.registers.f = 0x10;
+            // if value was less than 0 let's not be negative 
+            args.cpu.registers.a &= 255;
+        }
+
+        if (args.cpu.registers.a == 0) {
+            // set Z
+            args.cpu.registers.f |= 0x80;
+        }
+        // check borrow on 4-th bit
+        if ((reg_a_before & 0xF) < (n & 0xF)) {
+            //set H
+            args.cpu.registers.f |= 0x20;
+
+        }
+
+
+    }
+
+    // SUB A,n (n is A,B,C,D,E,H,L)
+    static SUB(reg: string): InstructionConfig {
+
+        return {
+            op: function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers[reg];
+
+                args.cpu.registers.a -= args.cpu.registers[reg];
+
+                OpTemplate.SetFlagsSubtraction(a, n, args);
+
+            },
+            cycles: 4,
+            arg_number: 0,
+            help_string: "SUB A," + reg.toUpperCase()
+        }
+
+    };
+
+    // SBC A,n (n is A,B,C,D,E,H,L) 
+    static SUB_C(reg: string): InstructionConfig {
+
+        return {
+            op: function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers[reg] + args.cpu.registers.carry_flag;
+
+                args.cpu.registers.a -= n;
+
+                OpTemplate.SetFlagsSubtraction(a, n, args);
+
+            },
+            cycles: 4,
+            arg_number: 0,
+            help_string: "SBC A," + reg.toUpperCase()
+        }
+
+    };
 
 
 }
@@ -748,6 +838,62 @@ export class InstructionGetter {
             }
 
 
+            // Arith
+            case 0x8F: {
+                return OpTemplate.ADD_C('a');
+            }
+
+            case 0x88: {
+                return OpTemplate.ADD_C('b');
+            }
+
+            case 0x89: {
+                return OpTemplate.ADD_C('c');
+            }
+
+            case 0x8A: {
+                return OpTemplate.ADD_C('d');
+            }
+
+            case 0x8B: {
+                return OpTemplate.ADD_C('e');
+            }
+
+            case 0x8C: {
+                return OpTemplate.ADD_C('h');
+            }
+
+            case 0x8D: {
+                return OpTemplate.ADD_C('l');
+            }
+
+            case 0x8E: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.mmu.getByte(args.cpu.registers.hl) + args.cpu.registers.carry_flag;
+                        args.cpu.registers.a += n;
+                        OpTemplate.SetFlagsAddition(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADC A,(HL)"
+                }
+            }
+
+            case 0xCE: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.arg + args.cpu.registers.carry_flag;
+                        args.cpu.registers.a += n;
+                        OpTemplate.SetFlagsAddition(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "ADC A,#"
+                }
+            }
 
 
             case 0xAF: {
@@ -760,6 +906,118 @@ export class InstructionGetter {
             }
 
 
+            case 0x97: {
+                return OpTemplate.SUB('a');
+            }
+
+            case 0x90: {
+                return OpTemplate.SUB('b');
+            }
+
+            case 0x91: {
+                return OpTemplate.SUB('c');
+            }
+
+            case 0x92: {
+                return OpTemplate.SUB('d');
+            }
+
+            case 0x93: {
+                return OpTemplate.SUB('e');
+            }
+
+            case 0x94: {
+                return OpTemplate.SUB('h');
+            }
+
+            case 0x95: {
+                return OpTemplate.SUB('l');
+            }
+
+            case 0x96: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.cpu.registers.hl;
+                        args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl);
+                        OpTemplate.SetFlagsAddition(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "SUB A,(HL)"
+                }
+            }
+
+            case 0xD6: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        args.cpu.registers.a += args.arg
+                        OpTemplate.SetFlagsAddition(a, args.arg, args);
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "SUB A,#"
+                }
+            }
+
+
+            // Arith
+            case 0x9F: {
+                return OpTemplate.SUB_C('a');
+            }
+
+            case 0x98: {
+                return OpTemplate.SUB_C('b');
+            }
+
+            case 0x99: {
+                return OpTemplate.SUB_C('c');
+            }
+
+            case 0x9A: {
+                return OpTemplate.SUB_C('d');
+            }
+
+            case 0x9B: {
+                return OpTemplate.SUB_C('e');
+            }
+
+            case 0x9C: {
+                return OpTemplate.SUB_C('h');
+            }
+
+            case 0x9D: {
+                return OpTemplate.SUB_C('l');
+            }
+
+            case 0x9E: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.mmu.getByte(args.cpu.registers.hl) + args.cpu.registers.carry_flag;
+                        args.cpu.registers.a -= n;
+                        OpTemplate.SetFlagsSubtraction(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "SBC A,(HL)"
+                }
+            }
+            // ?????
+            case 189129182: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.arg + args.cpu.registers.carry_flag;
+                        args.cpu.registers.a -= n;
+                        OpTemplate.SetFlagsSubtraction(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "SBC A,#"
+                }
+            }
 
 
 

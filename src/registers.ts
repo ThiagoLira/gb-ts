@@ -22,7 +22,25 @@ export class Registers {
 
 
 
+    get carry_flag(): number {
 
+        return ((this.f >> 5) & 0x01);
+    }
+
+    get half_carry_flag(): number {
+
+        return ((this.f >> 6) & 0x01);
+    }
+
+    get sub_flag(): number {
+
+        return ((this.f >> 7) & 0x01);
+    }
+
+    get zero_flag(): number {
+
+        return ((this.f >> 8) & 0x01);
+    }
 
     get af(): number {
         return (this.a << 8) | this.f;

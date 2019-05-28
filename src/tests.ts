@@ -111,6 +111,43 @@ describe('sub', function() {
 
     });
 
+    it('0x16 AND 0x90 == 0x10', function() {
+
+
+        cpu.registers.b = 0x16;
+        cpu.registers.a = 0x90;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test ADD A,B
+        var inst = IGetter.GetInstruction(0xA0);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0x10);
+
+    });
+
+    it('0x16 OR 0x90 == 0x10', function() {
+
+
+        cpu.registers.b = 0x16;
+        cpu.registers.a = 0x90;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test ADD A,B
+        var inst = IGetter.GetInstruction(0xB0);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0x16 | 0x90);
+
+    });
 
     it('0x6E - 0x37 == 0x37', function() {
 

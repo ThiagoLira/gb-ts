@@ -206,44 +206,72 @@ export class OpTemplate {
 
     };
 
+    // call AFTER summation to check and set flags 
+    static SetFlagsCP(reg_a_before: number, n: number, args: op_args) {
+
+        // set subtraction flag
+        args.cpu.registers.f = 0x40;
+
+        // check borrow 
+        if (args.cpu.registers.a - n < 0) {
+            // set C
+            args.cpu.registers.f = 0x10;
+            // if value was less than 0 let's not be negative 
+        }
+
+        if (args.cpu.registers.a - n == 0) {
+            // set Z
+            args.cpu.registers.f |= 0x80;
+        }
+        // check borrow on 4-th bit
+        if ((reg_a_before & 0xF) < (n & 0xF)) {
+            //set H
+            args.cpu.registers.f |= 0x20;
+
+        }
+
+
+    }
+    // SUB A,n (n is A,B,C,D,E,H,L)
+    static CP(reg: string): InstructionConfig {
+
+        return {
+            op: function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers[reg];
+
+
+                OpTemplate.SetFlagsCP(a, n, args);
+
+            },
+            cycles: 4,
+            arg_number: 0,
+            help_string: "CP " + reg.toUpperCase()
+        }
+
+    };
+
     static AND(reg: string): InstructionConfig {
 
-        let f: (args: op_args) => void;
-        let help_string = "";
-        let cycles = 0;
 
-        if (reg == '(hl)') {
+        let help_string = (reg == '(hl)') ? "AND (HL)" : "AND " + reg;
 
-            f = function(args: op_args) {
+        let cycles = (reg == '(hl)') ? 8 : 4;
 
-                var a = args.cpu.registers.a;
-                var n = args.mmu.getByte(args.cpu.registers.hl);
+        // being sneak sneak with closures
+        var reg_closure = reg;
 
-                args.cpu.registers.a &= n;
+        let f = function(args: op_args) {
 
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
-                else { args.cpu.registers.f = 0b00100000 }
+            var a = args.cpu.registers.a;
 
-                cycles = 4;
-                help_string = "ADD A,(HL)"
-            }
+            var n = (reg_closure == '(hl)') ? args.mmu.getByte(args.cpu.registers.hl) : args.cpu.registers[reg];
 
-        } else {
+            args.cpu.registers.a &= n;
 
-            f = function(args: op_args) {
-
-                var a = args.cpu.registers.a;
-                var n = args.cpu.registers.reg;
-
-                args.cpu.registers.a &= n;
-
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
-                else { args.cpu.registers.f = 0b00100000 }
-
-                cycles = 8;
-                help_string = "ADD A, " + reg;
-            }
-
+            if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
+            else { args.cpu.registers.f = 0b00100000 }
 
         }
 
@@ -260,42 +288,24 @@ export class OpTemplate {
 
     static OR(reg: string): InstructionConfig {
 
-        let f: (args: op_args) => void;
-        let help_string = "";
-        let cycles = 0;
 
-        if (reg == '(hl)') {
+        let help_string = (reg == '(hl)') ? "OR (HL)" : "OR " + reg;
 
-            f = function(args: op_args) {
+        let cycles = (reg == '(hl)') ? 8 : 4;
 
-                var a = args.cpu.registers.a;
-                var n = args.mmu.getByte(args.cpu.registers.hl);
+        // being sneak sneak with closures
+        var reg_closure = reg;
 
-                args.cpu.registers.a |= n;
+        let f = function(args: op_args) {
 
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
-                else { args.cpu.registers.f = 0b00000000 }
+            var a = args.cpu.registers.a;
 
-                cycles = 4;
-                help_string = "OR A,(HL)"
-            }
+            var n = (reg_closure == '(hl)') ? args.mmu.getByte(args.cpu.registers.hl) : args.cpu.registers[reg];
 
-        } else {
+            args.cpu.registers.a |= n;
 
-            f = function(args: op_args) {
-
-                var a = args.cpu.registers.a;
-                var n = args.cpu.registers.reg;
-
-                args.cpu.registers.a |= n;
-
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
-                else { args.cpu.registers.f = 0b00000000 }
-
-                cycles = 8;
-                help_string = "OR A, " + reg;
-            }
-
+            if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+            else { args.cpu.registers.f = 0b00000000 }
 
         }
 
@@ -312,42 +322,24 @@ export class OpTemplate {
 
     static XOR(reg: string): InstructionConfig {
 
-        let f: (args: op_args) => void;
-        let help_string = "";
-        let cycles = 0;
 
-        if (reg == '(hl)') {
+        let help_string = (reg == '(hl)') ? "XOR (HL)" : "XOR " + reg;
 
-            f = function(args: op_args) {
+        let cycles = (reg == '(hl)') ? 8 : 4;
 
-                var a = args.cpu.registers.a;
-                var n = args.mmu.getByte(args.cpu.registers.hl);
+        // being sneak sneak with closures
+        var reg_closure = reg;
 
-                args.cpu.registers.a ^= n;
+        let f = function(args: op_args) {
 
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
-                else { args.cpu.registers.f = 0b00000000 }
+            var a = args.cpu.registers.a;
 
-                cycles = 4;
-                help_string = "XOR A,(HL)"
-            }
+            var n = (reg_closure == '(hl)') ? args.mmu.getByte(args.cpu.registers.hl) : args.cpu.registers[reg];
 
-        } else {
+            args.cpu.registers.a ^= n;
 
-            f = function(args: op_args) {
-
-                var a = args.cpu.registers.a;
-                var n = args.cpu.registers.reg;
-
-                args.cpu.registers.a ^= n;
-
-                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
-                else { args.cpu.registers.f = 0b00000000 }
-
-                cycles = 8;
-                help_string = "XOR A, " + reg;
-            }
-
+            if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+            else { args.cpu.registers.f = 0b00000000 }
 
         }
 
@@ -1054,16 +1046,6 @@ export class InstructionGetter {
             }
 
 
-            case 0xAF: {
-                return {
-                    op: function(args: op_args) { args.cpu.registers.a = args.cpu.registers.a ^ args.cpu.registers.a; },
-                    cycles: 4,
-                    arg_number: 0,
-                    help_string: "XOR A"
-                }
-            }
-
-
             case 0x97: {
                 return OpTemplate.SUB('a');
             }
@@ -1096,7 +1078,7 @@ export class InstructionGetter {
                 return {
                     op: function(args: op_args) {
                         var a = args.cpu.registers.a;
-                        var n = args.cpu.registers.hl;
+                        var n = args.mmu.getByte(args.cpu.registers.hl);
                         args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl);
                         OpTemplate.SetFlagsAddition(a, n, args);
                     },
@@ -1119,6 +1101,59 @@ export class InstructionGetter {
                 }
             }
 
+
+            case 0xBF: {
+                return OpTemplate.CP('a');
+            }
+
+            case 0xB8: {
+                return OpTemplate.CP('b');
+            }
+
+            case 0xB9: {
+                return OpTemplate.CP('c');
+            }
+
+            case 0xBA: {
+                return OpTemplate.CP('d');
+            }
+
+            case 0xBB: {
+                return OpTemplate.CP('e');
+            }
+
+            case 0xBC: {
+                return OpTemplate.CP('h');
+            }
+
+            case 0xBD: {
+                return OpTemplate.CP('l');
+            }
+
+            case 0xBE: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.mmu.getByte(args.cpu.registers.hl);
+                        OpTemplate.SetFlagsCP(a, n, args);
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "CP (HL)"
+                }
+            }
+
+            case 0xFE: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        OpTemplate.SetFlagsCP(a, args.arg, args);
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "CP #"
+                }
+            }
 
             // Arith
             case 0x9F: {

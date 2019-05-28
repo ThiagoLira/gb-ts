@@ -206,8 +206,166 @@ export class OpTemplate {
 
     };
 
+    static AND(reg: string): InstructionConfig {
+
+        let f: (args: op_args) => void;
+        let help_string = "";
+        let cycles = 0;
+
+        if (reg == '(hl)') {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.mmu.getByte(args.cpu.registers.hl);
+
+                args.cpu.registers.a &= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
+                else { args.cpu.registers.f = 0b00100000 }
+
+                cycles = 4;
+                help_string = "ADD A,(HL)"
+            }
+
+        } else {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers.reg;
+
+                args.cpu.registers.a &= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
+                else { args.cpu.registers.f = 0b00100000 }
+
+                cycles = 8;
+                help_string = "ADD A, " + reg;
+            }
+
+
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
+
+    static OR(reg: string): InstructionConfig {
+
+        let f: (args: op_args) => void;
+        let help_string = "";
+        let cycles = 0;
+
+        if (reg == '(hl)') {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.mmu.getByte(args.cpu.registers.hl);
+
+                args.cpu.registers.a |= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                else { args.cpu.registers.f = 0b00000000 }
+
+                cycles = 4;
+                help_string = "OR A,(HL)"
+            }
+
+        } else {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers.reg;
+
+                args.cpu.registers.a |= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                else { args.cpu.registers.f = 0b00000000 }
+
+                cycles = 8;
+                help_string = "OR A, " + reg;
+            }
+
+
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
+
+    static XOR(reg: string): InstructionConfig {
+
+        let f: (args: op_args) => void;
+        let help_string = "";
+        let cycles = 0;
+
+        if (reg == '(hl)') {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.mmu.getByte(args.cpu.registers.hl);
+
+                args.cpu.registers.a ^= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                else { args.cpu.registers.f = 0b00000000 }
+
+                cycles = 4;
+                help_string = "XOR A,(HL)"
+            }
+
+        } else {
+
+            f = function(args: op_args) {
+
+                var a = args.cpu.registers.a;
+                var n = args.cpu.registers.reg;
+
+                args.cpu.registers.a ^= n;
+
+                if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                else { args.cpu.registers.f = 0b00000000 }
+
+                cycles = 8;
+                help_string = "XOR A, " + reg;
+            }
+
+
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
 
 }
+
+
+
 
 
 export class InstructionGetter {
@@ -1019,9 +1177,151 @@ export class InstructionGetter {
                 }
             }
 
+            case 0xA7: {
+                return OpTemplate.AND('a');
+            }
 
+            case 0xA0: {
+                return OpTemplate.AND('b');
+            }
 
+            case 0xA1: {
+                return OpTemplate.AND('c');
+            }
 
+            case 0xA2: {
+                return OpTemplate.AND('d');
+            }
+
+            case 0xA3: {
+                return OpTemplate.AND('e');
+            }
+
+            case 0xA4: {
+                return OpTemplate.AND('h');
+            }
+
+            case 0xA5: {
+                return OpTemplate.AND('l');
+            }
+
+            case 0xA6: {
+                return OpTemplate.AND('(hl)');
+            }
+
+            case 0xE6: {
+                return {
+                    op: function(args: op_args) {
+
+                        var n = args.arg;
+
+                        args.cpu.registers.a &= n;
+
+                        if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10100000 }
+                        else { args.cpu.registers.f = 0b00100000 }
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "AND A,#"
+                }
+            }
+
+            case 0xB7: {
+                return OpTemplate.OR('a');
+            }
+
+            case 0xB0: {
+                return OpTemplate.OR('b');
+            }
+
+            case 0xB1: {
+                return OpTemplate.OR('c');
+            }
+
+            case 0xB2: {
+                return OpTemplate.OR('d');
+            }
+
+            case 0xB3: {
+                return OpTemplate.OR('e');
+            }
+
+            case 0xB4: {
+                return OpTemplate.OR('h');
+            }
+
+            case 0xB5: {
+                return OpTemplate.OR('l');
+            }
+
+            case 0xB6: {
+                return OpTemplate.OR('(hl)');
+            }
+
+            case 0xF6: {
+                return {
+                    op: function(args: op_args) {
+
+                        var n = args.arg;
+
+                        args.cpu.registers.a |= n;
+
+                        if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                        else { args.cpu.registers.f = 0b00000000 }
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "OR A,#"
+                }
+            }
+            case 0xAF: {
+                return OpTemplate.XOR('a');
+            }
+
+            case 0xA8: {
+                return OpTemplate.XOR('b');
+            }
+
+            case 0xA9: {
+                return OpTemplate.XOR('c');
+            }
+
+            case 0xAA: {
+                return OpTemplate.XOR('d');
+            }
+
+            case 0xAB: {
+                return OpTemplate.XOR('e');
+            }
+
+            case 0xAC: {
+                return OpTemplate.XOR('h');
+            }
+
+            case 0xAD: {
+                return OpTemplate.XOR('l');
+            }
+
+            case 0xAE: {
+                return OpTemplate.XOR('(hl)');
+            }
+
+            case 0xEE: {
+                return {
+                    op: function(args: op_args) {
+
+                        var n = args.arg;
+
+                        args.cpu.registers.a ^= n;
+
+                        if (args.cpu.registers.a == 0) { args.cpu.registers.f = 0b10000000 }
+                        else { args.cpu.registers.f = 0b00000000 }
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "XOR A,#"
+                }
+            }
         }
 
 

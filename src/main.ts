@@ -23,7 +23,7 @@ function main() {
     let op = 0;
 
 
-    let numOps = 10;
+    let numOps = 100;
 
     while (numOps > 0) {
         numOps--;

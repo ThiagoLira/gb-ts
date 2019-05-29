@@ -30,8 +30,13 @@ function main() {
 
         // fetch opcode
         op = mmu.bios[cpu.registers.pc]
+        // detect prefix
+        let is_cb = op == 0xCB;
+        // fetch opcode after prefix
+        if (is_cb) { op = mmu.bios[++cpu.registers.pc] };
+
         // fetch Instruction
-        var inst = IGetter.GetInstruction(op);
+        var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);
 
         var arg = 0;
 

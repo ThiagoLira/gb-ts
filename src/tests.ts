@@ -29,7 +29,7 @@ describe('add', function() {
 
     });
 
-    it('should add regs A and B and set flags', function() {
+    it('should add regs a and b and set flags', function() {
 
 
 
@@ -169,5 +169,42 @@ describe('sub', function() {
 
     });
 
+    it('INC B 0xF, check lower nibble overflow', function() {
+
+
+        cpu.registers.b = 0xF;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test INC B
+        var inst = IGetter.GetInstruction(0x04);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.b).to.equal(0xF + 1);
+        expect(cpu.registers.f).to.equal(0b00100000);
+
+    });
+
+    it('SWAP C', function() {
+
+
+        cpu.registers.c = 0xF0;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test INC B
+        var inst = IGetter.GetCBInstruction(0x31);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.c).to.equal(0x0F);
+        expect(cpu.registers.f).to.equal(0b00000000);
+
+    });
 
 });

@@ -354,6 +354,99 @@ export class OpTemplate {
 
     }
 
+    static SWAP(reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "SWAP (HL)" : "SWAP " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        // being sneak sneak with closures
+        var reg_closure = reg;
+
+        let f = function(args: op_args) {
+
+            var a = args.cpu.registers.a;
+
+            let res = 0;
+
+            // extract the high byte hibyte = (x & 0xff00) >> 8;
+            // extract the low byte lobyte = (x & 0xff);
+            // combine them in the reverse order x = lobyte << 8 | hibyte;
+            if (reg_closure == '(hl)') {
+                let byte = args.mmu.getByte(args.cpu.registers.hl);
+                let high_byte = (byte & 0xf0) >> 4;
+                let low_byte = (byte & 0xf);
+                res = (low_byte << 4) | high_byte;
+                args.mmu.setByte(args.cpu.registers.hl, res);
+
+            }
+            else {
+                let byte = args.cpu.registers[reg];
+                let high_byte = (byte & 0xf0) >> 4;
+                let low_byte = (byte & 0xf);
+                res = (low_byte << 4) | high_byte;
+                args.cpu.registers[reg] = res;
+            }
+
+            if (res == 0) { args.cpu.registers.f = 0b10000000 }
+            else { args.cpu.registers.f = 0b00000000 }
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
+    static INC(reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "INC (HL)" : "INC " + reg;
+
+        let cycles = (reg == '(hl)') ? 12 : 4;
+
+        // being sneak sneak with closures
+        var reg_closure = reg;
+
+        let f = function(args: op_args) {
+
+            var a = args.cpu.registers.a;
+
+            let res = 0;
+
+            if (reg_closure == '(hl)') {
+                args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) + 1);
+                res = args.mmu.getByte(args.cpu.registers.hl);
+
+            }
+            else {
+                args.cpu.registers[reg] += 1;
+                res = args.cpu.registers[reg];
+            }
+
+            // zero flag
+            if (res == 0) { args.cpu.registers.f |= 0x80; }
+            // check carry on 3-th bit
+            if (res & 0x10) { args.cpu.registers.f |= 0x20; }
+            // reset N flag
+            args.cpu.registers.f &= 0xBF;
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
 }
 
 
@@ -364,7 +457,55 @@ export class InstructionGetter {
 
     // no no
     private constructor() { };
+    public static GetCBInstruction(opcode: number): InstructionConfig {
 
+        switch (opcode) {
+
+            case 0x37: {
+                return OpTemplate.SWAP('a');
+            }
+
+            case 0x30: {
+                return OpTemplate.SWAP('b');
+            }
+
+            case 0x31: {
+                return OpTemplate.SWAP('c');
+            }
+
+            case 0x32: {
+                return OpTemplate.SWAP('d');
+            }
+
+            case 0x33: {
+                return OpTemplate.SWAP('e');
+            }
+
+            case 0x34: {
+                return OpTemplate.SWAP('h');
+            }
+
+            case 0x35: {
+                return OpTemplate.SWAP('l');
+            }
+
+            case 0x36: {
+                return OpTemplate.SWAP('(hl)');
+            }
+
+
+
+
+        }
+
+        return {
+            op: function(args: op_args) { },
+            cycles: 0,
+            arg_number: 0,
+            help_string: "UNINPLEMENTED OPCODE: CB  " + opcode.toString(16)
+        }
+
+    }
 
     public static GetInstruction(opcode: number): InstructionConfig {
 
@@ -1356,6 +1497,37 @@ export class InstructionGetter {
                     arg_number: 1,
                     help_string: "XOR A,#"
                 }
+            }
+            case 0x3C: {
+                return OpTemplate.INC('a');
+            }
+
+            case 0x04: {
+                return OpTemplate.INC('b');
+            }
+
+            case 0x0C: {
+                return OpTemplate.INC('c');
+            }
+
+            case 0x14: {
+                return OpTemplate.INC('d');
+            }
+
+            case 0x1C: {
+                return OpTemplate.INC('e');
+            }
+
+            case 0x24: {
+                return OpTemplate.INC('h');
+            }
+
+            case 0x2C: {
+                return OpTemplate.INC('l');
+            }
+
+            case 0x34: {
+                return OpTemplate.INC('(hl)');
             }
         }
 

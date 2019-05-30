@@ -403,6 +403,41 @@ export class OpTemplate {
 
 
     }
+
+    static BIT(bit_pos: number, reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "BIT " + bit_pos.toString() + "(HL)" : "BIT " + bit_pos.toString() + " " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        let f = function(args: op_args) {
+
+
+            // what is the bit on bit_pos position?
+            let test = (args.cpu.registers[reg] >> bit_pos) & 0x01;
+
+            // if test bit was zero set Z flag
+            if (!test) { args.cpu.registers.f |= 0b10000000 } else { args.cpu.registers.f &= 0x01111111 }
+
+            //reset flag N
+            args.cpu.registers.f &= 0b10111111;
+            //set flag H
+            args.cpu.registers.f |= 0b00100000;
+
+        }
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+
+
+        }
+
+
+
+    }
     static INC(reg: string): InstructionConfig {
 
 
@@ -491,6 +526,11 @@ export class InstructionGetter {
 
             case 0x36: {
                 return OpTemplate.SWAP('(hl)');
+            }
+
+
+            case 0x7C: {
+                return OpTemplate.BIT(7, 'h');
             }
 
 
@@ -1046,6 +1086,123 @@ export class InstructionGetter {
 
 
 
+            case 0xCD: {
+
+                return {
+                    op: function(args: op_args) {
+                        // (sp - 1) <- PCh (sp - 2) <- PCl
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                        args.cpu.registers.sp -= 2;
+                        // pc <- arg
+                        args.cpu.registers.pc = args.arg
+                    },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "CALL"
+                }
+
+
+            }
+
+
+
+            case 0xC4: {
+
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = !args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // (sp - 1) <- PCh (sp - 2) <- PCl
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.cpu.registers.sp -= 2;
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 2,
+                    help_string: "CALL NZ"
+                }
+
+
+            }
+
+            case 0xCC: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // (sp - 1) <- PCh (sp - 2) <- PCl
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.cpu.registers.sp -= 2;
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 2,
+                    help_string: "CALL Z"
+                }
+
+
+            }
+
+            case 0xD4: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = !args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // (sp - 1) <- PCh (sp - 2) <- PCl
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.cpu.registers.sp -= 2;
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 2,
+                    help_string: "CALL NC"
+                }
+
+
+            }
+
+            case 0xDC: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // (sp - 1) <- PCh (sp - 2) <- PCl
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.cpu.registers.sp -= 2;
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 2,
+                    help_string: "CALL C"
+                }
+
+
+            }
             // Stack functions	
             case 0xF5: {
                 return OpTemplate.PUSH('af');

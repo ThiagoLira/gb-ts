@@ -206,5 +206,22 @@ describe('sub', function() {
         expect(cpu.registers.f).to.equal(0b00000000);
 
     });
+    it('BIT 7 H', function() {
+
+
+        cpu.registers.h = 0b10000000;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test INC B
+        var inst = IGetter.GetCBInstruction(0x7C);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.f).to.equal(0b00100000);
+
+    });
 
 });

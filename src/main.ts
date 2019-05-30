@@ -58,7 +58,7 @@ function main() {
             }
         }
 
-        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString());
+        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
         // run op
         inst.op({ arg, cpu, mmu });
 

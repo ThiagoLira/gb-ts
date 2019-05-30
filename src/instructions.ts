@@ -438,6 +438,57 @@ export class OpTemplate {
 
 
     }
+    static RES(bit_pos: number, reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "RES " + bit_pos.toString() + "(HL)" : "RES " + bit_pos.toString() + " " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        let f = function(args: op_args) {
+
+
+            args.cpu.registers[reg] &= ~(1 << bit_pos);              // shorthand
+
+        }
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+
+
+        }
+
+
+
+    }
+    static SET(bit_pos: number, reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "SET " + bit_pos.toString() + "(HL)" : "SET " + bit_pos.toString() + " " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        let f = function(args: op_args) {
+
+
+            args.cpu.registers[reg] |= 1 << bit_pos;              // shorthand
+
+
+        }
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+
+
+        }
+
+
+
+    }
     static INC(reg: string): InstructionConfig {
 
 
@@ -527,13 +578,586 @@ export class InstructionGetter {
             case 0x36: {
                 return OpTemplate.SWAP('(hl)');
             }
-
-
+            case 0x40: {
+                return OpTemplate.BIT(0, 'b');
+            }
+            case 0x41: {
+                return OpTemplate.BIT(0, 'c');
+            }
+            case 0x42: {
+                return OpTemplate.BIT(0, 'd');
+            }
+            case 0x43: {
+                return OpTemplate.BIT(0, 'e');
+            }
+            case 0x44: {
+                return OpTemplate.BIT(0, 'h');
+            }
+            case 0x45: {
+                return OpTemplate.BIT(0, 'l');
+            }
+            case 0x46: {
+                return OpTemplate.BIT(0, '(hl)');
+            }
+            case 0x47: {
+                return OpTemplate.BIT(0, 'a');
+            }
+            case 0x48: {
+                return OpTemplate.BIT(1, 'b');
+            }
+            case 0x49: {
+                return OpTemplate.BIT(1, 'c');
+            }
+            case 0x4A: {
+                return OpTemplate.BIT(1, 'd');
+            }
+            case 0x4B: {
+                return OpTemplate.BIT(1, 'e');
+            }
+            case 0x4C: {
+                return OpTemplate.BIT(1, 'h');
+            }
+            case 0x4D: {
+                return OpTemplate.BIT(1, 'l');
+            }
+            case 0x4E: {
+                return OpTemplate.BIT(1, '(hl)');
+            }
+            case 0x4F: {
+                return OpTemplate.BIT(1, 'a');
+            }
+            case 0x50: {
+                return OpTemplate.BIT(2, 'b');
+            }
+            case 0x51: {
+                return OpTemplate.BIT(2, 'c');
+            }
+            case 0x52: {
+                return OpTemplate.BIT(2, 'd');
+            }
+            case 0x53: {
+                return OpTemplate.BIT(2, 'e');
+            }
+            case 0x54: {
+                return OpTemplate.BIT(2, 'h');
+            }
+            case 0x55: {
+                return OpTemplate.BIT(2, 'l');
+            }
+            case 0x56: {
+                return OpTemplate.BIT(2, '(hl)');
+            }
+            case 0x57: {
+                return OpTemplate.BIT(2, 'a');
+            }
+            case 0x58: {
+                return OpTemplate.BIT(3, 'b');
+            }
+            case 0x59: {
+                return OpTemplate.BIT(3, 'c');
+            }
+            case 0x5A: {
+                return OpTemplate.BIT(3, 'd');
+            }
+            case 0x5B: {
+                return OpTemplate.BIT(3, 'e');
+            }
+            case 0x5C: {
+                return OpTemplate.BIT(3, 'h');
+            }
+            case 0x5D: {
+                return OpTemplate.BIT(3, 'l');
+            }
+            case 0x5E: {
+                return OpTemplate.BIT(3, '(hl)');
+            }
+            case 0x5F: {
+                return OpTemplate.BIT(3, 'a');
+            }
+            case 0x60: {
+                return OpTemplate.BIT(4, 'b');
+            }
+            case 0x61: {
+                return OpTemplate.BIT(4, 'c');
+            }
+            case 0x62: {
+                return OpTemplate.BIT(4, 'd');
+            }
+            case 0x63: {
+                return OpTemplate.BIT(4, 'e');
+            }
+            case 0x64: {
+                return OpTemplate.BIT(4, 'h');
+            }
+            case 0x65: {
+                return OpTemplate.BIT(4, 'l');
+            }
+            case 0x66: {
+                return OpTemplate.BIT(4, '(hl)');
+            }
+            case 0x67: {
+                return OpTemplate.BIT(4, 'a');
+            }
+            case 0x68: {
+                return OpTemplate.BIT(5, 'b');
+            }
+            case 0x69: {
+                return OpTemplate.BIT(5, 'c');
+            }
+            case 0x6A: {
+                return OpTemplate.BIT(5, 'd');
+            }
+            case 0x6B: {
+                return OpTemplate.BIT(5, 'e');
+            }
+            case 0x6C: {
+                return OpTemplate.BIT(5, 'h');
+            }
+            case 0x6D: {
+                return OpTemplate.BIT(5, 'l');
+            }
+            case 0x6E: {
+                return OpTemplate.BIT(5, '(hl)');
+            }
+            case 0x6F: {
+                return OpTemplate.BIT(5, 'a');
+            }
+            case 0x70: {
+                return OpTemplate.BIT(6, 'b');
+            }
+            case 0x71: {
+                return OpTemplate.BIT(6, 'c');
+            }
+            case 0x72: {
+                return OpTemplate.BIT(6, 'd');
+            }
+            case 0x73: {
+                return OpTemplate.BIT(6, 'e');
+            }
+            case 0x74: {
+                return OpTemplate.BIT(6, 'h');
+            }
+            case 0x75: {
+                return OpTemplate.BIT(6, 'l');
+            }
+            case 0x76: {
+                return OpTemplate.BIT(6, '(hl)');
+            }
+            case 0x77: {
+                return OpTemplate.BIT(6, 'a');
+            }
+            case 0x78: {
+                return OpTemplate.BIT(7, 'b');
+            }
+            case 0x79: {
+                return OpTemplate.BIT(7, 'c');
+            }
+            case 0x7A: {
+                return OpTemplate.BIT(7, 'd');
+            }
+            case 0x7B: {
+                return OpTemplate.BIT(7, 'e');
+            }
             case 0x7C: {
                 return OpTemplate.BIT(7, 'h');
             }
+            case 0x7D: {
+                return OpTemplate.BIT(7, 'l');
+            }
+            case 0x7E: {
+                return OpTemplate.BIT(7, '(hl)');
+            }
+            case 0x7F: {
+                return OpTemplate.BIT(7, 'a');
+            }
 
 
+            case 0x80: {
+                return OpTemplate.RES(0, 'b');
+            }
+            case 0x81: {
+                return OpTemplate.RES(0, 'c');
+            }
+            case 0x82: {
+                return OpTemplate.RES(0, 'd');
+            }
+            case 0x83: {
+                return OpTemplate.RES(0, 'e');
+            }
+            case 0x84: {
+                return OpTemplate.RES(0, 'h');
+            }
+            case 0x85: {
+                return OpTemplate.RES(0, 'l');
+            }
+            case 0x86: {
+                return OpTemplate.RES(0, '(hl)');
+            }
+            case 0x87: {
+                return OpTemplate.RES(0, 'a');
+            }
+            case 0x88: {
+                return OpTemplate.RES(1, 'b');
+            }
+            case 0x89: {
+                return OpTemplate.RES(1, 'c');
+            }
+            case 0x8A: {
+                return OpTemplate.RES(1, 'd');
+            }
+            case 0x8B: {
+                return OpTemplate.RES(1, 'e');
+            }
+            case 0x8C: {
+                return OpTemplate.RES(1, 'h');
+            }
+            case 0x8D: {
+                return OpTemplate.RES(1, 'l');
+            }
+            case 0x8E: {
+                return OpTemplate.RES(1, '(hl)');
+            }
+            case 0x8F: {
+                return OpTemplate.RES(1, 'a');
+            }
+            case 0x90: {
+                return OpTemplate.RES(2, 'b');
+            }
+            case 0x91: {
+                return OpTemplate.RES(2, 'c');
+            }
+            case 0x92: {
+                return OpTemplate.RES(2, 'd');
+            }
+            case 0x93: {
+                return OpTemplate.RES(2, 'e');
+            }
+            case 0x94: {
+                return OpTemplate.RES(2, 'h');
+            }
+            case 0x95: {
+                return OpTemplate.RES(2, 'l');
+            }
+            case 0x96: {
+                return OpTemplate.RES(2, '(hl)');
+            }
+            case 0x97: {
+                return OpTemplate.RES(2, 'a');
+            }
+            case 0x98: {
+                return OpTemplate.RES(3, 'b');
+            }
+            case 0x99: {
+                return OpTemplate.RES(3, 'c');
+            }
+            case 0x9A: {
+                return OpTemplate.RES(3, 'd');
+            }
+            case 0x9B: {
+                return OpTemplate.RES(3, 'e');
+            }
+            case 0x9C: {
+                return OpTemplate.RES(3, 'h');
+            }
+            case 0x9D: {
+                return OpTemplate.RES(3, 'l');
+            }
+            case 0x9E: {
+                return OpTemplate.RES(3, '(hl)');
+            }
+            case 0x9F: {
+                return OpTemplate.RES(3, 'a');
+            }
+            case 0xA0: {
+                return OpTemplate.RES(4, 'b');
+            }
+            case 0xA1: {
+                return OpTemplate.RES(4, 'c');
+            }
+            case 0xA2: {
+                return OpTemplate.RES(4, 'd');
+            }
+            case 0xA3: {
+                return OpTemplate.RES(4, 'e');
+            }
+            case 0xA4: {
+                return OpTemplate.RES(4, 'h');
+            }
+            case 0xA5: {
+                return OpTemplate.RES(4, 'l');
+            }
+            case 0xA6: {
+                return OpTemplate.RES(4, '(hl)');
+            }
+            case 0xA7: {
+                return OpTemplate.RES(4, 'a');
+            }
+            case 0xA8: {
+                return OpTemplate.RES(5, 'b');
+            }
+            case 0xA9: {
+                return OpTemplate.RES(5, 'c');
+            }
+            case 0xAA: {
+                return OpTemplate.RES(5, 'd');
+            }
+            case 0xAB: {
+                return OpTemplate.RES(5, 'e');
+            }
+            case 0xAC: {
+                return OpTemplate.RES(5, 'h');
+            }
+            case 0xAD: {
+                return OpTemplate.RES(5, 'l');
+            }
+            case 0xAE: {
+                return OpTemplate.RES(5, '(hl)');
+            }
+            case 0xAF: {
+                return OpTemplate.RES(5, 'a');
+            }
+            case 0xB0: {
+                return OpTemplate.RES(6, 'b');
+            }
+            case 0xB1: {
+                return OpTemplate.RES(6, 'c');
+            }
+            case 0xB2: {
+                return OpTemplate.RES(6, 'd');
+            }
+            case 0xB3: {
+                return OpTemplate.RES(6, 'e');
+            }
+            case 0xB4: {
+                return OpTemplate.RES(6, 'h');
+            }
+            case 0xB5: {
+                return OpTemplate.RES(6, 'l');
+            }
+            case 0xB6: {
+                return OpTemplate.RES(6, '(hl)');
+            }
+            case 0xB7: {
+                return OpTemplate.RES(6, 'a');
+            }
+            case 0xB8: {
+                return OpTemplate.RES(7, 'b');
+            }
+            case 0xB9: {
+                return OpTemplate.RES(7, 'c');
+            }
+            case 0xBA: {
+                return OpTemplate.RES(7, 'd');
+            }
+            case 0xBB: {
+                return OpTemplate.RES(7, 'e');
+            }
+            case 0xBC: {
+                return OpTemplate.RES(7, 'h');
+            }
+            case 0xBD: {
+                return OpTemplate.RES(7, 'l');
+            }
+            case 0xBE: {
+                return OpTemplate.RES(7, '(hl)');
+            }
+            case 0xBF: {
+                return OpTemplate.RES(7, 'a');
+            }
+
+
+            case 0xC0: {
+                return OpTemplate.SET(0, 'b');
+            }
+            case 0xC1: {
+                return OpTemplate.SET(0, 'c');
+            }
+            case 0xC2: {
+                return OpTemplate.SET(0, 'd');
+            }
+            case 0xC3: {
+                return OpTemplate.SET(0, 'e');
+            }
+            case 0xC4: {
+                return OpTemplate.SET(0, 'h');
+            }
+            case 0xC5: {
+                return OpTemplate.SET(0, 'l');
+            }
+            case 0xC6: {
+                return OpTemplate.SET(0, '(hl)');
+            }
+            case 0xC7: {
+                return OpTemplate.SET(0, 'a');
+            }
+            case 0xC8: {
+                return OpTemplate.SET(1, 'b');
+            }
+            case 0xC9: {
+                return OpTemplate.SET(1, 'c');
+            }
+            case 0xCA: {
+                return OpTemplate.SET(1, 'd');
+            }
+            case 0xCB: {
+                return OpTemplate.SET(1, 'e');
+            }
+            case 0xCC: {
+                return OpTemplate.SET(1, 'h');
+            }
+            case 0xCD: {
+                return OpTemplate.SET(1, 'l');
+            }
+            case 0xCE: {
+                return OpTemplate.SET(1, '(hl)');
+            }
+            case 0xCF: {
+                return OpTemplate.SET(1, 'a');
+            }
+            case 0xD0: {
+                return OpTemplate.SET(2, 'b');
+            }
+            case 0xD1: {
+                return OpTemplate.SET(2, 'c');
+            }
+            case 0xD2: {
+                return OpTemplate.SET(2, 'd');
+            }
+            case 0xD3: {
+                return OpTemplate.SET(2, 'e');
+            }
+            case 0xD4: {
+                return OpTemplate.SET(2, 'h');
+            }
+            case 0xD5: {
+                return OpTemplate.SET(2, 'l');
+            }
+            case 0xD6: {
+                return OpTemplate.SET(2, '(hl)');
+            }
+            case 0xD7: {
+                return OpTemplate.SET(2, 'a');
+            }
+            case 0xD8: {
+                return OpTemplate.SET(3, 'b');
+            }
+            case 0xD9: {
+                return OpTemplate.SET(3, 'c');
+            }
+            case 0xDA: {
+                return OpTemplate.SET(3, 'd');
+            }
+            case 0xDB: {
+                return OpTemplate.SET(3, 'e');
+            }
+            case 0xDC: {
+                return OpTemplate.SET(3, 'h');
+            }
+            case 0xDD: {
+                return OpTemplate.SET(3, 'l');
+            }
+            case 0xDE: {
+                return OpTemplate.SET(3, '(hl)');
+            }
+            case 0xDF: {
+                return OpTemplate.SET(3, 'a');
+            }
+            case 0xE0: {
+                return OpTemplate.SET(4, 'b');
+            }
+            case 0xE1: {
+                return OpTemplate.SET(4, 'c');
+            }
+            case 0xE2: {
+                return OpTemplate.SET(4, 'd');
+            }
+            case 0xE3: {
+                return OpTemplate.SET(4, 'e');
+            }
+            case 0xE4: {
+                return OpTemplate.SET(4, 'h');
+            }
+            case 0xE5: {
+                return OpTemplate.SET(4, 'l');
+            }
+            case 0xE6: {
+                return OpTemplate.SET(4, '(hl)');
+            }
+            case 0xE7: {
+                return OpTemplate.SET(4, 'a');
+            }
+            case 0xE8: {
+                return OpTemplate.SET(5, 'b');
+            }
+            case 0xE9: {
+                return OpTemplate.SET(5, 'c');
+            }
+            case 0xEA: {
+                return OpTemplate.SET(5, 'd');
+            }
+            case 0xEB: {
+                return OpTemplate.SET(5, 'e');
+            }
+            case 0xEC: {
+                return OpTemplate.SET(5, 'h');
+            }
+            case 0xED: {
+                return OpTemplate.SET(5, 'l');
+            }
+            case 0xEE: {
+                return OpTemplate.SET(5, '(hl)');
+            }
+            case 0xEF: {
+                return OpTemplate.SET(5, 'a');
+            }
+            case 0xF0: {
+                return OpTemplate.SET(6, 'b');
+            }
+            case 0xF1: {
+                return OpTemplate.SET(6, 'c');
+            }
+            case 0xF2: {
+                return OpTemplate.SET(6, 'd');
+            }
+            case 0xF3: {
+                return OpTemplate.SET(6, 'e');
+            }
+            case 0xF4: {
+                return OpTemplate.SET(6, 'h');
+            }
+            case 0xF5: {
+                return OpTemplate.SET(6, 'l');
+            }
+            case 0xF6: {
+                return OpTemplate.SET(6, '(hl)');
+            }
+            case 0xF7: {
+                return OpTemplate.SET(6, 'a');
+            }
+            case 0xF8: {
+                return OpTemplate.SET(7, 'b');
+            }
+            case 0xF9: {
+                return OpTemplate.SET(7, 'c');
+            }
+            case 0xFA: {
+                return OpTemplate.SET(7, 'd');
+            }
+            case 0xFB: {
+                return OpTemplate.SET(7, 'e');
+            }
+            case 0xFC: {
+                return OpTemplate.SET(7, 'h');
+            }
+            case 0xFD: {
+                return OpTemplate.SET(7, 'l');
+            }
+            case 0xFE: {
+                return OpTemplate.SET(7, '(hl)');
+            }
+            case 0xFF: {
+                return OpTemplate.SET(7, 'a');
+            }
 
 
         }

@@ -529,10 +529,82 @@ export class OpTemplate {
             arg_number: 0,
             help_string: help_string
         }
+    }
+
+    static DEC(reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "DEC (HL)" : "DEC " + reg;
+
+        let cycles = (reg == '(hl)') ? 12 : 4;
+
+        // being sneak sneak with closures
+        var reg_closure = reg;
+
+        let f = function(args: op_args) {
+
+            var a = args.cpu.registers.a;
+            var n = args.cpu.registers[reg];
+
+            let res = 0;
+
+            if (reg_closure == '(hl)') {
+                args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) - 1);
+                res = args.mmu.getByte(args.cpu.registers.hl);
+
+            }
+            else {
+                args.cpu.registers[reg] -= 1;
+                res = args.cpu.registers[reg];
+            }
+
+            // zero flag
+            if (res == 0) { args.cpu.registers.f |= 0x80; }
+
+            if ((a & 0xF) < (n & 0xF)) {
+                //set H
+                args.cpu.registers.f |= 0x20;
+
+            }
+            // set N flag
+            args.cpu.registers.f |= 0b01000000;
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+    }
+
+
+    static RL(reg: string): InstructionConfig {
+
+
+        let help_string = (reg == '(hl)') ? "RL (HL)" : "RL " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        // being sneak sneak with closures
+        var reg_closure = reg;
+
+        let f = function(args: op_args) {
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
 
 
 
     }
+
+
+
 }
 
 
@@ -1295,6 +1367,15 @@ export class InstructionGetter {
                 }
             };
 
+
+            case 0x3E: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.a = args.arg; },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "LD A,#"
+                }
+            };
             case 0xF2: {
                 return {
                     op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + args.cpu.registers.c); },
@@ -2465,6 +2546,121 @@ export class InstructionGetter {
             case 0x34: {
                 return OpTemplate.INC('(hl)');
             }
+
+            case 0x03: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.bc += 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "INC BC"
+                }
+            }
+            case 0x13: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.de += 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "INC DE"
+                }
+            }
+            case 0x23: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.hl += 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "INC hl"
+                }
+            }
+            case 0x33: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.sp += 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "INC SP"
+                }
+            }
+
+            case 0x3D: {
+                return OpTemplate.DEC('a');
+            }
+
+            case 0x05: {
+                return OpTemplate.DEC('b');
+            }
+
+            case 0x0D: {
+                return OpTemplate.DEC('c');
+            }
+
+            case 0x15: {
+                return OpTemplate.DEC('d');
+            }
+
+            case 0x1D: {
+                return OpTemplate.DEC('e');
+            }
+
+            case 0x25: {
+                return OpTemplate.DEC('h');
+            }
+
+            case 0x2D: {
+                return OpTemplate.DEC('l');
+            }
+
+            case 0x35: {
+                return OpTemplate.DEC('(hl)');
+            }
+
+            case 0x0B: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.bc -= 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "DEC BC"
+                }
+            }
+            case 0x1B: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.de -= 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "DEC DE"
+                }
+            }
+            case 0x2B: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.hl -= 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "DEC hl"
+                }
+            }
+            case 0x3B: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.sp -= 1;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "DEC SP"
+                }
+            }
+
         }
 
 

@@ -50,13 +50,12 @@ export class MMU {
         let address_without_offset = address;
         switch (true) {
 
-
             // boot rom range
             case (address < 0x100):
                 return this.bios[address_without_offset];
 
             case (address > 0x100):
-
+                return 0;
             //vram
             case ((0xA000 > address) && (address > 0x8000)):
                 address_without_offset = 0xA000 - address;

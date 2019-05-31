@@ -29,11 +29,11 @@ function main() {
         numOps--;
 
         // fetch opcode
-        op = mmu.bios[cpu.registers.pc]
+        op = mmu.getByte(cpu.registers.pc)
         // detect prefix
         let is_cb = op == 0xCB;
         // fetch opcode after prefix
-        if (is_cb) { op = mmu.bios[++cpu.registers.pc] };
+        if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
 
         // fetch Instruction
         var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);
@@ -47,12 +47,12 @@ function main() {
                 break;
             }
             case 1: {
-                arg = mmu.bios[cpu.registers.pc + 1];
+                arg = mmu.getByte(cpu.registers.pc + 1);
                 cpu.registers.pc += 2;
                 break;
             }
             case 2: {
-                arg = (mmu.bios[cpu.registers.pc + 1] + (mmu.bios[cpu.registers.pc + 2] << 8));
+                arg = (mmu.getByte(cpu.registers.pc + 1) + (mmu.getByte(cpu.registers.pc + 2) << 8));
                 cpu.registers.pc += 3;
                 break;
             }

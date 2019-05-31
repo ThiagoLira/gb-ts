@@ -1709,7 +1709,162 @@ export class InstructionGetter {
             }
 
 
+            case 0x20: {
+                return {
+                    op: function(args: op_args) {
 
+                        let will_call = !args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc += args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "JR NZ"
+                }
+            }
+
+            case 0x28: {
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc += args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "JR Z"
+                }
+            }
+
+            case 0x30: {
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = !args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc += args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 1,
+                    help_string: "JR NC"
+                }
+            }
+
+            case 0x38: {
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc += args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 1,
+                    help_string: "JR C"
+                }
+            }
+            case 0xC2: {
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = !args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "JP NZ"
+                }
+            }
+
+            case 0xCA: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.zero_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "JP Z"
+                }
+            }
+
+            case 0xD2: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = !args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "JP NC"
+                }
+            }
+
+            case 0xDA: {
+
+                return {
+                    op: function(args: op_args) {
+
+                        let will_call = args.cpu.registers.carry_flag;
+
+                        if (will_call) {
+                            // pc <- arg
+                            args.cpu.registers.pc = args.arg
+                        }
+                    },
+                    cycles: 24,
+                    arg_number: 2,
+                    help_string: "JP C"
+                }
+            }
+
+
+            case 0xE9: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.pc = args.cpu.registers.hl },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "JP (HL)"
+                }
+            }
+
+            case 0x18: {
+                return {
+                    op: function(args: op_args) { args.cpu.registers.pc = args.cpu.registers.pc + args.arg },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "JP (HL)"
+                }
+            }
             case 0xCD: {
 
                 return {

@@ -17,10 +17,37 @@ export class CPU {
 
     registers: Registers;
 
-    flag_z: boolean = false;
-    flag_n: boolean = false;
-    flag_h: boolean = false;
-    flag_c: boolean = false;
+    reset_carry_flag() {
+        this.registers.f &= ~(1 << 4)
+    }
+
+    reset_half_carry_flag() {
+        this.registers.f &= ~(1 << 5)
+    }
+
+    reset_n_flag() {
+        this.registers.f &= ~(1 << 6)
+    }
+
+    reset_zero_flag() {
+        this.registers.f &= ~(1 << 7)
+    }
+
+    set_carry_flag() {
+        this.registers.f |= 1 << 4
+    }
+
+    set_half_carry_flag() {
+        this.registers.f |= 1 << 5
+    }
+
+    set_n_flag() {
+        this.registers.f |= 1 << 6
+    }
+
+    set_zero_flag() {
+        this.registers.f |= 1 << 7
+    }
 
     constructor(registers: Registers) {
 
@@ -32,10 +59,6 @@ export class CPU {
         this.registers = new Registers();
 
 
-        this.flag_z = false;
-        this.flag_n = false;
-        this.flag_h = false;
-        this.flag_c = false;
 
     }
 

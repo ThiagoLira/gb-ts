@@ -577,8 +577,66 @@ export class OpTemplate {
             help_string: help_string
         }
     }
+    // rotate right through carry
+    static RR(reg: string): InstructionConfig {
 
 
+        let help_string = (reg == '(hl)') ? "RR (HL)" : "RR " + reg;
+
+        let cycles = (reg == '(hl)') ? 16 : 8;
+
+        // being sneak sneak with closures
+        var reg_closure = reg;
+
+        let f = function(args: op_args) {
+
+            if (reg == '(hl)') {
+                let byte = args.mmu.getByte(args.cpu.registers.hl);
+
+                byte = byte >> 1
+
+                let new_flag = (byte >> 0) & 0x01;
+
+                let old_flag = args.cpu.registers.carry_flag;
+
+                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+
+                (old_flag) ? byte |= 1 << 7 : byte &= ~(1 << 7);
+
+
+                args.mmu.setByte(args.cpu.registers.hl, byte);
+
+
+            }
+            else {
+                let byte = args.cpu.registers[reg]
+
+                byte = byte >> 1
+
+                let new_flag = (byte >> 0) & 0x01;
+
+                let old_flag = args.cpu.registers.carry_flag;
+
+                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+
+                (old_flag) ? byte |= 1 << 7 : byte &= ~(1 << 7);
+
+                args.cpu.registers[reg] = byte;
+            }
+
+        }
+
+        return {
+            op: f,
+            cycles: cycles,
+            arg_number: 0,
+            help_string: help_string
+        }
+
+
+
+    }
+    // rotate left through carry
     static RL(reg: string): InstructionConfig {
 
 
@@ -590,6 +648,41 @@ export class OpTemplate {
         var reg_closure = reg;
 
         let f = function(args: op_args) {
+
+            if (reg == '(hl)') {
+                let byte = args.mmu.getByte(args.cpu.registers.hl);
+
+                byte = byte << 1
+
+                let new_flag = (byte >> 7) & 0x01;
+
+                let old_flag = args.cpu.registers.carry_flag;
+
+                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+
+                (old_flag) ? byte |= 1 << 0 : byte &= ~(1 << 0);
+
+
+                args.mmu.setByte(args.cpu.registers.hl, byte);
+
+
+            }
+            else {
+                let byte = args.cpu.registers[reg]
+
+                byte = byte << 1
+
+                let new_flag = (byte >> 7) & 0x01;
+
+                let old_flag = args.cpu.registers.carry_flag;
+
+                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+
+                (old_flag) ? byte |= 1 << 0 : byte &= ~(1 << 0);
+
+                args.cpu.registers[reg] = byte;
+            }
+
         }
 
         return {

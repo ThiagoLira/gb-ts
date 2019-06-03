@@ -1769,7 +1769,7 @@ export class InstructionGetter {
 
             case 0x32: {
                 return {
-                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl--, args.cpu.registers.a); },
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.a); args.cpu.registers.hl-- },
                     cycles: 8,
                     arg_number: 0,
                     help_string: "LDD (HL),A"

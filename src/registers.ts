@@ -43,42 +43,42 @@ export class Registers {
     }
 
     get af(): number {
-        return (this.a << 4) | this.f;
+        return (this.a << 8) | this.f;
     }
 
     set af(val: number) {
 
-        this.a = val >> 7;
+        this.a = val >> 8;
         this.f = val & 0xff;
     }
 
     get bc(): number {
-        return (this.b << 4) | this.c;
+        return (this.b << 8) | this.c;
     }
 
     set bc(val: number) {
 
-        this.b = val >> 7;
+        this.b = val >> 8;
         this.c = val & 0xff;
     }
 
     get de(): number {
-        return (this.d << 4) | this.e;
+        return (this.d << 8) | this.e;
     }
 
     set de(val: number) {
 
-        this.d = val >> 7;
+        this.d = val >> 8;
         this.e = val & 0xff;
     }
 
     get hl(): number {
-        return (this.h << 4) | this.l;
+        return (this.h << 8) | this.l;
     }
 
     set hl(val: number) {
 
-        this.h = val >> 7;
+        this.h = val >> 8;
         this.l = val & 0xff;
     }
 

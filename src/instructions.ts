@@ -416,7 +416,6 @@ export class OpTemplate {
 
             // what is the bit on bit_pos position?
             let test = (args.cpu.registers[reg] >> bit_pos) & 0x01;
-
             // if test bit was zero set Z flag
             if (!test) { args.cpu.registers.f |= 0b10000000 } else { args.cpu.registers.f &= 0x01111111 }
 
@@ -1888,7 +1887,6 @@ export class InstructionGetter {
                     op: function(args: op_args) {
 
                         let will_call = !args.cpu.registers.zero_flag;
-
                         if (will_call) {
                             // pc <- arg
                             args.cpu.registers.pc += args.arg

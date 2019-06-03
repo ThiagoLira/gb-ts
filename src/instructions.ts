@@ -1793,10 +1793,6 @@ export class InstructionGetter {
                 }
             }
 
-
-
-
-
             case 0xE0: {
                 return {
                     op: function(args: op_args) { args.mmu.setByte(0xFF00 + args.arg, args.cpu.registers.a); },

@@ -23,7 +23,7 @@ function main() {
     let op = 0;
 
 
-    let numOps = 100;
+    let numOps = 100000;
 
     while (numOps > 0) {
         numOps--;
@@ -49,7 +49,6 @@ function main() {
             case 1: {
                 arg = mmu.getByte(cpu.registers.pc + 1);
                 cpu.registers.pc += 2;
-
                 // convert to 2-complement if highest bit is 1
                 if ((arg >> 7) & 0x01) { arg = arg - (1 << 8) }
 
@@ -62,14 +61,7 @@ function main() {
             }
         }
 
-
-        // console.log("(HL): " + mmu.getByte(cpu.registers.hl));
-        // console.log("HL: " + (cpu.registers.hl));
-
-        // if ((cpu.registers.hl) < 0x7FFF) { console.log(cpu.registers) };
-
         console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
-        // run op
         try { inst.op({ arg, cpu, mmu }); }
         catch{ console.log("failed to run " + inst.help_string) }
     };

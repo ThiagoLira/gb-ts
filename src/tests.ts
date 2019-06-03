@@ -206,6 +206,31 @@ describe('sub', function() {
         expect(cpu.registers.f).to.equal(0b00000000);
 
     });
+    it('set HL', function() {
+
+
+        cpu.registers.hl = 0b11010011;
+
+
+
+        // test INC B
+
+        expect(cpu.registers.hl).to.equal(0b11010011);
+
+    });
+    it('HL == H | L', function() {
+
+
+        cpu.registers.h = 0b1101;
+        cpu.registers.l = 0b0010;
+
+
+
+        // test INC B
+
+        expect(cpu.registers.hl).to.equal(0b11010010);
+
+    });
     it('BIT 7 H', function() {
 
 

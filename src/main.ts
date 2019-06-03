@@ -61,7 +61,8 @@ function main() {
             }
         }
 
-        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
+        if (cpu.registers.pc == 0x00f) { console.log(mmu.vram); console.log(op.toString(16)); break; }
+        // console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
         try { inst.op({ arg, cpu, mmu }); }
         catch{ console.log("failed to run " + inst.help_string) }
     };

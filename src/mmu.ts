@@ -83,19 +83,19 @@ export class MMU {
 
             // boot rom range
             case (address < 0x100):
-                throw new Error('Trying to write bootrom');
+                throw new Error('Trying to write on bootrom');
             //vram
-            case ((0xA000 > address) && (address > 0x8000)):
+            case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
                 this.vram[address_without_offset] = val;
 
             // iram	
-            case ((0xE000 > address) && (address > 0xC000)):
+            case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 this.iram[address_without_offset] = val;
 
             // iram echo	
-            case ((0xFE00 > address) && (address > 0xE000)):
+            case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 this.echo_iram[address_without_offset] = val;
 

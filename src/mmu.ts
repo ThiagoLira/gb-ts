@@ -53,9 +53,6 @@ export class MMU {
             // boot rom range
             case (address < 0x100):
                 return this.bios[address_without_offset];
-
-            case (address > 0x100):
-                return 0;
             //vram
             case ((0xA000 > address) && (address > 0x8000)):
                 address_without_offset = 0xA000 - address;
@@ -71,7 +68,10 @@ export class MMU {
                 address_without_offset = 0xFE00 - address;
                 return this.echo_iram[address_without_offset];
 
+
         }
+
+        throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
         return 0;
     }
 

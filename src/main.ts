@@ -49,6 +49,10 @@ function main() {
             case 1: {
                 arg = mmu.getByte(cpu.registers.pc + 1);
                 cpu.registers.pc += 2;
+
+                // convert to 2-complement if highest bit is 1
+                if ((arg >> 7) & 0x01) { arg = arg - (1 << 8) }
+
                 break;
             }
             case 2: {
@@ -57,10 +61,13 @@ function main() {
                 break;
             }
         }
+
+
+
         console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
         // run op
-        // inst.op({ arg, cpu, mmu });
-
+        inst.op({ arg, cpu, mmu });
+        console.log("after instrucion PC value is: " + cpu.registers.pc.toString(16));
     };
 
 

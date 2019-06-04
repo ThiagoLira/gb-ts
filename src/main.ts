@@ -51,7 +51,6 @@ function main() {
                 cpu.registers.pc += 2;
                 // convert to 2-complement if highest bit is 1
                 if ((arg >> 7) & 0x01) { arg = arg - (1 << 8) }
-
                 break;
             }
             case 2: {

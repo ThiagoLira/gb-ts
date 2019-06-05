@@ -40,6 +40,21 @@ export class MMU {
     // iram has 8kbs
     iram: number[] = Array(0x2000).fill(0xFF);
 
+    // oam has idkn how many kbs 
+    oam: number[] = Array(0xA0).fill(0x0);
+
+    // lcd control
+    lcdc: number = 0x91;
+
+    // lcdc status
+    stat: number = 0x0;
+
+    // SCY
+    scy: number = 0x0;
+
+    //scx
+    scx: number = 0x0;
+
     // echo iram
     //  do I just copy the reference to the iram?
     echo_iram: number[] = this.iram;
@@ -53,21 +68,28 @@ export class MMU {
             // boot rom range
             case (address < 0x100):
                 return this.bios[address_without_offset];
+
             //vram
-            case ((0xA000 > address) && (address > 0x8000)):
+            case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
                 return this.vram[address_without_offset];
 
             // iram	
-            case ((0xE000 > address) && (address > 0xC000)):
+            case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 return this.iram[address_without_offset];
 
             // iram echo	
-            case ((0xFE00 > address) && (address > 0xE000)):
+            case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 return this.echo_iram[address_without_offset];
 
+            case ((0xFEA0 > address) && (address >= 0xFE00)):
+                address_without_offset = address - 0xFE00;
+                return this.oam[address_without_offset];
+
+            case (0xFF40 == address):
+                return this.lcdc;
 
         }
 
@@ -99,6 +121,13 @@ export class MMU {
                 address_without_offset = address - 0xE000;
                 this.echo_iram[address_without_offset] = val;
 
+            // OAM
+            case ((0xFEA0 > address) && (address >= 0xFE00)):
+                address_without_offset = address - 0xFE00;
+                this.oam[address_without_offset] = val;
+
+            case (0xFF40 == address):
+                this.lcdc = val;
 
         }
 

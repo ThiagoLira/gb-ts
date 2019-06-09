@@ -55,6 +55,12 @@ export class MMU {
     //scx
     scx: number = 0x0;
 
+    //LCDC Y coordinate
+    ly: number = 0x0;
+
+    //ly compare
+    lyc: number = 0x0;
+
     // echo iram
     //  do I just copy the reference to the iram?
     echo_iram: number[] = this.iram;
@@ -88,13 +94,18 @@ export class MMU {
                 address_without_offset = address - 0xFE00;
                 return this.oam[address_without_offset];
 
-            case (0xFF40 == address):
-                return this.lcdc;
+            // video related registers
+            case ((0xFF46 > address) && (address >= 0xFF40)):
+                if (address == 0xFF40) { return this.lcdc; }
+                if (address == 0xFF41) { return this.stat; }
+                if (address == 0xFF42) { return this.scy; }
+                if (address == 0xFF43) { return this.scx; }
+                if (address == 0xFF44) { return this.ly; }
+                if (address == 0xFF45) { return this.lyc; }
 
         }
 
         throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
-        return 0;
     }
 
     setByte(address: number, val: number): void {
@@ -126,8 +137,14 @@ export class MMU {
                 address_without_offset = address - 0xFE00;
                 this.oam[address_without_offset] = val;
 
-            case (0xFF40 == address):
-                this.lcdc = val;
+            // video related registers
+            case ((0xFF46 > address) && (address >= 0xFF40)):
+                if (address == 0xFF40) { this.lcdc = val; }
+                if (address == 0xFF41) { this.stat = val; }
+                if (address == 0xFF42) { this.scy = val; }
+                if (address == 0xFF43) { this.scx = val; }
+                if (address == 0xFF44) { this.ly = val; }
+                if (address == 0xFF45) { this.lyc = val; }
 
         }
 

@@ -8,6 +8,8 @@ module.exports = {
   },
   target: 'web',
   plugins: [
-    new HtmlWebpackPlugin()
+      new HtmlWebpackPlugin({
+	  template: 'src/index_template.html'
+      })
   ]
 }

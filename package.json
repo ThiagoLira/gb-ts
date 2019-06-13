@@ -24,6 +24,7 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "@types/node": "^11.13.8",
+    "@types/webpack-env": "^1.13.9",
     "chai": "^4.2.0",
     "fs": "0.0.1-security",
     "html-webpack-plugin": "^4.0.0-beta.5",
@@ -40,11 +41,9 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
-
     "test:pack": "webpack --config test-webpack.config.js",
-      
-      "test:mocha": "mocha  lib/test_bundle.js",
-      "test": "npm run build:types && npm run build:js && npm run test:pack && npm run test:mocha",
+    "test:mocha": "mocha  lib/test_bundle.js",
+    "test": "npm run build:types && npm run build:js && npm run test:pack && npm run test:mocha",
     "build": "npm run build:types && npm run build:js && npm run build:pack",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",

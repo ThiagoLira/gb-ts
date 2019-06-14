@@ -28,8 +28,12 @@ function main() {
     while (numOps > 0) {
         numOps--;
 
+
+        var old_pc = cpu.registers.pc;
+
         // fetch opcode
-        op = mmu.getByte(cpu.registers.pc)
+        try { op = mmu.getByte(cpu.registers.pc) }
+        catch { console.log("Unable to get next instruction"); console.log(cpu.registers.pc.toString(16)) };
         // detect prefix
         let is_cb = op == 0xCB;
         // fetch opcode after prefix
@@ -60,10 +64,17 @@ function main() {
             }
         }
 
-        if (cpu.registers.pc == 0x00f) { console.log(mmu.vram); console.log(op.toString(16)); break; }
         // console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
+        if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
+
+
         try { inst.op({ arg, cpu, mmu }); }
-        catch{ console.log("failed to run " + inst.help_string) }
+        catch (err) {
+            console.log(err);
+            console.log(cpu.registers.de);
+            console.log("failed to run " + inst.help_string);
+            break;
+        }
     };
 
 

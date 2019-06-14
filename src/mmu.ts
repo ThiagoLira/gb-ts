@@ -76,6 +76,8 @@ export class MMU {
     //  do I just copy the reference to the iram?
     echo_iram: number[] = this.iram;
 
+    // RAM on top of memory usually used for the stack
+    stack_ram: number[] = Array(0x7F).fill(0x0);
 
     getByte(address: number): number {
 
@@ -83,9 +85,12 @@ export class MMU {
         switch (true) {
 
             // boot rom range
-            case (address < 0x100):
+            case (0x101 > address):
                 return this.bios[address_without_offset];
-
+            // second part of bootrom, I think	
+            case (0x201 > address) && (address > 0x101): {
+                return this.bios[address_without_offset];
+            }
             //vram
             case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
@@ -120,6 +125,9 @@ export class MMU {
                 if (address == 0xFF4A) { return this.wy; }
                 if (address == 0xFF4B) { return this.wx; }
 
+            case ((0x10000 > address) && (address >= 0xFF80)):
+                address_without_offset = address - 0xFF80;
+                return this.stack_ram[address_without_offset];
         }
 
         throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
@@ -169,6 +177,9 @@ export class MMU {
                 if (address == 0xFF4A) { this.wy = val; }
                 if (address == 0xFF4B) { this.wx = val; }
 
+            case ((0x10000 > address) && (address >= 0xFF80)):
+                address_without_offset = address - 0xFF80;
+                this.stack_ram[address_without_offset] = val;
         }
 
     }

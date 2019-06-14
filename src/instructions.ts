@@ -711,6 +711,39 @@ export class InstructionGetter {
 
         switch (opcode) {
 
+            case 0x17: {
+                return OpTemplate.RL('a');
+            }
+
+            case 0x10: {
+                return OpTemplate.RL('b');
+            }
+
+            case 0x11: {
+                return OpTemplate.RL('c');
+            }
+
+            case 0x12: {
+                return OpTemplate.RL('d');
+            }
+
+            case 0x13: {
+                return OpTemplate.RL('e');
+            }
+
+            case 0x14: {
+                return OpTemplate.RL('h');
+            }
+
+            case 0x15: {
+                return OpTemplate.RL('l');
+            }
+
+            case 0x16: {
+                return OpTemplate.RL('(hl)');
+            }
+
+
             case 0x37: {
                 return OpTemplate.SWAP('a');
             }
@@ -1366,6 +1399,10 @@ export class InstructionGetter {
                     arg_number: 1,
                     help_string: "LD D,n"
                 }
+            }
+
+            case 0x17: {
+                return OpTemplate.RL('a');
             }
 
             case 0x1E: {
@@ -2150,6 +2187,24 @@ export class InstructionGetter {
 
 
             }
+
+            case 0xC9: {
+                return {
+                    op: function(args: op_args) {
+                        // pcl  (SP), pch  (SP+1), SPSP+2
+                        let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                        let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                        let res = (high_byte << 4) | low_byte;
+                        args.cpu.registers.pc = res;
+                        args.cpu.registers.sp += 2;
+                    },
+                    cycles: 16,
+                    arg_number: 0,
+                    help_string: "RET"
+                }
+            }
+
+
             // Stack functions	
             case 0xF5: {
                 return OpTemplate.PUSH('af');

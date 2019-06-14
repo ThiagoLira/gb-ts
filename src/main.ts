@@ -1,4 +1,5 @@
 import { CPU } from "./cpu"
+import { GPU } from "./gpu"
 import { Registers } from "./registers"
 import { MMU } from "./mmu"
 import { InstructionConfig, InstructionGetter } from "./instructions"
@@ -14,6 +15,9 @@ function main() {
     // load bootrom on MMU
     let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
 
+    let gpu = new GPU();
+
+
     // https://www.typescriptlang.org/docs/handbook/classes.html
     let IGetter = InstructionGetter;
 
@@ -23,7 +27,7 @@ function main() {
     let op = 0;
 
 
-    let numOps = 100000;
+    let numOps = 10;
 
     while (numOps > 0) {
         numOps--;

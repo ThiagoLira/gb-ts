@@ -26,6 +26,7 @@ export class GPU {
 
 
     constructor() {
+        this.reset();
     }
 
     // values of the whole view
@@ -36,7 +37,13 @@ export class GPU {
     private full_pixel_grid: number[] = Array(65025).fill(0x00);
 
     // indices of tiles to be displayed
-    private tileset_indices: number[] = Array(384).fill(0x00);
+    // 32 by 32 tiles
+    private tileset_indices: number[][][] = Array(32).fill(0).map(() => new Array(32).fill(0))
+
+
+    // tileset data copied from vram
+    // 384 tiles, each with 8 colunms each with 8 pixels, each with 2 bits of information
+    public tileset_data: number[][][] = Array(384).fill(0).map(() => new Array(8).fill(0).map(() => new Array(8).fill(0)));
 
 
     // for testing and fun
@@ -44,8 +51,21 @@ export class GPU {
     public hard_code_nintendo_logo() {
         // Nintendo Logo
         //  $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D 
-        //  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99 
+        //  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99  
         //  $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E 
+        let logo_bytes =
+            [
+                0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+                0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+                0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
+            ]
+
+        for (let i = 0; i < logo_bytes.length; i += 1) {
+
+
+
+        }
+
 
 
     }
@@ -54,20 +74,56 @@ export class GPU {
     // canvas element
     // this is only 160x144 pixels, as we are drawing just what
     // really shows on screen
-    private screen_obj = document.getElementById("screen");
+    private screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
 
 
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU): void {
 
-
-
-
-
     }
 
+
+
+
+
+
     public reset() {
+
+        // reset tiledata
+        for (let tile of this.tileset_data) {
+            for (let collumn of tile) {
+                for (let pixel of collumn) {
+
+                    pixel = 0;
+                }
+            }
+        }
+
+
+        // draw blank screen
+        let context = this.screen_obj.getContext('2d');
+
+        if (context) {
+            let img_data = context.getImageData(0, 0, this.screen_obj.width, this.screen_obj.height);
+
+            let pixels = img_data.data;
+
+            for (let p = 0; p < (pixels.length); p += 4) {
+
+                pixels[p + 0] = 255;
+                pixels[p + 1] = 255;
+                pixels[p + 2] = 255;
+                pixels[p + 3] = 255;
+
+
+            }
+
+            context.putImageData(img_data, 0, 0);
+
+        }
+
+
 
 
 

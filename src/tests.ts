@@ -1,5 +1,6 @@
 
 import { CPU } from "./cpu"
+import { GPU } from "./gpu"
 import { Registers } from "./registers"
 import { MMU } from "./mmu"
 import { InstructionConfig, InstructionGetter } from "./instructions"
@@ -301,4 +302,13 @@ describe('sub', function() {
 
     });
 
+    it('GPU reset', function() {
+
+        // let gpu = new GPU();
+
+
+        // console.log(gpu.tileset_data);
+
+
+    });
 });

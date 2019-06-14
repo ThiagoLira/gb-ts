@@ -2194,7 +2194,7 @@ export class InstructionGetter {
                         // pcl  (SP), pch  (SP+1), SPSP+2
                         let low_byte = args.mmu.getByte(args.cpu.registers.sp);
                         let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
-                        let res = (high_byte << 4) | low_byte;
+                        let res = (low_byte << 4) | high_byte;
                         args.cpu.registers.pc = res;
                         args.cpu.registers.sp += 2;
                     },

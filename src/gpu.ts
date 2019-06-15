@@ -60,14 +60,30 @@ export class GPU {
                 0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
             ]
 
-        for (let i = 0; i < logo_bytes.length; i += 1) {
+        for (let t = 0; t < logo_bytes.length; t += 16) {
+            for (let i = 0; i < 16; i += 2) {
+                let byte1 = logo_bytes[t + i];
+                let byte2 = logo_bytes[t + i + 1];
+
+                // console.log(byte1.toString(16), byte2.toString(16));
+                for (let b = 0; b < 7; b += 1) {
+                    let bit1 = (byte1 >> b) & 1;
+                    let bit2 = (byte2 >> b) & 1;
+
+                    let pixel = bit1 + bit2;
+                    this.tileset_data[t / 16][i / 2][b] = pixel
+
+
+                }
+
+            }
 
 
 
         }
-
-
-
+        console.log(this.tileset_data[0]);
+        console.log(this.tileset_data[1]);
+        console.log(this.tileset_data[2]);
     }
 
 

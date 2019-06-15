@@ -17,7 +17,7 @@ function main() {
 
     let gpu = new GPU();
 
-
+    gpu.hard_code_nintendo_logo();
     // https://www.typescriptlang.org/docs/handbook/classes.html
     let IGetter = InstructionGetter;
 

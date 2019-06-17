@@ -17,7 +17,8 @@ function main() {
 
     let gpu = new GPU();
 
-    gpu.hard_code_nintendo_logo();
+    // gpu.hard_code_nintendo_logo();
+    // gpu.draw_screen(mmu);
     // https://www.typescriptlang.org/docs/handbook/classes.html
     let IGetter = InstructionGetter;
 
@@ -27,7 +28,7 @@ function main() {
     let op = 0;
 
 
-    let numOps = 10;
+    let numOps = 10000000;
 
     while (numOps > 0) {
         numOps--;
@@ -68,7 +69,7 @@ function main() {
             }
         }
 
-        // console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
+        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 
 
@@ -80,6 +81,9 @@ function main() {
             break;
         }
     };
+
+
+
 
 
 

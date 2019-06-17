@@ -2,22 +2,16 @@ import { MMU } from "./mmu"
 
 
 
-// RGB values for each shitty color on the classic gameboy
-enum DISPLAY_COLOR {
-    OFF,
-    THIRD,
-    SIXTH,
-    ON,
-}
 
 
-function get_RGB(col: DISPLAY_COLOR) {
-    switch (col) {
-        case (DISPLAY_COLOR.OFF): { return [255, 255, 255] }
-        case (DISPLAY_COLOR.THIRD): { return [192, 192, 192] }
-        case (DISPLAY_COLOR.SIXTH): { return [96, 96, 96] }
-        case (DISPLAY_COLOR.ON): { return [0, 0, 0] }
+function get_RGB(color: number): number[] {
+    switch (color) {
+        case (0): { return [255, 255, 255] }
+        case (1): { return [192, 192, 192] }
+        case (2): { return [96, 96, 96] }
+        case (3): { return [0, 0, 0] }
     }
+    return [0, 0, 0]
 
 }
 
@@ -60,6 +54,9 @@ export class GPU {
                 0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
             ]
 
+
+
+
         for (let t = 0; t < logo_bytes.length; t += 16) {
             for (let i = 0; i < 16; i += 2) {
                 let byte1 = logo_bytes[t + i];
@@ -72,18 +69,10 @@ export class GPU {
 
                     let pixel = bit1 + bit2;
                     this.tileset_data[t / 16][i / 2][b] = pixel
-
-
                 }
 
             }
-
-
-
         }
-        console.log(this.tileset_data[0]);
-        console.log(this.tileset_data[1]);
-        console.log(this.tileset_data[2]);
     }
 
 
@@ -97,6 +86,49 @@ export class GPU {
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU): void {
 
+
+
+
+
+        // draw background data
+        let context = this.screen_obj.getContext('2d');
+
+        if (context) {
+            let img_data = context.getImageData(0, 0, this.screen_obj.width, this.screen_obj.height);
+
+            let pixels = img_data.data;
+
+            let offset_x = mmu.scx;
+            let offset_y = mmu.scy;
+
+            for (let p = 0; p < (pixels.length); p += 4) {
+
+
+                let pixel = Math.floor(p / 4);
+
+                let index_tile = Math.floor(pixel / 384);
+
+                let index_pixel_frame = pixel % 64;
+
+                let index_line = Math.floor(index_pixel_frame / 8);
+
+                let index_column = index_pixel_frame % 8;
+
+                let pixel_color = this.tileset_data[index_tile][index_line][index_column];
+
+                let [r, g, b] = get_RGB(pixel_color);
+
+                pixels[p + 0] = r;
+                pixels[p + 1] = g;
+                pixels[p + 2] = b;
+                pixels[p + 3] = 255;
+
+
+            }
+
+            context.putImageData(img_data, 0, 0);
+
+        }
     }
 
 

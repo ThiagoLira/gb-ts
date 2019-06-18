@@ -302,12 +302,22 @@ describe('sub', function() {
 
     });
 
-    it('GPU reset', function() {
+    it('BGP setup', function() {
 
-        // let gpu = new GPU();
+        cpu.registers.a = 0;
+
+        let IGetter = InstructionGetter;
+
+        // LD A, 0xFC
+        var inst = IGetter.GetCBInstruction(0x3E);
+        inst.op({ arg: 0xFC, cpu, mmu });
 
 
-        // console.log(gpu.tileset_data);
+        // LD (0xFF00 + 0x47), A
+        var inst = IGetter.GetCBInstruction(0xE0);
+        inst.op({ arg: 0x47, cpu, mmu });
+
+        expect(mmu.bgp).to.equal(0xFC);
 
 
     });

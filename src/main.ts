@@ -28,19 +28,39 @@ function main() {
     let op = 0;
 
 
-    let numOps = 10000000;
+    let ops_to_run = 1000;
 
-    while (numOps > 0) {
-        numOps--;
+    while (ops_to_run > 0) {
+        ops_to_run--;
 
+
+
+        // debug
+        if (!ops_to_run) {
+            let res = prompt('Enter number of ops to run', '10');
+
+            if (res == 'vram') {
+                console.log(mmu.vram);
+                ops_to_run = 1000;
+            }
+            else if (res == 'registers') {
+                console.log(cpu.registers);
+                ops_to_run = 1000;
+            }
+            else if (res != null) {
+                ops_to_run = parseInt(res);
+            }
+        }
 
         var old_pc = cpu.registers.pc;
 
         // fetch opcode
         try { op = mmu.getByte(cpu.registers.pc) }
         catch { console.log("Unable to get next instruction"); console.log(cpu.registers.pc.toString(16)) };
+
         // detect prefix
         let is_cb = op == 0xCB;
+
         // fetch opcode after prefix
         if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
 
@@ -69,7 +89,8 @@ function main() {
             }
         }
 
-        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16));
+        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
+
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 
 

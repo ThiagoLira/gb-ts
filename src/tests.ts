@@ -15,12 +15,14 @@ describe('BOOTROM', function() {
 
     let cpu: CPU;
     let mmu: MMU;
+    let gpu: GPU;
 
     beforeEach("init", function() {
 
+        gpu = new GPU();
         cpu = new CPU(new Registers());
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
+        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
 
     });
 
@@ -66,12 +68,14 @@ describe('add', function() {
 
     let cpu: CPU;
     let mmu: MMU;
+    let gpu: GPU;
 
     beforeEach("init", function() {
 
+        gpu = new GPU();
         cpu = new CPU(new Registers());
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
+        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
 
     });
 
@@ -148,12 +152,14 @@ describe('sub', function() {
 
     let cpu: CPU;
     let mmu: MMU;
+    let gpu: GPU;
 
     beforeEach("init", function() {
 
         cpu = new CPU(new Registers());
+        gpu = new GPU();
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
+        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
 
     });
 

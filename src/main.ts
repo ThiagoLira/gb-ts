@@ -12,10 +12,11 @@ function main() {
 
     let cpu = new CPU(new Registers());
 
-    // load bootrom on MMU
-    let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin");
-
     let gpu = new GPU();
+
+    // load bootrom on MMU
+    let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
+
 
     // gpu.hard_code_nintendo_logo();
     // gpu.draw_screen(mmu);

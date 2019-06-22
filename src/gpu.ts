@@ -84,9 +84,25 @@ export class GPU {
 
     // this function is called when some byte is written on the VRAM
     // it should then update the tiles object on the gpu for fast drawing of the background
-    public update_tiles(address: number) {
+    // address is a index on vram object, not the actual memory
+    public update_tiles(address_without_offset: number, val: number, val_at_next_addr: number) {
+
+        // let tile = (address_without_offset >> 4) & 511;
+        let tile = Math.floor(address_without_offset / 384);
+        let y = (address_without_offset >> 1) & 7;
+
+        for (let b = 0; b < 7; b += 1) {
+            let bit1 = (val >> b) & 1;
+            let bit2 = (val_at_next_addr >> b) & 1;
 
 
+            console.log(address_without_offset, tile, y);
+
+            this.tileset_data[tile][y][b] = (bit1 ? 1 : 0) +
+                (bit2 ? 2 : 0)
+
+
+        }
     }
 
 

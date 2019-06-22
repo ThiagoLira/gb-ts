@@ -1,13 +1,18 @@
 
+import { GPU } from "./gpu"
 
 export class MMU {
 
-    constructor(path: string) {
+    constructor(path: string, gpu: GPU) {
         // use chromium with this function for now!
         // open -a Chromium --args --disable-web-security --user-data-dir
         // this.readLocalFile(path);
 
         // debug: hard code GB logo on cartridge memory location 0x104 - 0x133
+
+        // we need this reference so we can update the tiledata
+        // everytime the VRAM is updated
+        this.gpu = gpu;
 
         let logo_bytes =
             [
@@ -25,6 +30,7 @@ export class MMU {
 
     }
 
+    gpu: GPU;
 
     bios: number[] = [
         0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
@@ -161,6 +167,9 @@ export class MMU {
             //vram
             case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
+                //update tile data
+                //
+                this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
                 this.vram[address_without_offset] = val;
 
             // iram	
@@ -204,31 +213,31 @@ export class MMU {
 
 
 
-    // readLocalFile(filePath: string) {
-    // var fileRequest = new XMLHttpRequest();
+    readLocalFile(filePath: string) {
+        var fileRequest = new XMLHttpRequest();
 
-    //  Simulating a request against our local system
-    // fileRequest.open("GET", filePath, false);
-    // fileRequest.onreadystatechange = () => {
-    // if (fileRequest.readyState === 4) {
-    // if (fileRequest.status === 200 || fileRequest.status == 0) {
-    // var buff = fileRequest.response;
-    // convert string to bytes array
-    // var bytes: number[] = [];
-    // var charCode;
-    // for (var i = 0; i < buff.length; ++i) {
-    // charCode = buff.charCodeAt(i);
-    // bytes.push((charCode & 0xFF00) >> 8);
-    // bytes.push(charCode & 0xFF);
-    // }
+        // Simulating a request against our local system
+        fileRequest.open("GET", filePath, false);
+        fileRequest.onreadystatechange = () => {
+            if (fileRequest.readyState === 4) {
+                if (fileRequest.status === 200 || fileRequest.status == 0) {
+                    var buff = fileRequest.response;
+                    // convert string to bytes array
+                    var bytes: number[] = [];
+                    var charCode;
+                    for (var i = 0; i < buff.length; ++i) {
+                        charCode = buff.charCodeAt(i);
+                        bytes.push((charCode & 0xFF00) >> 8);
+                        bytes.push(charCode & 0xFF);
+                    }
 
-    // this.rom = bytes.slice(0);
-    // }
-    // }
-    // }
+                    this.cartridge = bytes.slice(0);
+                }
+            }
+        }
 
-    // fileRequest.send(null);
-    // }
+        fileRequest.send(null);
+    }
 
 
 

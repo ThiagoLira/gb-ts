@@ -7,6 +7,21 @@ export class MMU {
         // open -a Chromium --args --disable-web-security --user-data-dir
         // this.readLocalFile(path);
 
+        // debug: hard code GB logo on cartridge memory location 0x104 - 0x133
+
+        let logo_bytes =
+            [
+                0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+                0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+                0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
+            ]
+
+        // considering that cartridge begins at 0x100
+        // so cartridge[4] corresponds to memory location 0x104
+        for (let i = 4; i < 0x033; i += 1) {
+            this.cartridge[i] = logo_bytes[i - 4];
+        }
+
 
     }
 
@@ -79,37 +94,38 @@ export class MMU {
     // RAM on top of memory usually used for the stack
     stack_ram: number[] = Array(0x7F).fill(0x0);
 
+    // 32kb cartridge
+    cartridge: number[] = Array(0x8000).fill(0x0);
+
+
     getByte(address: number): number {
 
         let address_without_offset = address;
         switch (true) {
 
             // boot rom range
-            case (0x101 > address):
+            case (0x100 > address):
                 return this.bios[address_without_offset];
-            // second part of bootrom, I think	
-            case (0x201 > address) && (address > 0x101): {
-                return this.bios[address_without_offset];
-            }
+            // cartridge 
+            case (0x8000 > address) && (address >= 0x100):
+                address_without_offset = address - 0x100;
+                return this.cartridge[address_without_offset];
             //vram
             case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
                 return this.vram[address_without_offset];
-
             // iram	
             case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 return this.iram[address_without_offset];
-
             // iram echo	
             case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 return this.echo_iram[address_without_offset];
-
+            // oam
             case ((0xFEA0 > address) && (address >= 0xFE00)):
                 address_without_offset = address - 0xFE00;
                 return this.oam[address_without_offset];
-
             // video related registers
             case ((0xFF4C > address) && (address >= 0xFF40)):
                 if (address == 0xFF40) { return this.lcdc; }
@@ -124,7 +140,7 @@ export class MMU {
                 if (address == 0xFF49) { return this.bp1; }
                 if (address == 0xFF4A) { return this.wy; }
                 if (address == 0xFF4B) { return this.wx; }
-
+            // stack
             case ((0x10000 > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;
                 return this.stack_ram[address_without_offset];

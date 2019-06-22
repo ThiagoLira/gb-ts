@@ -28,7 +28,7 @@ function main() {
     let op = 0;
 
 
-    let ops_to_run = 1000;
+    let ops_to_run = 10000;
 
     while (ops_to_run > 0) {
         ops_to_run--;
@@ -41,6 +41,15 @@ function main() {
 
             if (res == 'vram') {
                 console.log(mmu.vram);
+                ops_to_run = 1000;
+            }
+            else if (res == 'draw') {
+                gpu.draw_screen(mmu);
+                ops_to_run = 1000;
+            }
+            else if (res == 'cartridge') {
+                console.log(mmu.cartridge);
+                console.log(mmu.getByte(0x104));
                 ops_to_run = 1000;
             }
             else if (res == 'registers') {
@@ -89,7 +98,7 @@ function main() {
             }
         }
 
-        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
+        // console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
 
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 

@@ -82,13 +82,16 @@ export class GPU {
     private screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
 
+    // this function is called when some byte is written on the VRAM
+    // it should then update the tiles object on the gpu for fast drawing of the background
+    public update_tiles(address: number) {
+
+
+    }
+
 
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU): void {
-
-
-
-
 
         // draw background data
         let context = this.screen_obj.getContext('2d');

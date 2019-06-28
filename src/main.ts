@@ -25,44 +25,56 @@ function main() {
 
 
 
+    let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
     let op = 0;
 
+    let stop = false;
 
-    let ops_to_run = 10000;
-
-    while (ops_to_run > 0) {
-        ops_to_run--;
+    // run until PC is at this position, then wait for orders
+    let run_until = 0x1D;
 
 
+    while (true) {
+
+        var old_pc = cpu.registers.pc;
+
+        if (old_pc == run_until) {
+            stop = true;
+            console.log('Reached checkpoint: ' + run_until.toString(16));
+        }
 
         // debug
-        if (!ops_to_run) {
-            let res = prompt('Enter number of ops to run', '10');
+        if (stop) {
+            let res = prompt('Enter new checkpoint for PC (will stop exec on that position)');
 
+            if (res == 'stop') {
+                console.log('EMULATION now over');
+                break;
+            }
             if (res == 'vram') {
                 console.log(mmu.vram);
-                ops_to_run = 1000;
             }
             else if (res == 'draw') {
-                gpu.draw_screen(mmu);
-                ops_to_run = 1000;
+
+                gpu.draw_screen(mmu, screen_obj);
             }
             else if (res == 'cartridge') {
                 console.log(mmu.cartridge);
                 console.log(mmu.getByte(0x104));
-                ops_to_run = 1000;
             }
             else if (res == 'registers') {
                 console.log(cpu.registers);
-                ops_to_run = 1000;
             }
-            else if (res != null) {
-                ops_to_run = parseInt(res);
+            else {
+                if (res) {
+                    run_until = parseInt(res);
+                }
             }
-        }
 
-        var old_pc = cpu.registers.pc;
+
+            stop = false
+        }
 
         // fetch opcode
         try { op = mmu.getByte(cpu.registers.pc) }
@@ -99,7 +111,7 @@ function main() {
             }
         }
 
-        // console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
+        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
 
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 
@@ -116,9 +128,9 @@ function main() {
 
 
 
-
-
-
 }
 
-main();
+// emulation won't start until pressed
+let btn = document.getElementById("startbt");
+if (btn) { btn.addEventListener("click", (e: Event) => main()); }
+

@@ -265,6 +265,26 @@ describe('sub', function() {
         expect(cpu.registers.f).to.equal(0b00000000);
 
     });
+    it('RLA', function() {
+
+
+        cpu.registers.a = 0b1000;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0x17);
+        inst.op({ arg, cpu, mmu });
+
+
+
+        expect(cpu.registers.a).to.equal(0b0);
+        expect(cpu.registers.carry_flag).to.equal(true);
+
+    });
     it('set HL', function() {
 
 

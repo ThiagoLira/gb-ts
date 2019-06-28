@@ -1,5 +1,6 @@
 const path = require('path');
 
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: './lib/tests.js',
@@ -11,4 +12,9 @@ module.exports = {
   fs: 'empty'
   },
   target: 'web',
+  plugins: [
+      new HtmlWebpackPlugin({
+	  template: 'src/index_template.html'
+      })
+  ]
 }

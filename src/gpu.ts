@@ -79,7 +79,7 @@ export class GPU {
     // canvas element
     // this is only 160x144 pixels, as we are drawing just what
     // really shows on screen
-    private screen_obj = <HTMLCanvasElement>document.getElementById("screen");
+    // private screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
 
     // this function is called when some byte is written on the VRAM
@@ -96,7 +96,7 @@ export class GPU {
             let bit2 = (val_at_next_addr >> b) & 1;
 
 
-            console.log(address_without_offset, tile, y);
+            // console.log(address_without_offset, tile, y);
 
             this.tileset_data[tile][y][b] = (bit1 ? 1 : 0) +
                 (bit2 ? 2 : 0)
@@ -107,13 +107,13 @@ export class GPU {
 
 
     // fetcher draws memory on the screen
-    public draw_screen(mmu: MMU): void {
+    public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 
         // draw background data
-        let context = this.screen_obj.getContext('2d');
+        let context = screen_obj.getContext('2d');
 
         if (context) {
-            let img_data = context.getImageData(0, 0, this.screen_obj.width, this.screen_obj.height);
+            let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
 
             let pixels = img_data.data;
 
@@ -168,27 +168,6 @@ export class GPU {
         }
 
 
-        // draw blank screen
-        let context = this.screen_obj.getContext('2d');
-
-        if (context) {
-            let img_data = context.getImageData(0, 0, this.screen_obj.width, this.screen_obj.height);
-
-            let pixels = img_data.data;
-
-            for (let p = 0; p < (pixels.length); p += 4) {
-
-                pixels[p + 0] = 255;
-                pixels[p + 1] = 255;
-                pixels[p + 2] = 255;
-                pixels[p + 3] = 255;
-
-
-            }
-
-            context.putImageData(img_data, 0, 0);
-
-        }
 
 
 

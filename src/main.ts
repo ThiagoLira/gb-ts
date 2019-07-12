@@ -32,16 +32,19 @@ function main() {
     let stop = false;
 
     // run until PC is at this position, then wait for orders
-    let run_until = 0x1D;
+    let breakpoint = 0x28;
 
 
     while (true) {
 
         var old_pc = cpu.registers.pc;
 
-        if (old_pc == run_until) {
+        if (old_pc == breakpoint) {
             stop = true;
-            console.log('Reached checkpoint: ' + run_until.toString(16));
+            console.log('Reached checkpoint: ' + breakpoint.toString(16));
+            console.log('Will run ' + mmu.getByte(cpu.registers.pc).toString(16) + " next.")
+            console.log(cpu.toString());
+            break;
         }
 
         // debug
@@ -64,11 +67,11 @@ function main() {
                 console.log(mmu.getByte(0x104));
             }
             else if (res == 'registers') {
-                console.log(cpu.registers);
+                console.log(cpu.toString());
             }
             else {
                 if (res) {
-                    run_until = parseInt(res);
+                    breakpoint = parseInt(res);
                 }
             }
 
@@ -77,8 +80,7 @@ function main() {
         }
 
         // fetch opcode
-        try { op = mmu.getByte(cpu.registers.pc) }
-        catch { console.log("Unable to get next instruction"); console.log(cpu.registers.pc.toString(16)) };
+        op = mmu.getByte(cpu.registers.pc)
 
         // detect prefix
         let is_cb = op == 0xCB;
@@ -87,7 +89,13 @@ function main() {
         if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
 
         // fetch Instruction
-        var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);
+        try{var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);}
+        catch(err){
+            console.log(err);
+            console.log(cpu.toString());
+            console.log( 'At memory position ' + cpu.registers.pc.toString(16));
+            break;
+        }
 
         var arg = 0;
 
@@ -100,8 +108,6 @@ function main() {
             case 1: {
                 arg = mmu.getByte(cpu.registers.pc + 1);
                 cpu.registers.pc += 2;
-                // convert to 2-complement if highest bit is 1
-                if ((arg >> 7) & 0x01) { arg = arg - (1 << 8) }
                 break;
             }
             case 2: {
@@ -111,7 +117,6 @@ function main() {
             }
         }
 
-        console.log("Running instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
 
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 
@@ -123,6 +128,8 @@ function main() {
             console.log("failed to run " + inst.help_string);
             break;
         }
+
+           console.log("Runned instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
     };
 
 

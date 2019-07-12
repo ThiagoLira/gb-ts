@@ -268,7 +268,7 @@ describe('sub', function() {
     it('RLA', function() {
 
 
-        cpu.registers.a = 0b1000;
+        cpu.registers.a = 0b10000000;
 
         var arg = 0;
 
@@ -282,7 +282,7 @@ describe('sub', function() {
 
 
         expect(cpu.registers.a).to.equal(0b0);
-        expect(cpu.registers.carry_flag).to.equal(true);
+        expect(cpu.registers.carry_flag).to.equal(1);
 
     });
     it('set HL', function() {
@@ -348,6 +348,27 @@ describe('sub', function() {
 
     });
 
+    it('BIT 7 then JR NZ', function() {
+
+        cpu.registers.h = 0b10000000;
+
+        cpu.registers.pc = 0x5
+        let IGetter = InstructionGetter;
+
+        // BIT 7,H
+        var inst = IGetter.GetCBInstruction(0x7C);
+        inst.op({ arg: 0x0, cpu, mmu });
+
+        expect(cpu.registers.zero_flag).to.equal(0);
+
+        // JR NZ
+        var inst = IGetter.GetInstruction(0x20);
+        inst.op({ arg: 0xfc, cpu, mmu });
+
+        expect(cpu.registers.pc).to.equal(0x01);
+
+
+    });
     it('LOAD NINTENDO LOGO FROM BOOTROM', function() {
 
         cpu.registers.a = 0;

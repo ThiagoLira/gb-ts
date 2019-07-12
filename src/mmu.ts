@@ -20,11 +20,12 @@ export class MMU {
                 0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
                 0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
             ]
-
         // considering that cartridge begins at 0x100
         // so cartridge[4] corresponds to memory location 0x104
         for (let i = 4; i < 0x033; i += 1) {
-            this.cartridge[i] = logo_bytes[i - 4];
+            //    this.cartridge[i] = logo_bytes[i - 4];
+            // suppose the gameboy has nothing inserted
+            this.cartridge[i] = 0xFF
         }
 
 
@@ -55,13 +56,13 @@ export class MMU {
     // rom has 32 kbs
     rom: number[] = [];
 
-    // vram has 8kbs 
+    // vram has 8kbs
     vram: number[] = Array(0x2000).fill(0xFF);
 
     // iram has 8kbs
     iram: number[] = Array(0x2000).fill(0xFF);
 
-    // oam has idkn how many kbs 
+    // oam has idkn how many kbs
     oam: number[] = Array(0xA0).fill(0x0);
 
     // lcd control
@@ -112,7 +113,7 @@ export class MMU {
             // boot rom range
             case (0x100 > address):
                 return this.bios[address_without_offset];
-            // cartridge 
+            // cartridge
             case (0x8000 > address) && (address >= 0x100):
                 address_without_offset = address - 0x100;
                 return this.cartridge[address_without_offset];
@@ -120,11 +121,11 @@ export class MMU {
             case ((0xA000 > address) && (address >= 0x8000)):
                 address_without_offset = address - 0x8000;
                 return this.vram[address_without_offset];
-            // iram	
+            // iram
             case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 return this.iram[address_without_offset];
-            // iram echo	
+            // iram echo
             case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 return this.echo_iram[address_without_offset];
@@ -172,12 +173,12 @@ export class MMU {
                 this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
                 this.vram[address_without_offset] = val;
 
-            // iram	
+            // iram
             case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 this.iram[address_without_offset] = val;
 
-            // iram echo	
+            // iram echo
             case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 this.echo_iram[address_without_offset] = val;

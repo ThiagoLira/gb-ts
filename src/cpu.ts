@@ -57,10 +57,25 @@ export class CPU {
     // reset CPU
     reset() {
         this.registers = new Registers();
-
-
-
     }
+
+    // convert to 2-complement and add val to reg(string)
+    public twoComplementAdd(reg:string,val:number): void{
+        // convert to 2-complement if highest bit is 1
+        if ((val >> 7) & 0x01) { val = val - (1 << 8) }
+        this.registers[reg]+= val;
+    }
+
+
+    public toString = () : string => {
+        return `AF = (${this.registers.af.toString(16)}) \n
+BC = (${this.registers.bc.toString(16)}) \n
+DE = (${this.registers.de.toString(16)}) \n
+HL = (${this.registers.hl.toString(16)}) \n
+SP = (${this.registers.sp.toString(16)}) \n
+PC = (${this.registers.pc.toString(16)}) `;
+    }
+
 
 }
 

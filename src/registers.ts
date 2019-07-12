@@ -3,7 +3,7 @@ export class Registers {
     // we can access any member with a index string
     // will be useful to create templates for cpu operations
     // https://basarat.gitbooks.io/typescript/docs/types/index-signatures.html
-    [key: string]: number;
+    [key: string]:  number;
 
     public a: number = 0;
     public b: number = 0;
@@ -13,7 +13,7 @@ export class Registers {
     public h: number = 0;
     public l: number = 0;
     // flag register
-    // Z N H C 0 0 0 0 
+    // Z N H C 0 0 0 0
     public f: number = 0;
     // default value for program counter and stack counter
     // remember those two values are *adresses*

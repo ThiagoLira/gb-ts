@@ -417,10 +417,10 @@ export class OpTemplate {
             // what is the bit on bit_pos position?
             let test = (args.cpu.registers[reg] >> bit_pos) & 0x01;
             // if test bit was zero set Z flag
-            if (!test) { args.cpu.registers.f |= 0b10000000 } else { args.cpu.registers.f &= 0x01111111 }
+            if (!test) { args.cpu.registers.f |= 0b10000000 } else { args.cpu.registers.f &= 0x01110000 }
 
             //reset flag N
-            args.cpu.registers.f &= 0b10111111;
+            args.cpu.registers.f &= 0b10110000;
             //set flag H
             args.cpu.registers.f |= 0b00100000;
 
@@ -519,7 +519,7 @@ export class OpTemplate {
             // check carry on 3-th bit
             if (res & 0x10) { args.cpu.registers.f |= 0x20; }
             // reset N flag
-            args.cpu.registers.f &= 0xBF;
+            args.cpu.registers.f &= 0xB0;
         }
 
         return {
@@ -651,7 +651,7 @@ export class OpTemplate {
             if (reg == '(hl)') {
                 let byte = args.mmu.getByte(args.cpu.registers.hl);
 
-                byte = byte << 1
+                byte = (byte << 1) 
 
                 let new_flag = (byte >> 7) & 0x01;
 
@@ -669,17 +669,17 @@ export class OpTemplate {
             else {
                 let byte = args.cpu.registers[reg]
 
-                byte = byte << 1
+                let  shifted_byte = (byte << 1) & 0b11111111
 
                 let new_flag = (byte >> 7) & 0x01;
 
                 let old_flag = args.cpu.registers.carry_flag;
 
-                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+                (new_flag) ? args.cpu.set_carry_flag() : args.cpu.reset_carry_flag();
 
-                (old_flag) ? byte |= 1 << 0 : byte &= ~(1 << 0);
+                (old_flag) ? shifted_byte |= 1 << 0 : shifted_byte &= ~(1 << 0);
 
-                args.cpu.registers[reg] = byte;
+                args.cpu.registers[reg] = shifted_byte;
             }
 
         }
@@ -1922,7 +1922,8 @@ export class InstructionGetter {
                         let will_call = !args.cpu.registers.zero_flag;
                         if (will_call) {
                             // pc <- arg
-                            args.cpu.registers.pc += args.arg
+                            args.cpu.twoComplementAdd('pc',args.arg);
+                            //args.cpu.registers.pc += args.arg
                         }
                     },
                     cycles: 12,
@@ -1939,7 +1940,8 @@ export class InstructionGetter {
 
                         if (will_call) {
                             // pc <- arg
-                            args.cpu.registers.pc += args.arg
+                            args.cpu.twoComplementAdd('pc',args.arg);
+                            //args.cpu.registers.pc += args.arg
                         }
                     },
                     cycles: 12,
@@ -1956,7 +1958,8 @@ export class InstructionGetter {
 
                         if (will_call) {
                             // pc <- arg
-                            args.cpu.registers.pc += args.arg
+                            args.cpu.twoComplementAdd('pc',args.arg);
+                            //args.cpu.registers.pc += args.arg
                         }
                     },
                     cycles: 12,
@@ -1973,7 +1976,8 @@ export class InstructionGetter {
 
                         if (will_call) {
                             // pc <- arg
-                            args.cpu.registers.pc += args.arg
+                            args.cpu.twoComplementAdd('pc',args.arg);
+                            //args.cpu.registers.pc += args.arg
                         }
                     },
                     cycles: 24,
@@ -2006,7 +2010,7 @@ export class InstructionGetter {
                         let will_call = args.cpu.registers.zero_flag;
 
                         if (will_call) {
-                            // pc <- arg
+                            // pc <- argu
                             args.cpu.registers.pc = args.arg
                         }
                     },
@@ -2278,6 +2282,10 @@ export class InstructionGetter {
                 return {
                     op: function(args: op_args) {
                         var a = args.cpu.registers.a;
+                        let comp_arg = 0;
+                        // convert to 2 complement
+                        if ((args.arg >> 7) & 0x01) { comp_arg = args.arg - (1 << 8) }
+
                         args.cpu.registers.a += args.arg
                         OpTemplate.SetFlagsAddition(a, args.arg, args);
                     },
@@ -2805,15 +2813,7 @@ export class InstructionGetter {
 
         }
 
-
-        return {
-            op: function(args: op_args) { },
-            cycles: 0,
-            arg_number: 0,
-            help_string: "UNINPLEMENTED OPCODE: " + opcode.toString(16)
-        }
-
-
+        throw new Error("UNINPLEMENTED OPCODE:  " + opcode.toString(16));
 
 
     }

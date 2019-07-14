@@ -32,7 +32,7 @@ function main() {
     let stop = false;
 
     // run until PC is at this position, then wait for orders
-    let breakpoint = 0x28;
+    let breakpoint = 0x27;
 
 
     while (true) {
@@ -129,7 +129,7 @@ function main() {
             break;
         }
 
-           console.log("Runned instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
+           // console.log("Runned instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
     };
 
 

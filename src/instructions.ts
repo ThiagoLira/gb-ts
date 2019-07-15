@@ -43,8 +43,9 @@ export class OpTemplate {
 
         return {
             op: function(args: op_args) {
-                args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers[reg] & 0xFF);
-                args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers[reg] >> 8);
+
+                args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers[reg] >> 8);
+                args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers[reg] & 0xFF);
                 args.cpu.registers.sp -= 2;
             },
             cycles: 16,
@@ -677,9 +678,12 @@ export class OpTemplate {
 
                 (new_flag) ? args.cpu.set_carry_flag() : args.cpu.reset_carry_flag();
 
-                (old_flag) ? shifted_byte |= 1 << 0 : shifted_byte &= ~(1 << 0);
+                (old_flag) ? shifted_byte |= (1) : shifted_byte &= ~(0x0001);
 
                 args.cpu.registers[reg] = shifted_byte;
+
+
+
             }
 
         }
@@ -2079,8 +2083,8 @@ export class InstructionGetter {
                 return {
                     op: function(args: op_args) {
                         // (sp - 1) <- PCh (sp - 2) <- PCl
-                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
-                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
                         args.cpu.registers.sp -= 2;
                         // pc <- arg
                         args.cpu.registers.pc = args.arg

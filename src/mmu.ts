@@ -23,9 +23,9 @@ export class MMU {
         // considering that cartridge begins at 0x100
         // so cartridge[4] corresponds to memory location 0x104
         for (let i = 4; i < 0x033; i += 1) {
-            //    this.cartridge[i] = logo_bytes[i - 4];
+               this.cartridge[i] = logo_bytes[i - 4];
             // suppose the gameboy has nothing inserted
-            this.cartridge[i] = 0xFF
+            // this.cartridge[i] = 0xFF
         }
 
 
@@ -172,22 +172,22 @@ export class MMU {
                 //
                 this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
                 this.vram[address_without_offset] = val;
-
+                break;
             // iram
             case ((0xE000 > address) && (address >= 0xC000)):
                 address_without_offset = address - 0xC000
                 this.iram[address_without_offset] = val;
-
+                break;
             // iram echo
             case ((0xFE00 > address) && (address >= 0xE000)):
                 address_without_offset = address - 0xE000;
                 this.echo_iram[address_without_offset] = val;
-
+                break;
             // OAM
             case ((0xFEA0 > address) && (address >= 0xFE00)):
                 address_without_offset = address - 0xFE00;
                 this.oam[address_without_offset] = val;
-
+                break;
             // video related registers
             case ((0xFF46 > address) && (address >= 0xFF40)):
                 if (address == 0xFF40) { this.lcdc = val; }
@@ -202,10 +202,11 @@ export class MMU {
                 if (address == 0xFF49) { this.bp1 = val; }
                 if (address == 0xFF4A) { this.wy = val; }
                 if (address == 0xFF4B) { this.wx = val; }
-
+                break;
             case ((0x10000 > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;
                 this.stack_ram[address_without_offset] = val;
+                break;
         }
 
     }

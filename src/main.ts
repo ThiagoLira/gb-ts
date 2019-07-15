@@ -6,7 +6,6 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 
 
-
 function main() {
 
 
@@ -24,7 +23,6 @@ function main() {
     let IGetter = InstructionGetter;
 
 
-
     let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
     let op = 0;
@@ -32,20 +30,49 @@ function main() {
     let stop = false;
 
     // run until PC is at this position, then wait for orders
-    let breakpoint = 0x27;
+    let breakpoint = 0x9D;
 
 
     while (true) {
 
+
         var old_pc = cpu.registers.pc;
+        // fetch opcode
+        op = mmu.getByte(cpu.registers.pc)
+
+        // detect prefix
+        let is_cb = op == 0xCB;
+
+        // fetch opcode after prefix
+        if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
+
+        // fetch Instruction
+        try{var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);}
+        catch(err){
+            console.log(err);
+            console.log(cpu.toString());
+            console.log( 'At memory position ' + cpu.registers.pc.toString(16));
+            break;
+        }
+
 
         if (old_pc == breakpoint) {
             stop = true;
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
-            console.log('Will run ' + mmu.getByte(cpu.registers.pc).toString(16) + " next.")
+            console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
+
+            // console.log('FFFE ' + mmu.getByte(0xFFFE).toString(16))
+            // console.log('FFFD ' + mmu.getByte(0xFFFD).toString(16))
+            // console.log('FFFC ' + mmu.getByte(0xFFFC).toString(16))
+            // console.log('FFFB ' + mmu.getByte(0xFFFB).toString(16))
+            // console.log('FFFA ' + mmu.getByte(0xFFFA).toString(16))
+            // console.log('FFF9 ' + mmu.getByte(0xFFF9).toString(16))
+
             break;
         }
+
+
 
         // debug
         if (stop) {
@@ -75,28 +102,8 @@ function main() {
                 }
             }
 
-
             stop = false
         }
-
-        // fetch opcode
-        op = mmu.getByte(cpu.registers.pc)
-
-        // detect prefix
-        let is_cb = op == 0xCB;
-
-        // fetch opcode after prefix
-        if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
-
-        // fetch Instruction
-        try{var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);}
-        catch(err){
-            console.log(err);
-            console.log(cpu.toString());
-            console.log( 'At memory position ' + cpu.registers.pc.toString(16));
-            break;
-        }
-
         var arg = 0;
 
         switch (inst.arg_number) {

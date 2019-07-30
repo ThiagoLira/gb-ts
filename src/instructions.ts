@@ -518,7 +518,7 @@ export class OpTemplate {
             // zero flag
             if (res == 0) { args.cpu.registers.f |= 0x80; } else {args.cpu.registers.f &= 0x7F  };
             // check carry on 4-th bit
-            if ( ((res >> 4) & 0x1) & 0x10) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
+            if ( ((res >> 4) & 0x1) ) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
             // reset N flag
             args.cpu.registers.f &= 0xB0;
         }

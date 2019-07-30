@@ -241,7 +241,6 @@ describe('sub', function() {
         // test INC B
         var inst = IGetter.GetInstruction(0x04);
         inst.op({ arg, cpu, mmu });
-
         expect(cpu.registers.b).to.equal(0xF + 1);
         expect(cpu.registers.f).to.equal(0b00100000);
 

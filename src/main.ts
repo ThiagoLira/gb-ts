@@ -6,7 +6,7 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 
 
-function main() {
+function main(breakpoint: number) {
 
 
     let cpu = new CPU(new Registers());
@@ -30,7 +30,7 @@ function main() {
     let stop = false;
 
     // run until PC is at this position, then wait for orders
-    let breakpoint = 0x9D;
+    // let breakpoint = 0x95;
 
 
     while (true) {
@@ -61,49 +61,14 @@ function main() {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
-
-            // console.log('FFFE ' + mmu.getByte(0xFFFE).toString(16))
-            // console.log('FFFD ' + mmu.getByte(0xFFFD).toString(16))
-            // console.log('FFFC ' + mmu.getByte(0xFFFC).toString(16))
-            // console.log('FFFB ' + mmu.getByte(0xFFFB).toString(16))
-            // console.log('FFFA ' + mmu.getByte(0xFFFA).toString(16))
-            // console.log('FFF9 ' + mmu.getByte(0xFFF9).toString(16))
-
             break;
         }
 
-
-
         // debug
         if (stop) {
-            let res = prompt('Enter new checkpoint for PC (will stop exec on that position)');
-
-            if (res == 'stop') {
-                console.log('EMULATION now over');
-                break;
-            }
-            if (res == 'vram') {
-                console.log(mmu.vram);
-            }
-            else if (res == 'draw') {
-
-                gpu.draw_screen(mmu, screen_obj);
-            }
-            else if (res == 'cartridge') {
-                console.log(mmu.cartridge);
-                console.log(mmu.getByte(0x104));
-            }
-            else if (res == 'registers') {
-                console.log(cpu.toString());
-            }
-            else {
-                if (res) {
-                    breakpoint = parseInt(res);
-                }
-            }
-
             stop = false
         }
+
         var arg = 0;
 
         switch (inst.arg_number) {
@@ -144,7 +109,13 @@ function main() {
 
 }
 
+
+
+
+
 // emulation won't start until pressed
 let btn = document.getElementById("startbt");
-if (btn) { btn.addEventListener("click", (e: Event) => main()); }
+let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
+
+if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value)   )); }
 

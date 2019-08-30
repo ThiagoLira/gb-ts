@@ -504,13 +504,15 @@ export class OpTemplate {
             var a = args.cpu.registers.a;
 
             let res = 0;
-
+            let before = 0;
             if (reg_closure == '(hl)') {
+                before = args.cpu.registers.hl;
                 args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) + 1);
                 res = args.mmu.getByte(args.cpu.registers.hl);
 
             }
             else {
+                before = args.cpu.registers[reg];
                 args.cpu.registers[reg] += 1;
                 res = args.cpu.registers[reg];
             }
@@ -518,7 +520,9 @@ export class OpTemplate {
             // zero flag
             if (res == 0) { args.cpu.registers.f |= 0x80; } else {args.cpu.registers.f &= 0x7F  };
             // check carry on 4-th bit
-            if ( ((res >> 4) & 0x1) ) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
+
+            // check if lower nibble before was 1111 i.e. incrementing 1 resulted in overflow
+            if ((before & 0x1111) == 0x1111) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
             // reset N flag
             args.cpu.registers.f &= 0xB0;
         }

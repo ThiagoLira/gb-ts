@@ -506,10 +506,11 @@ export class OpTemplate {
             let res = 0;
             let before = 0;
             if (reg_closure == '(hl)') {
-                before = args.cpu.registers.hl;
+                before = args.mmu.getByte(args.cpu.registers.hl);
                 args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) + 1);
                 res = args.mmu.getByte(args.cpu.registers.hl);
-
+                console.log(before.toString(16));
+                console.log(res.toString(16));
             }
             else {
                 before = args.cpu.registers[reg];
@@ -534,7 +535,7 @@ export class OpTemplate {
             help_string: help_string
         }
     }
-
+    
     static DEC(reg: string): InstructionConfig {
 
 
@@ -547,17 +548,18 @@ export class OpTemplate {
 
         let f = function(args: op_args) {
 
-            var a = args.cpu.registers.a;
-            var n = args.cpu.registers[reg];
 
             let res = 0;
+            let before = 0;
 
             if (reg_closure == '(hl)') {
+                before = args.mmu.getByte(args.cpu.registers.hl) ;
                 args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) - 1);
                 res = args.mmu.getByte(args.cpu.registers.hl);
 
             }
             else {
+                before = args.cpu.registers[reg]; 
                 args.cpu.registers[reg] -= 1;
                 res = args.cpu.registers[reg];
             }
@@ -565,11 +567,13 @@ export class OpTemplate {
             // zero flag
             if (res == 0) { args.cpu.registers.f |= 0x80; }
 
-            if ((a & 0xF) < (n & 0xF)) {
+            if ((before & 0xF) < 1) {
                 //set H
                 args.cpu.registers.f |= 0x20;
 
-            }
+            }else{
+                args.cpu.registers.f &= 0xDF
+                 }
             // set N flag
             args.cpu.registers.f |= 0b01000000;
         }
@@ -2206,7 +2210,7 @@ export class InstructionGetter {
                         // pcl  (SP), pch  (SP+1), SPSP+2
                         let low_byte = args.mmu.getByte(args.cpu.registers.sp);
                         let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
-                        let res = (low_byte << 4) | high_byte;
+                        let res = (high_byte << 4) | low_byte;
                         args.cpu.registers.pc = res;
                         args.cpu.registers.sp += 2;
                     },

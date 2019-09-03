@@ -52,6 +52,9 @@ function main(breakpoint: number) {
             console.log(err);
             console.log(cpu.toString());
             console.log( 'At memory position ' + cpu.registers.pc.toString(16));
+            console.log('op ' + op.toString(16));
+            console.log('old_pc ' + old_pc.toString(16));
+            console.log('@ 0x2b ' + mmu.getByte(0x2b0));
             break;
         }
 
@@ -61,6 +64,7 @@ function main(breakpoint: number) {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
+            console.log(mmu.vram);
             break;
         }
 

@@ -284,6 +284,26 @@ describe('sub', function() {
         expect(cpu.registers.carry_flag).to.equal(1);
 
     });
+    it('RLA 2', function() {
+
+
+        cpu.registers.a = 0b00000100;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0x17);
+        inst.op({ arg, cpu, mmu });
+
+
+
+        expect(cpu.registers.a).to.equal(0b00001000);
+        expect(cpu.registers.carry_flag).to.equal(0);
+
+    });
     it('set HL', function() {
 
 

@@ -211,7 +211,23 @@ export class MMU {
 
     }
 
+    // return string representation of vram
+    public get_vram() : string{
 
+        let offset = 0x8000
+        let output = ""
+
+        for (let i = this.vram.length - 2; i>=0;i=i-2){
+
+            output = output + (offset + i).toString(16) + " : "
+            // output = output + this.vram[i].toString(16) + this.vram[i+1].toString(16)
+            output = output + (i + offset).toString(16) + " " + this.vram[i].toString(16) +" " +  (i + 1 + offset).toString(16) +" " +   this.vram[i+1].toString(16)
+
+            output = output + "\n"
+
+        }
+       return output
+    }
 
 
 

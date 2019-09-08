@@ -523,7 +523,7 @@ export class OpTemplate {
             // check carry on 4-th bit
 
             // check if lower nibble before was 1111 i.e. incrementing 1 resulted in overflow
-            if ((before & 0x1111) == 0x1111) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
+            if ((before & 0b1111) == 0b1111) { args.cpu.registers.f |= 0x20; } else { args.cpu.registers.f &= 0xDF  };
             // reset N flag
             args.cpu.registers.f &= 0xB0;
         }
@@ -535,7 +535,7 @@ export class OpTemplate {
             help_string: help_string
         }
     }
-    
+
     static DEC(reg: string): InstructionConfig {
 
 
@@ -687,6 +687,9 @@ export class OpTemplate {
                 (new_flag) ? args.cpu.set_carry_flag() : args.cpu.reset_carry_flag();
 
                 (old_flag) ? shifted_byte |= (1) : shifted_byte &= ~(0x0001);
+
+                //console.log("Original byte " + byte.toString(2))
+                //console.log("shifted byte " + shifted_byte.toString(2))
 
                 args.cpu.registers[reg] = shifted_byte;
 

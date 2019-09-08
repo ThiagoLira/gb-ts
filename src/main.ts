@@ -64,7 +64,7 @@ function main(breakpoint: number) {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
-            console.log(mmu.vram);
+            console.log(mmu.get_vram());
             break;
         }
 

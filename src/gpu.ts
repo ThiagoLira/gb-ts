@@ -76,6 +76,7 @@ export class GPU {
     }
 
 
+
     // canvas element
     // this is only 160x144 pixels, as we are drawing just what
     // really shows on screen

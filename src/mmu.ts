@@ -221,7 +221,7 @@ export class MMU {
 
             output = output + (offset + i).toString(16) + " : "
             // output = output + this.vram[i].toString(16) + this.vram[i+1].toString(16)
-            output = output + (i + offset).toString(16) + " " + this.vram[i].toString(16) +" " +  (i + 1 + offset).toString(16) +" " +   this.vram[i+1].toString(16)
+            output = output + (i + 1+ offset).toString(16) + " " + this.vram[i+1].toString(16) +" " +  (i  + offset).toString(16) +" " +   this.vram[i].toString(16)
 
             output = output + "\n"
 

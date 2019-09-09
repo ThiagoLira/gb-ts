@@ -559,7 +559,7 @@ export class OpTemplate {
 
             }
             else {
-                before = args.cpu.registers[reg]; 
+                before = args.cpu.registers[reg];
                 args.cpu.registers[reg] -= 1;
                 res = args.cpu.registers[reg];
             }

@@ -64,7 +64,7 @@ describe('BOOTROM', function() {
     });
 });
 
-describe('add', function() {
+describe('logic instructions', function() {
 
     let cpu: CPU;
     let mmu: MMU;
@@ -148,7 +148,7 @@ describe('add', function() {
 
 });
 
-describe('sub', function() {
+describe('other instructions', function() {
 
     let cpu: CPU;
     let mmu: MMU;
@@ -246,6 +246,28 @@ describe('sub', function() {
 
     });
 
+    it('RL C', function() {
+
+        // C before CE
+        // C after 9D
+        // F before 10
+        // F after 10
+        cpu.registers.c = 0xCE;
+        cpu.registers.f = 0x10;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test INC B
+        var inst = IGetter.GetCBInstruction(0x11);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.c).to.equal(0x9D);
+        expect(cpu.registers.f).to.equal(0x10);
+
+    });
     it('SWAP C', function() {
 
 
@@ -267,8 +289,8 @@ describe('sub', function() {
     it('RLA', function() {
 
 
-        cpu.registers.a = 0b10000000;
-
+        cpu.registers.a = 0x9D;
+        cpu.registers.f = 0x10;
         var arg = 0;
 
 
@@ -280,9 +302,45 @@ describe('sub', function() {
 
 
 
-        expect(cpu.registers.a).to.equal(0b0);
-        expect(cpu.registers.carry_flag).to.equal(1);
+        expect(cpu.registers.a).to.equal(0x3B);
 
+    });
+
+    it('DEC B', function() {
+
+
+        cpu.registers.b = 0x04;
+        cpu.registers.f = 0x10;
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0x05);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.b).to.equal(0x03);
+        expect(cpu.registers.f).to.equal(0x50);
+    });
+    it('LDI (HL),A', function() {
+
+
+        cpu.registers.a = 0xFC;
+        cpu.registers.hl = 0x801A;
+        mmu.setByte(0x801A,0x0000)
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0x22);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.a).to.equal(0xFC);
+        expect(mmu.getByte(0x801A)).to.equal(0xFC);
+        expect(cpu.registers.hl).to.equal(0x801b);
     });
     it('RLA 2', function() {
 

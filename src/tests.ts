@@ -323,6 +323,85 @@ describe('other instructions', function() {
         expect(cpu.registers.b).to.equal(0x03);
         expect(cpu.registers.f).to.equal(0x50);
     });
+
+    it('JR NZ 0x0098', function() {
+
+        cpu.registers.a = 0x3B;
+        cpu.registers.f = 0x50;
+        cpu.registers.pc = 0xA1;
+
+        var arg = 0xF5;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0x20);
+        inst.op({ arg, cpu, mmu });
+
+
+        expect( cpu.registers.pc).to.equal(0x0098);
+
+    });
+    it('POP BC', function() {
+
+        cpu.registers.b = 0x04;
+        cpu.registers.c = 0x9C;
+        cpu.registers.sp = 0xFFFA;
+        // the stack
+        mmu.setByte(0xFFFE,0x42)
+        mmu.setByte(0xFFFD,0x00)
+        mmu.setByte(0xFFFC,0x2B)
+        mmu.setByte(0xFFFB,0x04)
+        mmu.setByte(0xFFFA,0xCE)
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0xC1);
+        inst.op({ arg, cpu, mmu });
+
+
+        expect(mmu.getByte(0xFFFA)).to.equal(0xCE);
+        expect( cpu.registers.sp).to.equal(0xFFFC);
+        expect(mmu.getByte(0xFFFB)).to.equal(0x04);
+
+    });
+    it('PUSH BC', function() {
+
+        cpu.registers.b = 0x04;
+        cpu.registers.c = 0xce;
+ 
+        cpu.registers.sp = 0xFFFC;
+       // the stack
+        mmu.setByte(0xFFFE,0x42)
+        mmu.setByte(0xFFFD,0x00)
+        mmu.setByte(0xFFFC,0x2B)
+        mmu.setByte(0xFFFB,0xD7)
+        mmu.setByte(0xFFFA,0xD6)
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test RLA
+        var inst = IGetter.GetInstruction(0xC5);
+        inst.op({ arg, cpu, mmu });
+
+
+        expect(mmu.getByte(0xFFFA)).to.equal(0xCE);
+        expect( cpu.registers.sp).to.equal(0xFFFA);
+        expect(mmu.getByte(0xFFFB)).to.equal(0x04);
+
+    });
+
+
+
+
     it('LDI (HL),A', function() {
 
 
@@ -425,27 +504,6 @@ describe('other instructions', function() {
 
     });
 
-    it('BIT 7 then JR NZ', function() {
-
-        cpu.registers.h = 0b10000000;
-
-        cpu.registers.pc = 0x5
-        let IGetter = InstructionGetter;
-
-        // BIT 7,H
-        var inst = IGetter.GetCBInstruction(0x7C);
-        inst.op({ arg: 0x0, cpu, mmu });
-
-        expect(cpu.registers.zero_flag).to.equal(0);
-
-        // JR NZ
-        var inst = IGetter.GetInstruction(0x20);
-        inst.op({ arg: 0xfc, cpu, mmu });
-
-        expect(cpu.registers.pc).to.equal(0x01);
-
-
-    });
     it('LOAD NINTENDO LOGO FROM BOOTROM', function() {
 
         cpu.registers.a = 0;

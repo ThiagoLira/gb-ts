@@ -60,10 +60,12 @@ export class CPU {
     }
 
     // convert to 2-complement and add val to reg(string)
-    public twoComplementAdd(reg:string,val:number): void{
+    twoComplementAdd(reg:string,val:number): void{
         // convert to 2-complement if highest bit is 1
         if ((val >> 7) & 0x01) { val = val - (1 << 8) }
-        this.registers[reg]+= val;
+
+        // this.registers[reg]+= (val + 2);
+        this.registers[reg]+= (val);
     }
 
 

@@ -509,8 +509,6 @@ export class OpTemplate {
                 before = args.mmu.getByte(args.cpu.registers.hl);
                 args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) + 1);
                 res = args.mmu.getByte(args.cpu.registers.hl);
-                console.log(before.toString(16));
-                console.log(res.toString(16));
             }
             else {
                 before = args.cpu.registers[reg];

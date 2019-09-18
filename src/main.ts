@@ -6,7 +6,9 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 
 
-function main(breakpoint: number) {
+
+// will run emulator until pc==breakpoint and then run_n_more steps 
+function main(breakpoint: number,run_n_more : number) {
 
 
     let cpu = new CPU(new Registers());
@@ -33,8 +35,10 @@ function main(breakpoint: number) {
     // let breakpoint = 0x95;
 
 
-    while (true) {
+    let count_to_stop = 0;
 
+
+    while (true) {
 
         var old_pc = cpu.registers.pc;
         // fetch opcode
@@ -58,20 +62,27 @@ function main(breakpoint: number) {
             break;
         }
 
+        if(stop){
+            count_to_stop++
+            console.log("--------------------------------------")
+            console.log( 'At memory position ' + old_pc.toString(16));
+            console.log('Will run ' + inst.help_string + " next.")
+            console.log(cpu.toString());
+            console.log("--------------------------------------")
+            if(count_to_stop == run_n_more){
+                break;
+            }
 
-        if (old_pc == breakpoint) {
+        }
+
+        if (old_pc == breakpoint && (~stop)) {
             stop = true;
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
             console.log(mmu.get_vram());
-            break;
         }
 
-        // debug
-        if (stop) {
-            stop = false
-        }
 
         var arg = 0;
 
@@ -104,10 +115,7 @@ function main(breakpoint: number) {
             console.log("failed to run " + inst.help_string);
             break;
         }
-
-           // console.log("Runned instruction " + inst.help_string + " on arg " + arg.toString(16) + " at " + old_pc.toString(16));
     };
-
 
 
 
@@ -121,5 +129,5 @@ function main(breakpoint: number) {
 let btn = document.getElementById("startbt");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
 
-if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value)   )); }
+if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value) ,5  )); }
 

@@ -268,6 +268,28 @@ describe('other instructions', function() {
         expect(cpu.registers.f).to.equal(0x10);
 
     });
+    it('RL C 2', function() {
+
+        // C before CE
+        // C after 9D
+        // F before 10
+        // F after 10
+        cpu.registers.c = 0xEB;
+        cpu.registers.f = 0xC0;
+
+        var arg = 0;
+
+
+        let IGetter = InstructionGetter;
+
+        // test INC B
+        var inst = IGetter.GetCBInstruction(0x11);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.c).to.equal(0xD6);
+        expect(cpu.registers.f).to.equal(0x10);
+
+    });
     it('SWAP C', function() {
 
 
@@ -328,7 +350,7 @@ describe('other instructions', function() {
 
         cpu.registers.a = 0x3B;
         cpu.registers.f = 0x50;
-        cpu.registers.pc = 0xA1;
+        cpu.registers.pc = 0xA3;
 
         var arg = 0xF5;
 

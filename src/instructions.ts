@@ -655,10 +655,15 @@ export class OpTemplate {
 
         let f = function(args: op_args) {
 
+            let shifted_byte = 0;
+
+
             if (reg == '(hl)') {
                 let byte = args.mmu.getByte(args.cpu.registers.hl);
 
-                byte = (byte << 1) 
+                byte = (byte << 1)
+
+                shifted_byte = byte;
 
                 let new_flag = (byte >> 7) & 0x01;
 
@@ -676,7 +681,7 @@ export class OpTemplate {
             else {
                 let byte = args.cpu.registers[reg]
 
-                let  shifted_byte = (byte << 1) & 0b11111111
+                shifted_byte = (byte << 1) & 0b11111111
 
                 let new_flag = (byte >> 7) & 0x01;
 
@@ -686,14 +691,20 @@ export class OpTemplate {
 
                 (old_flag) ? shifted_byte |= (1) : shifted_byte &= ~(0x0001);
 
-                //console.log("Original byte " + byte.toString(2))
-                //console.log("shifted byte " + shifted_byte.toString(2))
-
                 args.cpu.registers[reg] = shifted_byte;
 
-
-
             }
+
+            if(shifted_byte == 0){
+                //set zero flag
+                args.cpu.set_zero_flag()
+            }else{
+                // reset zero flag
+                args.cpu.reset_zero_flag()
+            }
+
+            // reset N & H flags
+            args.cpu.registers.f &= 0x90
 
         }
 

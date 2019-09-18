@@ -7,7 +7,7 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 
 
-// will run emulator until pc==breakpoint and then run_n_more steps 
+// will run emulator until pc==breakpoint and then run_n_more steps
 function main(breakpoint: number,run_n_more : number) {
 
 
@@ -40,6 +40,8 @@ function main(breakpoint: number,run_n_more : number) {
 
     while (true) {
 
+
+
         var old_pc = cpu.registers.pc;
         // fetch opcode
         op = mmu.getByte(cpu.registers.pc)
@@ -54,11 +56,6 @@ function main(breakpoint: number,run_n_more : number) {
         try{var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);}
         catch(err){
             console.log(err);
-            console.log(cpu.toString());
-            console.log( 'At memory position ' + cpu.registers.pc.toString(16));
-            console.log('op ' + op.toString(16));
-            console.log('old_pc ' + old_pc.toString(16));
-            console.log('@ 0x2b ' + mmu.getByte(0x2b0));
             break;
         }
 
@@ -80,7 +77,8 @@ function main(breakpoint: number,run_n_more : number) {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             console.log(cpu.toString());
-            console.log(mmu.get_vram());
+            console.log(gpu.tileset2string());
+            gpu.draw_screen(mmu,screen_obj)
         }
 
 

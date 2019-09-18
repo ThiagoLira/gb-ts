@@ -44,9 +44,9 @@ export class GPU {
     // write tileset for nintendo logo internally on GPU
     public hard_code_nintendo_logo() {
         // Nintendo Logo
-        //  $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D 
-        //  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99  
-        //  $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E 
+        //  $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D
+        //  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99
+        //  $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E
         let logo_bytes =
             [
                 0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
@@ -77,35 +77,44 @@ export class GPU {
 
 
 
-    // canvas element
-    // this is only 160x144 pixels, as we are drawing just what
-    // really shows on screen
-    // private screen_obj = <HTMLCanvasElement>document.getElementById("screen");
-
-
     // this function is called when some byte is written on the VRAM
     // it should then update the tiles object on the gpu for fast drawing of the background
     // address is a index on vram object, not the actual memory
     public update_tiles(address_without_offset: number, val: number, val_at_next_addr: number) {
 
-        // let tile = (address_without_offset >> 4) & 511;
-        let tile = Math.floor(address_without_offset / 384);
+        let tile = (address_without_offset >> 4) & 511;
         let y = (address_without_offset >> 1) & 7;
 
         for (let b = 0; b < 7; b += 1) {
             let bit1 = (val >> b) & 1;
             let bit2 = (val_at_next_addr >> b) & 1;
 
-
-            // console.log(address_without_offset, tile, y);
-
             this.tileset_data[tile][y][b] = (bit1 ? 1 : 0) +
                 (bit2 ? 2 : 0)
-
 
         }
     }
 
+
+    public tileset2string(): string{
+
+        let out = ""
+
+        for (let t = 0 ; t < 384; t++){
+            out = out + "Tile " + t.toString() + " :"
+            out = out + "\n"
+            for (let c =0;c<8;c++){
+                for (let l =0;l<8;l++){
+                    out = out + this.tileset_data[t][c][l].toString()
+                }
+
+                out = out + "\n"
+            }
+        }
+
+        return out
+
+    }
 
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {

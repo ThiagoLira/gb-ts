@@ -170,7 +170,10 @@ export class MMU {
                 address_without_offset = address - 0x8000;
                 //update tile data
                 //
-                this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
+
+                if(address <= 0x97ff){
+                    this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
+                }
                 this.vram[address_without_offset] = val;
                 break;
             // iram
@@ -212,7 +215,7 @@ export class MMU {
     }
 
     // return string representation of vram
-    public get_vram() : string{
+    public vram2string() : string{
 
         let offset = 0x8000
         let output = ""

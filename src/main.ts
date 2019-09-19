@@ -127,5 +127,5 @@ function main(breakpoint: number,run_n_more : number) {
 let btn = document.getElementById("startbt");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
 
-if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value) ,5  )); }
+if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value) ,50  )); }
 

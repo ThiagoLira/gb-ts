@@ -282,12 +282,27 @@ describe('other instructions', function() {
 
         let IGetter = InstructionGetter;
 
-        // test INC B
         var inst = IGetter.GetCBInstruction(0x11);
         inst.op({ arg, cpu, mmu });
 
         expect(cpu.registers.c).to.equal(0xD6);
         expect(cpu.registers.f).to.equal(0x10);
+
+    });
+    it('CP A 34', function() {
+
+        cpu.registers.a = 0x05;
+        cpu.registers.f = 0xC0;
+
+        var arg = 0x34;
+
+
+        let IGetter = InstructionGetter;
+
+        var inst = IGetter.GetInstruction(0xFE);
+        inst.op({ arg, cpu, mmu });
+
+        expect(cpu.registers.f).to.equal(0x50);
 
     });
     it('SWAP C', function() {

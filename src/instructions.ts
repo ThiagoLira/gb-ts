@@ -207,17 +207,15 @@ export class OpTemplate {
 
     };
 
-    // call AFTER summation to check and set flags 
-    static SetFlagsCP(reg_a_before: number, n: number, args: op_args) {
+    static SetFlagsCP(n: number, args: op_args) {
 
         // set subtraction flag
         args.cpu.registers.f = 0x40;
 
-        // check borrow 
+        // check borrow
         if (args.cpu.registers.a - n < 0) {
             // set C
-            args.cpu.registers.f = 0x10;
-            // if value was less than 0 let's not be negative 
+            args.cpu.registers.f |= 0x10;
         }
 
         if (args.cpu.registers.a - n == 0) {
@@ -225,7 +223,7 @@ export class OpTemplate {
             args.cpu.registers.f |= 0x80;
         }
         // check borrow on 4-th bit
-        if ((reg_a_before & 0xF) < (n & 0xF)) {
+        if ((args.cpu.registers.a & 0xF) < (n & 0xF)) {
             //set H
             args.cpu.registers.f |= 0x20;
 
@@ -243,7 +241,7 @@ export class OpTemplate {
                 var n = args.cpu.registers[reg];
 
 
-                OpTemplate.SetFlagsCP(a, n, args);
+                OpTemplate.SetFlagsCP(n, args);
 
             },
             cycles: 4,
@@ -2467,7 +2465,7 @@ export class InstructionGetter {
                     op: function(args: op_args) {
                         var a = args.cpu.registers.a;
                         var n = args.mmu.getByte(args.cpu.registers.hl);
-                        OpTemplate.SetFlagsCP(a, n, args);
+                        OpTemplate.SetFlagsCP(n, args);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2478,8 +2476,7 @@ export class InstructionGetter {
             case 0xFE: {
                 return {
                     op: function(args: op_args) {
-                        var a = args.cpu.registers.a;
-                        OpTemplate.SetFlagsCP(a, args.arg, args);
+                        OpTemplate.SetFlagsCP(args.arg, args);
                     },
                     cycles: 8,
                     arg_number: 1,

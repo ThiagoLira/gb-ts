@@ -113,6 +113,11 @@ function main(breakpoint: number,run_n_more : number) {
             console.log("failed to run " + inst.help_string);
             break;
         }
+
+
+        // machine cycles logic
+
+
     };
 
 
@@ -121,7 +126,9 @@ function main(breakpoint: number,run_n_more : number) {
 
 
 
-
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
 
 // emulation won't start until pressed
 let btn = document.getElementById("startbt");

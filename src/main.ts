@@ -6,7 +6,7 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 import { Gameboy } from "./gameboy"
 
 
-let gameboy = new Gameboy()
+let gb : Gameboy;
 let IGetter = InstructionGetter;
 let breakpoint = 0;
 
@@ -86,7 +86,6 @@ let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
 
 
+if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,new Gameboy())); }
 
-if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gameboy] = main(parseInt(breakpoint_input.value) ,gameboy)); }
-
-if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => [breakpoint,gameboy] = main(breakpoint,gameboy)); }
+if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(breakpoint,gb)); }

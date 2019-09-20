@@ -3,117 +3,61 @@ import { GPU } from "./gpu"
 import { Registers } from "./registers"
 import { MMU } from "./mmu"
 import { InstructionConfig, InstructionGetter } from "./instructions"
+import { Gameboy } from "./gameboy"
+
+
+let gameboy = new Gameboy()
+let IGetter = InstructionGetter;
+let breakpoint = 0;
 
 
 
-
-// will run emulator until pc==breakpoint and then run_n_more steps
-function main(breakpoint: number,run_n_more : number) {
-
-
-    let cpu = new CPU(new Registers());
-
-    let gpu = new GPU();
-
-    // load bootrom on MMU
-    let mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
-
-
-    // gpu.hard_code_nintendo_logo();
-    // gpu.draw_screen(mmu);
-    // https://www.typescriptlang.org/docs/handbook/classes.html
-    let IGetter = InstructionGetter;
-
-
-    let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
-
-    let op = 0;
+// main function runs gameboy until breakpoint is reached,
+// then returns a new breakpoint on the next instruction, plus the new gameboy state
+function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
     let stop = false;
 
-    // run until PC is at this position, then wait for orders
-    // let breakpoint = 0x95;
-
-
-    let count_to_stop = 0;
-
-
     while (true) {
 
-
-
-        var old_pc = cpu.registers.pc;
+        var old_pc = gameboy.cpu.registers.pc;
         // fetch opcode
-        op = mmu.getByte(cpu.registers.pc)
+        let op = gameboy.mmu.getByte(gameboy.cpu.registers.pc)
 
         // detect prefix
         let is_cb = op == 0xCB;
-
         // fetch opcode after prefix
-        if (is_cb) { op = mmu.getByte(++cpu.registers.pc) };
+        if (is_cb) { op = gameboy.mmu.getByte(++gameboy.cpu.registers.pc) };
 
         // fetch Instruction
-        try{var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);}
-        catch(err){
-            console.log(err);
-            break;
-        }
+        var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);
 
-        if(stop){
-            count_to_stop++
-            console.log("--------------------------------------")
-            console.log( 'At memory position ' + old_pc.toString(16));
-            console.log('Will run ' + inst.help_string + " next.")
-            console.log(cpu.toString());
-            console.log("--------------------------------------")
-            if(count_to_stop == run_n_more){
-                break;
-            }
+        let arg = 0;
+        let new_pc = 0;
 
-        }
+        [arg,new_pc] = gameboy.GetArgAndPC(inst.arg_number);
 
-        if (old_pc == breakpoint && (~stop)) {
+        // check before running instruction
+        if (old_pc == breakpoint ) {
             stop = true;
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
-            console.log(cpu.toString());
-            console.log(gpu.tileset2string());
-            gpu.draw_screen(mmu,screen_obj)
-        }
-
-
-        var arg = 0;
-
-        switch (inst.arg_number) {
-
-            case 0: {
-                cpu.registers.pc++;
-                break;
-            }
-            case 1: {
-                arg = mmu.getByte(cpu.registers.pc + 1);
-                cpu.registers.pc += 2;
-                break;
-            }
-            case 2: {
-                arg = (mmu.getByte(cpu.registers.pc + 1) + (mmu.getByte(cpu.registers.pc + 2) << 8));
-                cpu.registers.pc += 3;
-                break;
-            }
+            registers_div.innerHTML = gameboy.cpu.toString();
+            console.log(gameboy.gpu.tileset2string());
+            gameboy.gpu.draw_screen(gameboy.mmu,screen_obj)
+            breakpoint = new_pc;
+            return [breakpoint,gameboy]
+        }else{
+            //commit to new PC and keep going
+            gameboy.cpu.registers.pc = new_pc;
         }
 
 
         if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
 
-
-        try { inst.op({ arg, cpu, mmu }); }
-        catch (err) {
-            console.log(err);
-            console.log(cpu.registers.de);
-            console.log("failed to run " + inst.help_string);
-            break;
-        }
-
+         inst.op({ arg: arg,
+                        cpu : gameboy.cpu  ,
+                        mmu : gameboy.mmu });
 
         // machine cycles logic
 
@@ -121,6 +65,8 @@ function main(breakpoint: number,run_n_more : number) {
     };
 
 
+    // why are u here?
+    return [breakpoint,gameboy]
 
 }
 
@@ -130,9 +76,17 @@ function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
-// emulation won't start until pressed
 let btn = document.getElementById("startbt");
+let one_step_btn = document.getElementById("onestepbt");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
+let registers_div =  <HTMLInputElement>document.getElementById("registers") ;
+let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
-if (btn) { btn.addEventListener("click", (e: Event) => main(    parseInt(breakpoint_input.value) ,50  )); }
 
+
+
+
+
+if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gameboy] = main(parseInt(breakpoint_input.value) ,gameboy)); }
+
+if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => [breakpoint,gameboy] = main(breakpoint,gameboy)); }

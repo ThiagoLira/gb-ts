@@ -45,17 +45,20 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             registers_div.innerHTML = gameboy.cpu.toString();
             console.log(gameboy.gpu.tileset2string());
             gameboy.gpu.draw_screen(gameboy.mmu,screen_obj)
-            breakpoint = new_pc;
-            return [breakpoint,gameboy]
-        }else{
-            //commit to new PC and keep going
             gameboy.cpu.registers.pc = new_pc;
+            // run instruction to keep going later
+            inst.op({ arg: arg,
+                      cpu : gameboy.cpu  ,
+                      mmu : gameboy.mmu });
+
+            breakpoint = gameboy.cpu.registers.pc
+
+            return [breakpoint,gameboy]
         }
 
+        gameboy.cpu.registers.pc = new_pc;
 
-        if (inst.cycles == 0) { console.log(inst.help_string); console.log(old_pc.toString(16)); break };
-
-         inst.op({ arg: arg,
+        inst.op({ arg: arg,
                         cpu : gameboy.cpu  ,
                         mmu : gameboy.mmu });
 

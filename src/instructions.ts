@@ -1807,15 +1807,15 @@ export class InstructionGetter {
             case 0x6F: {
                 return OpTemplate.LDr1r2("l", "a");
             }
-            case 0x70: { };
-            case 0x71: { };
-            case 0x72: { };
-            case 0x73: { };
-            case 0x74: { };
-            case 0x75: { };
+            // case 0x70: { };
+            // case 0x71: { };
+            // case 0x72: { };
+            // case 0x73: { };
+            // case 0x74: { };
+            // case 0x75: { };
 
 
-            case 0x36: { };
+            // case 0x36: { };
 
             case 0x3A: {
                 return {

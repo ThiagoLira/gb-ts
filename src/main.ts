@@ -81,6 +81,7 @@ function delay(ms: number) {
 
 let btn = document.getElementById("startbt");
 let one_step_btn = document.getElementById("onestepbt");
+let tillbreak = document.getElementById("untilbreak");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
 let registers_div =  <HTMLInputElement>document.getElementById("registers") ;
 let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
@@ -90,5 +91,7 @@ let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 
 
 if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,new Gameboy())); }
+
+if (tillbreak) { tillbreak.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,gb)); }
 
 if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(breakpoint,gb)); }

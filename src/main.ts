@@ -43,7 +43,8 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             registers_div.innerHTML = gameboy.cpu.toString();
-            console.log(gameboy.gpu.tileset2string());
+            // console.log(gameboy.gpu.tileset2string());
+            console.log(gameboy.mmu.cartridge2string());
             gameboy.gpu.draw_screen(gameboy.mmu,screen_obj);
             gameboy.cpu.registers.pc = new_pc;
             // run instruction to keep going later
@@ -63,6 +64,12 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
                         mmu : gameboy.mmu });
 
         // machine cycles logic
+        // console.log("-----------------------------------")
+        // console.log("Register C before : " + gameboy.cpu.registers.c.toString(16) + "Carry flag : " + gameboy.cpu.registers.carry_flag.toString(16))
+        // console.log(inst.help_string + " on arg " + arg.toString(16));
+        // console.log("Register C after : " + gameboy.cpu.registers.c.toString(16)+ "Carry flag : " + gameboy.cpu.registers.carry_flag.toString(16))
+        // console.log("-----------------------------------")
+
 
 
     };

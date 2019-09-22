@@ -232,7 +232,39 @@ export class MMU {
        return output
     }
 
+    // return string representation of vram
+    public hram2string() : string{
 
+        let offset = 0xFF80;
+        let output = ""
+
+        for (let i = this.stack_ram.length - 2; i>=0;i=i-2){
+
+            output = output + (offset + i).toString(16) + " : "
+            output = output + (i + 1+ offset).toString(16) + " " + this.stack_ram[i+1].toString(16) +" " +  (i  + offset).toString(16) +" " +   this.stack_ram[i].toString(16)
+
+            output = output + "\n"
+
+        }
+        return output
+    }
+
+    // return string representation of vram
+    public cartridge2string() : string{
+
+        let offset = 0x100;
+        let output = ""
+
+        for (let i = this.cartridge.length - 2; i>=0;i=i-2){
+
+            output = output + (offset + i).toString(16) + " : "
+            output = output + (i + 1+ offset).toString(16) + " " + this.cartridge[i+1].toString(16) +" " +  (i  + offset).toString(16) +" " +   this.cartridge[i].toString(16)
+
+            output = output + "\n"
+
+        }
+        return output
+    }
 
     readLocalFile(filePath: string) {
         var fileRequest = new XMLHttpRequest();

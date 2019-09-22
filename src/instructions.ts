@@ -511,12 +511,12 @@ export class OpTemplate {
             let before = 0;
             if (reg_closure == '(hl)') {
                 before = args.mmu.getByte(args.cpu.registers.hl);
-                args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) + 1);
+                args.mmu.setByte(args.cpu.registers.hl, (args.mmu.getByte(args.cpu.registers.hl) + 1) & 0xff);
                 res = args.mmu.getByte(args.cpu.registers.hl);
             }
             else {
                 before = args.cpu.registers[reg];
-                args.cpu.registers[reg] += 1;
+                args.cpu.registers[reg] = (args.cpu.registers[reg] + 1) & 0xff;
                 res = args.cpu.registers[reg];
             }
 
@@ -556,13 +556,13 @@ export class OpTemplate {
 
             if (reg_closure == '(hl)') {
                 before = args.mmu.getByte(args.cpu.registers.hl) ;
-                args.mmu.setByte(args.cpu.registers.hl, args.mmu.getByte(args.cpu.registers.hl) - 1);
+                args.mmu.setByte(args.cpu.registers.hl, (args.mmu.getByte(args.cpu.registers.hl) - 1) & 0xff) ;
                 res = args.mmu.getByte(args.cpu.registers.hl);
 
             }
             else {
                 before = args.cpu.registers[reg];
-                args.cpu.registers[reg] -= 1;
+                args.cpu.registers[reg] = (args.cpu.registers[reg] - 1) & 0xff;
                 res = args.cpu.registers[reg];
             }
 
@@ -657,6 +657,9 @@ export class OpTemplate {
 
         let cycles = (reg == '(hl)') ? 16 : 8;
 
+        (reg == 'a')? cycles = 4: cycles = cycles;
+
+
         // being sneak sneak with closures
         var reg_closure = reg;
 
@@ -688,7 +691,7 @@ export class OpTemplate {
             else {
                 let byte = args.cpu.registers[reg]
 
-                shifted_byte = (byte << 1) & 0b11111111
+                shifted_byte = (byte << 1) & 0xFF;
 
                 let new_flag = (byte >> 7) & 0x01;
 
@@ -696,7 +699,7 @@ export class OpTemplate {
 
                 (new_flag) ? args.cpu.set_carry_flag() : args.cpu.reset_carry_flag();
 
-                (old_flag) ? shifted_byte |= (1) : shifted_byte &= ~(0x0001);
+                shifted_byte |= old_flag? (1) : (0);
 
                 args.cpu.registers[reg] = shifted_byte;
 
@@ -709,6 +712,8 @@ export class OpTemplate {
                 // reset zero flag
                 args.cpu.reset_zero_flag()
             }
+
+            (reg == 'a')? args.cpu.reset_zero_flag() : null ;
 
             // reset N & H flags
             args.cpu.registers.f &= 0x90
@@ -2730,7 +2735,7 @@ export class InstructionGetter {
             case 0x03: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.bc += 1;
+                        args.cpu.registers.bc =  (args.cpu.registers.bc + 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2740,7 +2745,7 @@ export class InstructionGetter {
             case 0x13: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.de += 1;
+                        args.cpu.registers.de =  (args.cpu.registers.de + 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2750,7 +2755,7 @@ export class InstructionGetter {
             case 0x23: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.hl += 1;
+                        args.cpu.registers.hl =  (args.cpu.registers.hl + 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2760,7 +2765,7 @@ export class InstructionGetter {
             case 0x33: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.sp += 1;
+                        args.cpu.registers.sp =  (args.cpu.registers.sp + 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2803,7 +2808,7 @@ export class InstructionGetter {
             case 0x0B: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.bc -= 1;
+                        args.cpu.registers.bc =  (args.cpu.registers.bc - 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2813,7 +2818,7 @@ export class InstructionGetter {
             case 0x1B: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.de -= 1;
+                        args.cpu.registers.de =  (args.cpu.registers.de - 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2823,7 +2828,7 @@ export class InstructionGetter {
             case 0x2B: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.hl -= 1;
+                        args.cpu.registers.hl =  (args.cpu.registers.hl - 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,
@@ -2833,7 +2838,7 @@ export class InstructionGetter {
             case 0x3B: {
                 return {
                     op: function(args: op_args) {
-                        args.cpu.registers.sp -= 1;
+                        args.cpu.registers.sp =  (args.cpu.registers.sp - 1) & (0xffff);
                     },
                     cycles: 8,
                     arg_number: 0,

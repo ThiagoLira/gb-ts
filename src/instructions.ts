@@ -216,17 +216,23 @@ export class OpTemplate {
         if (args.cpu.registers.a - n < 0) {
             // set C
             args.cpu.registers.f |= 0x10;
+        }else{
+            args.cpu.registers.f &= 0xEF;
         }
 
         if (args.cpu.registers.a - n == 0) {
             // set Z
             args.cpu.registers.f |= 0x80;
+        }else{
+            args.cpu.registers.f &= 0x7F;
         }
         // check borrow on 4-th bit
         if ((args.cpu.registers.a & 0xF) < (n & 0xF)) {
             //set H
             args.cpu.registers.f |= 0x20;
 
+        }else{
+            args.cpu.registers.f &= 0xDF;
         }
 
 
@@ -562,13 +568,16 @@ export class OpTemplate {
 
             // zero flag
             if (res == 0) { args.cpu.registers.f |= 0x80; }
+            else{
+                args.cpu.registers.f &= 0x7F; 
+            }
 
             if ((before & 0xF) < 1) {
                 //set H
                 args.cpu.registers.f |= 0x20;
 
             }else{
-                args.cpu.registers.f &= 0xDF
+                args.cpu.registers.f &= 0xDF;
                  }
             // set N flag
             args.cpu.registers.f |= 0b01000000;
@@ -667,7 +676,7 @@ export class OpTemplate {
 
                 let old_flag = args.cpu.registers.carry_flag;
 
-                (new_flag) ? args.cpu.set_carry_flag : args.cpu.reset_carry_flag;
+                (new_flag) ? args.cpu.set_carry_flag() : args.cpu.reset_carry_flag();
 
                 (old_flag) ? byte |= 1 << 0 : byte &= ~(1 << 0);
 

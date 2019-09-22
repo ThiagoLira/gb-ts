@@ -72,6 +72,14 @@ export class CPU {
 
 
     public toString = () : string => {
+        return `AF = (${this.registers.a.toString(16)} ${this.registers.f.toString(16)}) \n
+BC = (${this.registers.b.toString(16)} ${this.registers.c.toString(16)}) \n
+DE = (${this.registers.d.toString(16)} ${this.registers.e.toString(16)}) \n
+HL = (${this.registers.hl.toString(16)}) \n
+SP = (${this.registers.sp.toString(16)}) \n
+PC = (${this.registers.pc.toString(16)}) `;
+    }
+    public toString2 = () : string => {
         return `AF = (${this.registers.af.toString(16)}) \n
 BC = (${this.registers.bc.toString(16)}) \n
 DE = (${this.registers.de.toString(16)}) \n

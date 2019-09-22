@@ -44,14 +44,14 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             console.log('Will run ' + inst.help_string + " next.")
             registers_div.innerHTML = gameboy.cpu.toString();
             console.log(gameboy.gpu.tileset2string());
-            gameboy.gpu.draw_screen(gameboy.mmu,screen_obj)
+            gameboy.gpu.draw_screen(gameboy.mmu,screen_obj);
             gameboy.cpu.registers.pc = new_pc;
             // run instruction to keep going later
             inst.op({ arg: arg,
                       cpu : gameboy.cpu  ,
                       mmu : gameboy.mmu });
 
-            breakpoint = gameboy.cpu.registers.pc
+            breakpoint = gameboy.cpu.registers.pc;
 
             return [breakpoint,gameboy]
         }

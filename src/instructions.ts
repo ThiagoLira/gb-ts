@@ -22,6 +22,15 @@ export interface InstructionConfig {
 }
 
 
+function TwoComplementConvert(val:number): number{
+    // convert to 2-complement if highest bit is 1
+    let res = val;
+
+    if ((val >> 7) & 0x01) { res = val - (1 << 8)  }
+
+    return res;
+
+}
 
 export class OpTemplate {
 
@@ -713,7 +722,6 @@ export class OpTemplate {
                 args.cpu.reset_zero_flag()
             }
 
-            (reg == 'a')? args.cpu.reset_zero_flag() : null ;
 
             // reset N & H flags
             args.cpu.registers.f &= 0x90
@@ -1868,7 +1876,7 @@ export class InstructionGetter {
 
             case 0xE0: {
                 return {
-                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + args.arg, args.cpu.registers.a); },
+                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + TwoComplementConvert(args.arg), args.cpu.registers.a); },
                     cycles: 12,
                     arg_number: 1,
                     help_string: "LDH (n),A"
@@ -1878,7 +1886,7 @@ export class InstructionGetter {
 
             case 0xF0: {
                 return {
-                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + args.arg); },
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + TwoComplementConvert(args.arg)); },
                     cycles: 12,
                     arg_number: 1,
                     help_string: "LDH A,(n)"
@@ -2104,10 +2112,10 @@ export class InstructionGetter {
 
             case 0x18: {
                 return {
-                    op: function(args: op_args) { args.cpu.registers.pc = args.cpu.registers.pc + args.arg },
+                    op: function(args: op_args) { args.cpu.twoComplementAdd('pc',args.arg)},
                     cycles: 8,
                     arg_number: 1,
-                    help_string: "JP (HL)"
+                    help_string: "JP n"
                 }
             }
             case 0xCD: {

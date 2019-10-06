@@ -7,7 +7,6 @@ import { Gameboy } from "./gameboy"
 
 
 let gb : Gameboy;
-let IGetter = InstructionGetter;
 let breakpoint = 0;
 
 
@@ -20,22 +19,10 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
     while (true) {
 
-        var old_pc = gameboy.cpu.registers.pc;
-        // fetch opcode
-        let op = gameboy.mmu.getByte(gameboy.cpu.registers.pc)
+        let old_pc = gameboy.cpu.registers.pc;
 
-        // detect prefix
-        let is_cb = op == 0xCB;
-        // fetch opcode after prefix
-        if (is_cb) { op = gameboy.mmu.getByte(++gameboy.cpu.registers.pc) };
 
-        // fetch Instruction
-        var inst = (is_cb) ? IGetter.GetCBInstruction(op) : IGetter.GetInstruction(op);
-
-        let arg = 0;
-        let new_pc = 0;
-
-        [arg,new_pc] = gameboy.GetArgAndPC(inst.arg_number);
+        let {arg,new_pc,inst} = gameboy.FetchOpCode();
 
         // check before running instruction
         if (old_pc == breakpoint ) {

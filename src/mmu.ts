@@ -3,10 +3,10 @@ import { GPU } from "./gpu"
 
 export class MMU {
 
-    constructor(path: string, gpu: GPU) {
+
+
+    constructor( gpu: GPU,use_bootrom?: boolean,buff?: Buffer) {
         // use chromium with this function for now!
-        // open -a Chromium --args --disable-web-security --user-data-dir
-        // this.readLocalFile(path);
 
         // debug: hard code GB logo on cartridge memory location 0x104 - 0x133
 
@@ -14,7 +14,15 @@ export class MMU {
         // everytime the VRAM is updated
         this.gpu = gpu;
 
-        let logo_bytes =
+        if(use_bootrom){
+            this.using_bootrom = use_bootrom;
+        }else{
+            this.using_bootrom = true;
+        }
+
+
+        if (this.using_bootrom){
+            let logo_bytes =
             [
                 0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
                 0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
@@ -23,15 +31,19 @@ export class MMU {
         // considering that cartridge begins at 0x100
         // so cartridge[4] corresponds to memory location 0x104
         for (let i = 4; i < 0x033; i += 1) {
-               this.cartridge[i] = logo_bytes[i - 4];
+            this.cartridge[i] = logo_bytes[i - 4];
             // suppose the gameboy has nothing inserted
             // this.cartridge[i] = 0xFF
+        }}
+
+        if(buff){
+            this.loadRomFromFile(buff);
         }
-
-
     }
 
     gpu: GPU;
+
+    using_bootrom: boolean;
 
     bios: number[] = [
         0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
@@ -112,7 +124,13 @@ export class MMU {
 
             // boot rom range
             case (0x100 > address):
-                return this.bios[address_without_offset];
+                if(this.using_bootrom){
+                    return this.bios[address_without_offset];
+                }
+                else{
+                    // cartridge also maps 0 til 0x100 addresses
+                    return this.cartridge[address_without_offset]
+                }
             // cartridge
             case (0x8000 > address) && (address >= 0x100):
                 address_without_offset = address - 0x100;
@@ -152,7 +170,6 @@ export class MMU {
                 address_without_offset = address - 0xFF80;
                 return this.stack_ram[address_without_offset];
         }
-
         throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
     }
 
@@ -252,13 +269,13 @@ export class MMU {
     // return string representation of vram
     public cartridge2string() : string{
 
-        let offset = 0x100;
         let output = ""
 
-        for (let i = this.cartridge.length - 2; i>=0;i=i-2){
+        for (let i = 1; i <= this.cartridge.length - 2;i=i+2){
 
-            output = output + (offset + i).toString(16) + " : "
-            output = output + (i + 1+ offset).toString(16) + " " + this.cartridge[i+1].toString(16) +" " +  (i  + offset).toString(16) +" " +   this.cartridge[i].toString(16)
+            output+= (i - 1).toString(16) + ": " + this.cartridge[i-1].toString(16)
+            output+= "     "
+            output+= (i).toString(16) +": " +   this.cartridge[i].toString(16)
 
             output = output + "\n"
 
@@ -266,30 +283,15 @@ export class MMU {
         return output
     }
 
-    readLocalFile(filePath: string) {
-        var fileRequest = new XMLHttpRequest();
 
-        // Simulating a request against our local system
-        fileRequest.open("GET", filePath, false);
-        fileRequest.onreadystatechange = () => {
-            if (fileRequest.readyState === 4) {
-                if (fileRequest.status === 200 || fileRequest.status == 0) {
-                    var buff = fileRequest.response;
-                    // convert string to bytes array
-                    var bytes: number[] = [];
-                    var charCode;
-                    for (var i = 0; i < buff.length; ++i) {
-                        charCode = buff.charCodeAt(i);
-                        bytes.push((charCode & 0xFF00) >> 8);
-                        bytes.push(charCode & 0xFF);
-                    }
+    // load some bytes on cartridge
+    loadRomFromFile(buffArray: Buffer) {
 
-                    this.cartridge = bytes.slice(0);
-                }
-            }
+        for (let i=0; i <= buffArray.length; i=i+1){
+            this.cartridge[i] = buffArray[i];
         }
 
-        fileRequest.send(null);
+
     }
 
 

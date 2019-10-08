@@ -22,7 +22,7 @@ describe('BOOTROM', function() {
         gpu = new GPU();
         cpu = new CPU(new Registers());
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
+        mmu = new MMU(gpu  );
 
     });
 
@@ -75,7 +75,7 @@ describe('logic instructions', function() {
         gpu = new GPU();
         cpu = new CPU(new Registers());
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
+        mmu = new MMU(gpu);
 
     });
 
@@ -159,7 +159,7 @@ describe('other instructions', function() {
         cpu = new CPU(new Registers());
         gpu = new GPU();
         // load bootrom on MMU
-        mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", gpu);
+        mmu = new MMU( gpu);
 
     });
 

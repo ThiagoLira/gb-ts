@@ -15,16 +15,16 @@ export class Gameboy {
     getter = InstructionGetter;
 
 
-    
 
-
-    constructor(){
+    constructor(buff? : Buffer){
         this.cpu = new CPU(new Registers());
 
         this.gpu = new GPU();
 
-        this.mmu = new MMU("file:///Users/thiagolira/gb-ts/lib/sample.bin", this.gpu);
+        this.mmu = new MMU(this.gpu,false,buff);
     }
+
+
 
 
     // fetch next instruction

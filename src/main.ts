@@ -17,13 +17,21 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
     let stop = false;
 
+
+    gameboy.cpu.registers.pc = 0x2817;
+
+
+    console.log(gameboy.mmu.cartridge2string());
+
+
     while (true) {
 
         let old_pc = gameboy.cpu.registers.pc;
 
-
         let {arg,new_pc,inst} = gameboy.FetchOpCode();
 
+        console.log('Reached checkpoint: ' + old_pc.toString(16));
+        console.log('Will run ' + inst.help_string + " next.")
         // check before running instruction
         if (old_pc == breakpoint ) {
             stop = true;
@@ -79,12 +87,26 @@ let tillbreak = document.getElementById("untilbreak");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
 let registers_div =  <HTMLInputElement>document.getElementById("registers") ;
 let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
+let load_rom = <HTMLInputElement>document.getElementById("loadrom");
 
 
 
 
 
-if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,new Gameboy())); }
+if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
+                                          {var fileReader = new FileReader();
+
+                                           fileReader.onload = function (e) {
+                                               let buff = new Buffer(fileReader.result as ArrayBuffer);
+
+                                               gb = new Gameboy(buff)
+
+                                           }
+                                           fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);
+
+                                          }) }
+
+if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) , gb)); }
 
 if (tillbreak) { tillbreak.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,gb)); }
 

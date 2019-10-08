@@ -2137,7 +2137,23 @@ export class InstructionGetter {
 
             }
 
+            case 0xC3: {
 
+
+
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.pc = args.arg; 
+                    },
+                    cycles: 12,
+                    arg_number: 2,
+                    help_string: "JP nn"
+                }
+
+
+
+
+            }
 
             case 0xC4: {
 

@@ -2269,7 +2269,7 @@ export class InstructionGetter {
             }
 
 
-            // Stack functions	
+            // Stack function
             case 0xF5: {
                 return OpTemplate.PUSH('af');
             }
@@ -2867,6 +2867,27 @@ export class InstructionGetter {
                     cycles: 8,
                     arg_number: 0,
                     help_string: "DEC SP"
+                }
+            }
+
+            case 0xF3: {
+                return {
+                    op: function(args: op_args) {
+                        console.log('uninplemented instruction')
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "DI"
+                }
+            }
+            case 0xFB: {
+                return {
+                    op: function(args: op_args) {
+                        console.log('uninplemented instruction')
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "EI"
                 }
             }
 

@@ -18,29 +18,24 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
     let stop = false;
 
 
-    gameboy.cpu.registers.pc = 0x2817;
-
-
-    console.log(gameboy.mmu.cartridge2string());
+    gameboy.cpu.registers.pc = 0x0;
 
 
     while (true) {
+
 
         let old_pc = gameboy.cpu.registers.pc;
 
         let {arg,new_pc,inst} = gameboy.FetchOpCode();
 
-        console.log('Reached checkpoint: ' + old_pc.toString(16));
-        console.log('Will run ' + inst.help_string + " next.")
         // check before running instruction
-        if (old_pc == breakpoint ) {
+        if (old_pc == breakpoint  ) {
             stop = true;
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             registers_div.innerHTML = gameboy.cpu.toString();
-            // console.log(gameboy.gpu.tileset2string());
-            console.log(gameboy.mmu.cartridge2string());
-            gameboy.gpu.draw_screen(gameboy.mmu,screen_obj);
+            console.log(gameboy.gpu.tileset2string());
+            gameboy.gpu.draw_tiles(gameboy.mmu,screen_obj);
             gameboy.cpu.registers.pc = new_pc;
             // run instruction to keep going later
             inst.op({ arg: arg,
@@ -57,14 +52,6 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
         inst.op({ arg: arg,
                         cpu : gameboy.cpu  ,
                         mmu : gameboy.mmu });
-
-        // machine cycles logic
-        // console.log("-----------------------------------")
-        // console.log("Register C before : " + gameboy.cpu.registers.c.toString(16) + "Carry flag : " + gameboy.cpu.registers.carry_flag.toString(16))
-        // console.log(inst.help_string + " on arg " + arg.toString(16));
-        // console.log("Register C after : " + gameboy.cpu.registers.c.toString(16)+ "Carry flag : " + gameboy.cpu.registers.carry_flag.toString(16))
-        // console.log("-----------------------------------")
-
 
 
     };
@@ -99,7 +86,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
                                            fileReader.onload = function (e) {
                                                let buff = new Buffer(fileReader.result as ArrayBuffer);
 
-                                               gb = new Gameboy(buff)
+                                               gb = new Gameboy(buff,true);
 
                                            }
                                            fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);

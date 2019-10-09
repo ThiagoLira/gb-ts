@@ -16,12 +16,12 @@ export class Gameboy {
 
 
 
-    constructor(buff? : Buffer){
+    constructor(buff : Buffer,use_bootrom : boolean){
         this.cpu = new CPU(new Registers());
 
         this.gpu = new GPU();
 
-        this.mmu = new MMU(this.gpu,false,buff);
+        this.mmu = new MMU(this.gpu,use_bootrom,buff);
     }
 
 
@@ -76,6 +76,11 @@ export class Gameboy {
     // this function should run the emulation for 1.1ms i.e. the time
     // to calculate one frame
     RunFrame(){
+
+        let clock_count = 0;
+
+
+        
 
 
 

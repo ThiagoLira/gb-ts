@@ -133,7 +133,6 @@ export class MMU {
                 }
             // cartridge
             case (0x8000 > address) && (address >= 0x100):
-                address_without_offset = address - 0x100;
                 return this.cartridge[address_without_offset];
             //vram
             case ((0xA000 > address) && (address >= 0x8000)):
@@ -266,6 +265,45 @@ export class MMU {
         return output
     }
 
+    public tilemap2string(): string{
+
+
+        let out = ""
+        let offset_1 = 0x8000;
+        // tilemap region 1
+        for (let i = 0x9800; i<= 0x9bff;i++){
+            out = out + " " + this.vram[ i - offset_1 ]
+            if(i%32==0 && i!= 0x9800){
+                out = out + '\n';
+            }
+        }
+        return out
+    }
+
+    public screen2string(): string{
+
+        let out = ""
+        let offset_1 = 0x8000;
+        let l = 0;
+        // tilemap region 1
+        for (let i = 0x9800; i<= 0x9bff;i++){
+            for (let l = 0;l<=7;l++){
+
+                let t =  this.vram[ i - offset_1 ]
+
+                    for (let c =0;c<8;c++){
+                            out = out + this.gpu.tileset_data[t][c][l].toString()
+                    }
+
+                if(i%32==0 && i!= 0x9800){
+                    out = out + "\n"
+                }
+            }
+        }
+        return out
+    }
+
+
     // return string representation of vram
     public cartridge2string() : string{
 
@@ -284,7 +322,7 @@ export class MMU {
     }
 
 
-    // load some bytes on cartridge
+    // load some bytes on cartridge from FileReader buffer 
     loadRomFromFile(buffArray: Buffer) {
 
         for (let i=0; i <= buffArray.length; i=i+1){

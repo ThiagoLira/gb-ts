@@ -96,6 +96,7 @@ export class GPU {
     }
 
 
+
     public tileset2string(): string{
 
         let out = ""
@@ -116,6 +117,51 @@ export class GPU {
 
     }
 
+    // fetcher draws memory on the screen
+    public draw_tiles(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+
+        // draw background data
+        let context = screen_obj.getContext('2d');
+
+        if (context) {
+            let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
+
+            let pixels = img_data.data;
+
+
+            console.log(img_data.width);
+            console.log(img_data.height);
+
+            let x_offset = 0
+            let y_offset = 0
+            // for each tile on memory
+            for (let p =0 ; p < 20 ; p++ ){
+
+                y_offset = 0;
+
+                for (let l = 0; l<8;l++){
+                    for (let c = 0; c<8;c++){
+
+                        let pixel = x_offset*4 + y_offset*640 + c
+
+
+                        let pixel_color = this.tileset_data[p][l][c];
+                        let [r, g, b] = get_RGB(pixel_color);
+
+                        pixels[pixel + 0] = r;
+                        pixels[pixel + 1] = g;
+                        pixels[pixel + 2] = b;
+                        pixels[pixel + 3] = 255;
+                    }
+                    y_offset += 1
+                }
+                x_offset += 8
+            }
+
+            context.putImageData(img_data, 0, 0);
+
+        }
+    }
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 

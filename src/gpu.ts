@@ -85,7 +85,7 @@ export class GPU {
         let tile = (address_without_offset >> 4) & 511;
         let y = (address_without_offset >> 1) & 7;
 
-        for (let b = 0; b < 7; b += 1) {
+        for (let b = 0; b < 8; b += 1) {
             let bit1 = (val >> b) & 1;
             let bit2 = (val_at_next_addr >> b) & 1;
 
@@ -132,17 +132,14 @@ export class GPU {
             console.log(img_data.width);
             console.log(img_data.height);
 
-            let x_offset = 0
-            let y_offset = 0
             // for each tile on memory
-            for (let p =0 ; p < 20 ; p++ ){
+            for (let p = 0; p < (144 / 8) * (160 / 8); p++){
 
-                y_offset = 0;
 
                 for (let l = 0; l<8;l++){
                     for (let c = 0; c<8;c++){
 
-                        let pixel = x_offset*4 + y_offset*640 + c
+                        let pixel = (p * 8 % 160) + l + (c + p * 8 / 160 * 8) * 160
 
 
                         let pixel_color = this.tileset_data[p][l][c];
@@ -153,9 +150,7 @@ export class GPU {
                         pixels[pixel + 2] = b;
                         pixels[pixel + 3] = 255;
                     }
-                    y_offset += 1
                 }
-                x_offset += 8
             }
 
             context.putImageData(img_data, 0, 0);

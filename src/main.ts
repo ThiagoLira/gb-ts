@@ -36,6 +36,7 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             registers_div.innerHTML = gameboy.cpu.toString();
             console.log(gameboy.gpu.tileset2string());
             gameboy.gpu.draw_tiles(gameboy.mmu,screen_obj);
+            gameboy.gpu.draw_full_screen(gameboy.mmu,full_screen_obj);
             gameboy.cpu.registers.pc = new_pc;
             // run instruction to keep going later
             inst.op({ arg: arg,
@@ -74,6 +75,7 @@ let tillbreak = document.getElementById("untilbreak");
 let breakpoint_input =  <HTMLInputElement>document.getElementById("breakpoint_input") ;
 let registers_div =  <HTMLInputElement>document.getElementById("registers") ;
 let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
+let full_screen_obj = <HTMLCanvasElement>document.getElementById("fullscreen");
 let load_rom = <HTMLInputElement>document.getElementById("loadrom");
 
 

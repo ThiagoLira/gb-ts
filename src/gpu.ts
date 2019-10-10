@@ -1,4 +1,4 @@
-import { MMU } from "./mmu"
+import { MMU } from "./mmu";
 
 
 
@@ -133,16 +133,16 @@ export class GPU {
             console.log(img_data.height);
 
             // for each tile on memory
-            for (let p = 0; p < (144 / 8) * (160 / 8); p++){
+            for (let p = 0; p < 300; p++){
 
 
-                for (let l = 0; l<8;l++){
-                    for (let c = 0; c<8;c++){
+                for (let l = 7; l>=0;l--){
+                    for (let c = 7; c>=0;c--){
 
-                        let pixel = (p * 8 % 160) + l + (c + p * 8 / 160 * 8) * 160
+                        let pixel = (p * 8 % 160) + l*4 + (c + p * 8 / 160 * 8) * 640
 
 
-                        let pixel_color = this.tileset_data[p][l][c];
+                        let pixel_color = this.tileset_data[p][c][l];
                         let [r, g, b] = get_RGB(pixel_color);
 
                         pixels[pixel + 0] = r;
@@ -165,36 +165,81 @@ export class GPU {
 
         if (context) {
             let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
+            // full pixel grid
+            let full_image = Array(255).fill(0).map(() => new Array(255))
 
             let pixels = img_data.data;
 
+            let offset_vram = 0x8000;
             let offset_x = mmu.scx;
             let offset_y = mmu.scy;
 
-            for (let p = 0; p < (pixels.length); p += 4) {
 
-
-                let pixel = Math.floor(p / 4);
-
-                let index_tile = Math.floor(pixel / 384);
-
-                let index_pixel_frame = pixel % 64;
-
-                let index_line = Math.floor(index_pixel_frame / 8);
-
-                let index_column = index_pixel_frame % 8;
-
-                let pixel_color = this.tileset_data[index_tile][index_line][index_column];
-
-                let [r, g, b] = get_RGB(pixel_color);
-
-                pixels[p + 0] = r;
-                pixels[p + 1] = g;
-                pixels[p + 2] = b;
-                pixels[p + 3] = 255;
+            // tilemap region 1
+            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
 
 
             }
+
+
+
+
+
+            context.putImageData(img_data, 0, 0);
+
+        }
+    }
+
+    public draw_full_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+
+        // draw background data
+        let context = screen_obj.getContext('2d');
+
+        if (context) {
+            let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
+
+            let pixels = img_data.data;
+
+            let offset_vram = 0x8000;
+
+
+            // tilemap region 1
+            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
+
+
+                let t =  mmu.vram[i]
+                // draw full tile
+                let p = 0; 
+
+
+                for (let l = 0; l<8;l++){
+                    for (let c = 0; c<8;c++){
+
+
+                        let pixel = (p * 8 % 255) + l*4 + (c + p * 8 / 255 * 8) * (255 * 4)
+
+
+                        let pixel_color = this.tileset_data[t][l][c];
+                        if(t!=0){
+                            console.log(t,l,c,i,pixel);
+                        }
+                        let [r, g, b] = get_RGB(pixel_color);
+
+                        pixels[pixel + 0] = r;
+                        pixels[pixel + 1] = g;
+                        pixels[pixel + 2] = b;
+                        pixels[pixel + 3] = 255;
+
+
+                    }
+                }
+
+                p++
+                }
+
+
+
+
 
             context.putImageData(img_data, 0, 0);
 

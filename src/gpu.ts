@@ -129,8 +129,6 @@ export class GPU {
             let pixels = img_data.data;
 
 
-            console.log(img_data.width);
-            console.log(img_data.height);
 
             // for each tile on memory
             for (let p = 0; p < 300; p++){
@@ -203,26 +201,41 @@ export class GPU {
             let offset_vram = 0x8000;
 
 
+            console.log(pixels.length)
+            // /// // / // / / /
+            for (let p=0;p<1023;p++){
+                for (let l = 0; l<8;l++){
+                    for (let c = 0; c<8;c++){
+
+                        let pixel = ((p * 8) % (255 )) + l*4 + (c * 255 * 4)
+                        if(p==2){console.log({"x":l,"p":p,"y":c,"pixel":pixel})}
+                        }
+
+                    }
+                }
+            /// / / / // / / /  
+
+
+            let p = 0;
             // tilemap region 1
-            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
+            // for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
+            for (let i = 6436; i<=  6447;i++){
 
 
                 let t =  mmu.vram[i]
                 // draw full tile
-                let p = 0; 
-
+                if(t!=0){
+                    console.log(i);
+                }
 
                 for (let l = 0; l<8;l++){
                     for (let c = 0; c<8;c++){
 
 
-                        let pixel = (p * 8 % 255) + l*4 + (c + p * 8 / 255 * 8) * (255 * 4)
+                        let pixel = ((p * 8) % (255 )) + l*4 + (c * 255 * 4)
 
+                        let pixel_color = this.tileset_data[t][c][l];
 
-                        let pixel_color = this.tileset_data[t][l][c];
-                        if(t!=0){
-                            console.log(t,l,c,i,pixel);
-                        }
                         let [r, g, b] = get_RGB(pixel_color);
 
                         pixels[pixel + 0] = r;

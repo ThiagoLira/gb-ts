@@ -89,7 +89,8 @@ export class GPU {
             let bit1 = (val >> b) & 1;
             let bit2 = (val_at_next_addr >> b) & 1;
 
-            this.tileset_data[tile][y][b] = (bit1 ? 1 : 0) +
+            // I don't know why but reversing the index here fixes the tiles being reversed on the x axis
+            this.tileset_data[tile][y][7-b] = (bit1 ? 1 : 0) +
                 (bit2 ? 2 : 0)
 
         }
@@ -201,33 +202,14 @@ export class GPU {
             let offset_vram = 0x8000;
 
 
-            console.log(pixels.length)
-            // /// // / // / / /
-            for (let p=0;p<1023;p++){
-                for (let l = 0; l<8;l++){
-                    for (let c = 0; c<8;c++){
-
-                        let pixel = ((p * 8) % (255 )) + l*4 + (c * 255 * 4)
-                        if(p==2){console.log({"x":l,"p":p,"y":c,"pixel":pixel})}
-                        }
-
-                    }
-                }
-            /// / / / // / / /  
-
-
             let p = 0;
             // tilemap region 1
-            // for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
-            for (let i = 6436; i<=  6447;i++){
+            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
 
 
                 let t =  mmu.vram[i]
-                // draw full tile
-                if(t!=0){
-                    console.log(i);
-                }
 
+                // draw full tile
                 for (let l = 0; l<8;l++){
                     for (let c = 0; c<8;c++){
 

@@ -20,10 +20,12 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
     gameboy.cpu.registers.pc = 0x0;
 
+    let will_break = false;
 
     while (true) {
 
 
+        // probably all of this will eventually be inside runFrame function
         let old_pc = gameboy.cpu.registers.pc;
 
         let {arg,new_pc,inst} = gameboy.FetchOpCode();
@@ -37,23 +39,25 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             console.log(gameboy.gpu.tileset2string());
             gameboy.gpu.draw_tiles(gameboy.mmu,screen_obj);
             gameboy.gpu.draw_full_screen(gameboy.mmu,full_screen_obj);
-            gameboy.cpu.registers.pc = new_pc;
-            // run instruction to keep going later
-            inst.op({ arg: arg,
-                      cpu : gameboy.cpu  ,
-                      mmu : gameboy.mmu });
 
-            breakpoint = gameboy.cpu.registers.pc;
-
-            return [breakpoint,gameboy]
+            will_break = true;
         }
 
+        // must run instruction before breaking
         gameboy.cpu.registers.pc = new_pc;
+
+
+        // check for interrupts:w
+
+        gameboy.CheckInterrupts();
 
         inst.op({ arg: arg,
                         cpu : gameboy.cpu  ,
                         mmu : gameboy.mmu });
 
+        if (will_break) {
+            return [breakpoint,gameboy]
+        }
 
     };
 

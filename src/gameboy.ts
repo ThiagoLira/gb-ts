@@ -73,16 +73,17 @@ export class Gameboy {
         }
     }
 
+    // interfaces CPU and MMU to check for interrupts
+    CheckInterrupts(){
+
+
+    }
+
     // this function should run the emulation for 1.1ms i.e. the time
     // to calculate one frame
     RunFrame(){
 
         let clock_count = 0;
-
-
-        
-
-
 
 
 

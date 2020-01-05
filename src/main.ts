@@ -47,13 +47,13 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
         gameboy.cpu.registers.pc = new_pc;
 
 
-        // check for interrupts:w
+        // run interruption
+        inst.op({ arg: arg,
+                  cpu : gameboy.cpu  ,
+                  mmu : gameboy.mmu });
 
         gameboy.CheckInterrupts();
 
-        inst.op({ arg: arg,
-                        cpu : gameboy.cpu  ,
-                        mmu : gameboy.mmu });
 
         if (will_break) {
             return [breakpoint,gameboy]

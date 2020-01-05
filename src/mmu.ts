@@ -117,6 +117,17 @@ export class MMU {
     cartridge: number[] = Array(0x8000).fill(0x0);
 
 
+    //IF
+    interrupt_flag: number = 0xF;
+
+    // enables for each type of interrupt
+    interrupt_enable: number = 0xF;
+
+    // interrupt master enable IME
+
+    ime : number = 0x0;
+
+
     getByte(address: number): number {
 
         let address_without_offset = address;
@@ -147,11 +158,12 @@ export class MMU {
                 address_without_offset = address - 0xE000;
                 return this.echo_iram[address_without_offset];
             // oam
-            case ((0xFEA0 > address) && (address >= 0xFE00)):
+            case ((0xFF0F > address) && (address >= 0xFE00)):
                 address_without_offset = address - 0xFE00;
                 return this.oam[address_without_offset];
             // video related registers
-            case ((0xFF4C > address) && (address >= 0xFF40)):
+            case ((0xFF4C > address) && (address >= 0xFF0F)):
+                if (address == 0xFF0F) { return this.interrupt_flag; }
                 if (address == 0xFF40) { return this.lcdc; }
                 if (address == 0xFF41) { return this.stat; }
                 if (address == 0xFF42) { return this.scy; }
@@ -165,9 +177,13 @@ export class MMU {
                 if (address == 0xFF4A) { return this.wy; }
                 if (address == 0xFF4B) { return this.wx; }
             // stack
-            case ((0x10000 > address) && (address >= 0xFF80)):
+            case ((0xFFFF > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;
                 return this.stack_ram[address_without_offset];
+
+            case(0xFFFF == address):
+                return this.interrupt_enable ;
+
         }
         throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
     }
@@ -203,12 +219,13 @@ export class MMU {
                 this.echo_iram[address_without_offset] = val;
                 break;
             // OAM
-            case ((0xFEA0 > address) && (address >= 0xFE00)):
+            case ((0xFF0F > address) && (address >= 0xFE00)):
                 address_without_offset = address - 0xFE00;
                 this.oam[address_without_offset] = val;
                 break;
             // video related registers
-            case ((0xFF46 > address) && (address >= 0xFF40)):
+            case ((0xFF80 > address) && (address >= 0xFF0F)):
+                if (address == 0xFF0F) { this.interrupt_flag = val; }
                 if (address == 0xFF40) { this.lcdc = val; }
                 if (address == 0xFF41) { this.stat = val; }
                 if (address == 0xFF42) { this.scy = val; }
@@ -222,9 +239,12 @@ export class MMU {
                 if (address == 0xFF4A) { this.wy = val; }
                 if (address == 0xFF4B) { this.wx = val; }
                 break;
-            case ((0x10000 > address) && (address >= 0xFF80)):
+            case ((0xFFFF > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;
                 this.stack_ram[address_without_offset] = val;
+                break;
+            case(0xFFFF == address):
+                this.interrupt_enable = val;
                 break;
         }
 

@@ -76,6 +76,15 @@ export class Gameboy {
     // interfaces CPU and MMU to check for interrupts
     CheckInterrupts(){
 
+        // check for interrupts
+
+        if (this.mmu.ime && this.mmu.interrupt_enable && this.mmu.interrupt_flag ){
+            // TODO handle interrupts
+        }
+
+
+
+
 
     }
 
@@ -84,6 +93,36 @@ export class Gameboy {
     RunFrame(){
 
         let clock_count = 0;
+
+
+        // one frame timing
+
+        while(clock_count < 70224){
+
+            let old_pc = this.cpu.registers.pc;
+
+            let {arg,new_pc,inst} = this.FetchOpCode();
+
+            this.cpu.registers.pc = new_pc;
+
+            // run interruption
+            inst.op({   arg: arg,
+                        cpu : this.cpu  ,
+                        mmu : this.mmu });
+
+            clock_count += inst.cycles;
+
+
+            // check for interrupts
+
+
+            // execute interrupts
+
+
+
+       }
+
+        // update screen
 
 
 

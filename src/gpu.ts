@@ -19,9 +19,19 @@ function get_RGB(color: number): number[] {
 export class GPU {
 
 
+
+
     constructor() {
         this.reset();
     }
+
+    // internal clock count to manage gpu states
+    modeclock: number = 0;
+    // internal mode inside frame
+    mode :number = 0;
+    // which line currently being drawn
+    line: number = 0;
+
 
     // values of the whole view
     // 255 x 255 pixels (32x32 tiles)
@@ -38,6 +48,73 @@ export class GPU {
     // tileset data copied from vram
     // 384 tiles, each with 8 colunms each with 8 pixels, each with 2 bits of information
     public tileset_data: number[][][] = Array(384).fill(0).map(() => new Array(8).fill(0).map(() => new Array(8).fill(0)));
+
+
+    // update gpu state by giving number of clocks elapsed on frame by CPU
+    public run_clocks(clock_count : number){
+
+        this.modeclock += clock_count;
+
+        switch (this.mode) {
+            // OAM read mode, scanline active
+            case 2:
+                if (this.modeclock >= 80) {
+                    // Enter scanline mode 3
+                    this.modeclock = 0;
+                    this.mode = 3;
+                }
+                break;
+
+            // VRAM read mode, scanline active
+            // Treat end of mode 3 as end of scanline
+            case 3:
+                if (this.modeclock >= 172) {
+                    // Enter hblank
+                    this.modeclock = 0;
+                    this.mode = 0;
+
+                    // Write a scanline to the framebuffer
+                    // this.renderScan();
+                }
+                break;
+
+            // Hblank
+            // After the last hblank, push the screen data to canvas
+            case 0:
+                if (this.modeclock >= 204) {
+                    this.modeclock = 0;
+                    this.line++;
+
+                    if (this.line == 143) {
+                        // Enter vblank
+                        this.mode = 1;
+                        // this.canvas.putImageData(this.screen, 0, 0);
+                    }
+                    else {
+                        this.mode = 2;
+                    }
+                }
+                break;
+
+            // Vblank (10 lines)
+            case 1:
+                if (this.modeclock >= 456) {
+                    this.modeclock = 0;
+                    this.line++;
+
+                    if (this.line > 153) {
+                        // Restart scanning modes
+                        this.mode = 2;
+                        this.line = 0;
+                    }
+                }
+                break;
+        }
+    }
+
+
+
+
 
 
     // for testing and fun
@@ -97,7 +174,7 @@ export class GPU {
     }
 
 
-
+    // DEBUG PURPOSES
     public tileset2string(): string{
 
         let out = ""
@@ -156,6 +233,8 @@ export class GPU {
 
         }
     }
+
+
     // fetcher draws memory on the screen
     public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 
@@ -180,14 +259,12 @@ export class GPU {
 
             }
 
-
-
-
-
             context.putImageData(img_data, 0, 0);
 
         }
     }
+
+
 
     public draw_full_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 

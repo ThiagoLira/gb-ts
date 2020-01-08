@@ -78,9 +78,6 @@ export class Gameboy {
 
         // check for interrupts
 
-        if (this.mmu.ime && this.mmu.interrupt_enable && this.mmu.interrupt_flag ){
-            // TODO handle interrupts
-        }
 
 
 
@@ -113,10 +110,17 @@ export class Gameboy {
             clock_count += inst.cycles;
 
 
+            this.gpu.run_clocks(clock_count);
+
             // check for interrupts
 
+            if (this.mmu.ime && this.mmu.interrupt_enable && this.mmu.interrupt_flag ){
 
-            // execute interrupts
+                // execute interrupts
+
+
+            }
+
 
 
 

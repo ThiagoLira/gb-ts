@@ -2873,7 +2873,8 @@ export class InstructionGetter {
             case 0xF3: {
                 return {
                     op: function(args: op_args) {
-                        console.log('uninplemented instruction')
+                        // interrupt master enable
+                        args.mmu.ime = 0x0;
                     },
                     cycles: 4,
                     arg_number: 0,
@@ -2883,7 +2884,7 @@ export class InstructionGetter {
             case 0xFB: {
                 return {
                     op: function(args: op_args) {
-                        console.log('uninplemented instruction')
+                        args.mmu.ime = 0x1;
                     },
                     cycles: 4,
                     arg_number: 0,

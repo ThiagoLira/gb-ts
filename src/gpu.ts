@@ -33,6 +33,37 @@ export class GPU {
     line: number = 0;
 
 
+    // video registers
+    // lcd control
+    lcdc: number = 0x91;
+
+    // lcdc status
+    stat: number = 0x0;
+
+    // SCY
+    scy: number = 0x0;
+
+    //scx
+    scx: number = 0x0;
+
+    //LCDC Y coordinate
+    ly: number = 0x0;
+
+    //ly compare
+    lyc: number = 0x0;
+
+    dma: number = 0x0;
+
+    // Background Color Pallete
+    bgp: number = 0xFC;
+
+    bp0: number = 0xff;
+    bp1: number = 0xff;
+
+    wx: number = 0x00;
+    wy: number = 0x00;
+
+
     // values of the whole view
     // 255 x 255 pixels (32x32 tiles)
     // will only draw on screen a smaller 160x144 pixels via scx and scy registers
@@ -114,7 +145,9 @@ export class GPU {
 
 
 
-
+    // this function should draw a complete line of pixels on the gpu's internal pixel matrix
+    public render_scan(){
+    }
 
 
     // for testing and fun
@@ -249,8 +282,8 @@ export class GPU {
             let pixels = img_data.data;
 
             let offset_vram = 0x8000;
-            let offset_x = mmu.scx;
-            let offset_y = mmu.scy;
+            let offset_x = this.scx;
+            let offset_y = this.scy;
 
 
             // tilemap region 1

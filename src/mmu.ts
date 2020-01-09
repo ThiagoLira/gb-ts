@@ -77,34 +77,6 @@ export class MMU {
     // oam has idkn how many kbs
     oam: number[] = Array(0xA0).fill(0x0);
 
-    // lcd control
-    lcdc: number = 0x91;
-
-    // lcdc status
-    stat: number = 0x0;
-
-    // SCY
-    scy: number = 0x0;
-
-    //scx
-    scx: number = 0x0;
-
-    //LCDC Y coordinate
-    ly: number = 0x0;
-
-    //ly compare
-    lyc: number = 0x0;
-
-    dma: number = 0x0;
-
-    // Background Color Pallete
-    bgp: number = 0xFC;
-
-    bp0: number = 0xff;
-    bp1: number = 0xff;
-
-    wx: number = 0x00;
-    wy: number = 0x00;
 
     // echo iram
     //  do I just copy the reference to the iram?
@@ -164,18 +136,18 @@ export class MMU {
             // video related registers
             case ((0xFF4C > address) && (address >= 0xFF0F)):
                 if (address == 0xFF0F) { return this.interrupt_flag; }
-                if (address == 0xFF40) { return this.lcdc; }
-                if (address == 0xFF41) { return this.stat; }
-                if (address == 0xFF42) { return this.scy; }
-                if (address == 0xFF43) { return this.scx; }
-                if (address == 0xFF44) { return this.ly; }
-                if (address == 0xFF45) { return this.lyc; }
-                if (address == 0xFF46) { return this.dma; }
-                if (address == 0xFF47) { return this.bgp; }
-                if (address == 0xFF48) { return this.bp0; }
-                if (address == 0xFF49) { return this.bp1; }
-                if (address == 0xFF4A) { return this.wy; }
-                if (address == 0xFF4B) { return this.wx; }
+                if (address == 0xFF40) { return this.gpu.lcdc; }
+                if (address == 0xFF41) { return this.gpu.stat; }
+                if (address == 0xFF42) { return this.gpu.scy; }
+                if (address == 0xFF43) { return this.gpu.scx; }
+                if (address == 0xFF44) { return this.gpu.ly; }
+                if (address == 0xFF45) { return this.gpu.lyc; }
+                if (address == 0xFF46) { return this.gpu.dma; }
+                if (address == 0xFF47) { return this.gpu.bgp; }
+                if (address == 0xFF48) { return this.gpu.bp0; }
+                if (address == 0xFF49) { return this.gpu.bp1; }
+                if (address == 0xFF4A) { return this.gpu.wy; }
+                if (address == 0xFF4B) { return this.gpu.wx; }
             // stack
             case ((0xFFFF > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;
@@ -226,18 +198,18 @@ export class MMU {
             // video related registers
             case ((0xFF80 > address) && (address >= 0xFF0F)):
                 if (address == 0xFF0F) { this.interrupt_flag = val; }
-                if (address == 0xFF40) { this.lcdc = val; }
-                if (address == 0xFF41) { this.stat = val; }
-                if (address == 0xFF42) { this.scy = val; }
-                if (address == 0xFF43) { this.scx = val; }
-                if (address == 0xFF44) { this.ly = val; }
-                if (address == 0xFF45) { this.lyc = val; }
-                if (address == 0xFF46) { this.dma = val; }
-                if (address == 0xFF47) { this.bgp = val; }
-                if (address == 0xFF48) { this.bp0 = val; }
-                if (address == 0xFF49) { this.bp1 = val; }
-                if (address == 0xFF4A) { this.wy = val; }
-                if (address == 0xFF4B) { this.wx = val; }
+                if (address == 0xFF40) { this.gpu.lcdc = val; }
+                if (address == 0xFF41) { this.gpu.stat = val; }
+                if (address == 0xFF42) { this.gpu.scy = val; }
+                if (address == 0xFF43) { this.gpu.scx = val; }
+                if (address == 0xFF44) { this.gpu.ly = val; }
+                if (address == 0xFF45) { this.gpu.lyc = val; }
+                if (address == 0xFF46) { this.gpu.dma = val; }
+                if (address == 0xFF47) { this.gpu.bgp = val; }
+                if (address == 0xFF48) { this.gpu.bp0 = val; }
+                if (address == 0xFF49) { this.gpu.bp1 = val; }
+                if (address == 0xFF4A) { this.gpu.wy = val; }
+                if (address == 0xFF4B) { this.gpu.wx = val; }
                 break;
             case ((0xFFFF > address) && (address >= 0xFF80)):
                 address_without_offset = address - 0xFF80;

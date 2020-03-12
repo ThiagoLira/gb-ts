@@ -536,7 +536,7 @@ describe('other instructions', function() {
         var inst = IGetter.GetCBInstruction(0xE0);
         inst.op({ arg: 0x47, cpu, mmu });
 
-        expect(mmu.bgp).to.equal(0xFC);
+        expect(gpu.bgp).to.equal(0xFC);
 
 
     });
@@ -556,7 +556,7 @@ describe('other instructions', function() {
         var inst = IGetter.GetCBInstruction(0xE0);
         inst.op({ arg: 0x47, cpu, mmu });
 
-        expect(mmu.bgp).to.equal(0xFC);
+        expect(gpu.bgp).to.equal(0xFC);
 
 
     });

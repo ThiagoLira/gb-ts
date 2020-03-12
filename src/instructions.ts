@@ -2892,6 +2892,21 @@ export class InstructionGetter {
                 }
             }
 
+
+            case 0x0:{
+
+                return {
+                    op: function(args: op_args) {},
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "NOP"
+                }
+
+
+
+
+            }
+
         }
 
         throw new Error("UNINPLEMENTED OPCODE:  " + opcode.toString(16));

@@ -15,20 +15,32 @@ let breakpoint = 0;
 // then returns a new breakpoint on the next instruction, plus the new gameboy state
 function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
+
+    let count = 0;
+
     let stop = false;
 
 
-    gameboy.cpu.registers.pc = 0x0;
+    gameboy.cpu.registers.pc = 0x100;
 
     let will_break = false;
 
     while (true) {
+
+        count++;
 
 
         // probably all of this will eventually be inside runFrame function
         let old_pc = gameboy.cpu.registers.pc;
 
         let {arg,new_pc,inst} = gameboy.FetchOpCode();
+
+        if(count==100){
+            count = 0;
+
+            console.log('Reached checkpoint: ' + old_pc.toString(16));
+            console.log('Will run ' + inst.help_string + " next.")
+        }
 
         // check before running instruction
         if (old_pc == breakpoint  ) {
@@ -92,7 +104,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
                                            fileReader.onload = function (e) {
                                                let buff = new Buffer(fileReader.result as ArrayBuffer);
 
-                                               gb = new Gameboy(buff,true);
+                                               gb = new Gameboy(buff,false);
 
                                            }
                                            fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);

@@ -73,11 +73,60 @@ export class Gameboy {
         }
     }
 
-    // interfaces CPU and MMU to check for interrupts
-    CheckInterrupts(){
 
-        // check for interrupts
+    HandleInterrupts() : boolean{
 
+        if(!this.mmu.ime){
+            return false;
+        }
+
+
+        let interruptFlag = this.mmu.interrupt_flag;
+
+        let interruptEnable = this.mmu.interrupt_enable;
+
+
+        let handler = 0;
+
+        if ((interruptEnable & interruptFlag & (1 << 0)) != 0) {
+            handler = 0x0040; // V-Blank
+        }
+        if ((interruptEnable & interruptFlag & (1 << 1)) != 0) {
+            handler = 0x0048; // LCDC Status
+        }
+        if ((interruptEnable & interruptFlag & (1 << 2)) != 0) {
+            handler = 0x0050; // Timer Overflow
+        }
+        if ((interruptEnable & interruptFlag & (1 << 3)) != 0) {
+            handler = 0x0058; // Serial Transfer
+        }
+        if ((interruptEnable & interruptFlag & (1 << 4)) != 0) {
+            handler = 0x0060; // Hi-Lo of P10-P13
+        }
+
+
+        if (handler != 0){
+
+            // set IME to 0
+            this.mmu.ime = 0;
+            // set 0xFF0F to 0
+            // equivalent to this.mmu.interrupt_flag = 0;
+            this.mmu.setByte(0xFF0F,0);
+
+            // PUSH current PC to stack
+
+            this.mmu.setByte(this.cpu.registers.sp - 1, this.cpu.registers.pc >> 8);
+            this.mmu.setByte(this.cpu.registers.sp - 2, this.cpu.registers.pc & 0xFF);
+            this.cpu.registers.sp -= 2;
+
+            // jump to correct memory location
+
+            this.cpu.registers.pc = handler;
+
+            return true;
+        }else{
+            return false;
+        }
 
 
 
@@ -98,11 +147,13 @@ export class Gameboy {
 
             let old_pc = this.cpu.registers.pc;
 
+            // check for interrupts
+            this.HandleInterrupts();
+
             let {arg,new_pc,inst} = this.FetchOpCode();
 
             this.cpu.registers.pc = new_pc;
 
-            // run interruption
             inst.op({   arg: arg,
                         cpu : this.cpu  ,
                         mmu : this.mmu });
@@ -111,18 +162,6 @@ export class Gameboy {
 
 
             this.gpu.run_clocks(clock_count);
-
-            // check for interrupts
-
-            if (this.mmu.ime && this.mmu.interrupt_enable && this.mmu.interrupt_flag ){
-
-                // execute interrupts
-
-
-            }
-
-
-
 
        }
 

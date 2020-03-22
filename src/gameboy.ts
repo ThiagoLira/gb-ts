@@ -161,7 +161,7 @@ export class Gameboy {
             clock_count += inst.cycles;
 
 
-            this.gpu.run_clocks(clock_count);
+            this.gpu.RunClocks(clock_count);
 
        }
 

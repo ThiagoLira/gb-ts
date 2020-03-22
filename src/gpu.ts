@@ -82,7 +82,7 @@ export class GPU {
 
 
     // update gpu state by giving number of clocks elapsed on frame by CPU
-    public run_clocks(clock_count : number){
+    public RunClocks(clock_count : number){
 
         this.modeclock += clock_count;
 
@@ -297,6 +297,24 @@ export class GPU {
         }
     }
 
+    public tilemap2string(mmu: MMU){
+
+
+        let offset_vram = 0x8000;
+
+        let ret = "";
+        for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
+
+            let current_position = (i + offset_vram).toString(16);
+
+            ret += " VRAM : " + current_position + " : " + mmu.vram[i].toString(16); 
+
+
+        }
+
+        return ret;
+
+    }
 
 
     public draw_full_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
@@ -324,9 +342,11 @@ export class GPU {
                     for (let c = 0; c<8;c++){
 
 
-                        let pixel = ((p * 8) % (255 )) + l*4 + (c * 255 * 4)
+
+                        let pixel = (p * 8 % 255) + l*4 + (c + p * 8 / 255 * 8) * 640
 
                         let pixel_color = this.tileset_data[t][c][l];
+
 
                         let [r, g, b] = get_RGB(pixel_color);
 

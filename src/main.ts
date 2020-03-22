@@ -11,6 +11,25 @@ let breakpoint = 0;
 
 
 
+
+function mainF(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
+
+
+
+    gameboy.cpu.registers.pc = 0x100;
+
+    let frameCount = 10;
+
+    while(frameCount > 0){
+
+        setTimeout(gameboy.RunFrame,1);
+        frameCount--;
+    }
+
+
+    return [breakpoint,gameboy]
+
+}
 // main function runs gameboy until breakpoint is reached,
 // then returns a new breakpoint on the next instruction, plus the new gameboy state
 function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
@@ -21,7 +40,10 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
     let stop = false;
 
 
-    gameboy.cpu.registers.pc = 0x100;
+    gameboy.cpu.registers.pc = 0x0;
+
+    // force v-blank state
+    gameboy.gpu.ly = 0x90;
 
     let will_break = false;
 
@@ -38,8 +60,8 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
         if(count==100){
             count = 0;
 
-            console.log('Reached checkpoint: ' + old_pc.toString(16));
-            console.log('Will run ' + inst.help_string + " next.")
+            //console.log('Reached checkpoint: ' + old_pc.toString(16));
+            //console.log('Will run ' + inst.help_string + " next.")
         }
 
         // check before running instruction
@@ -48,7 +70,8 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             registers_div.innerHTML = gameboy.cpu.toString();
-            console.log(gameboy.gpu.tileset2string());
+            //console.log(gameboy.gpu.tileset2string());
+            console.log(gameboy.gpu.tilemap2string(gameboy.mmu));
             gameboy.gpu.draw_tiles(gameboy.mmu,screen_obj);
             gameboy.gpu.draw_full_screen(gameboy.mmu,full_screen_obj);
 
@@ -64,7 +87,7 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
                   cpu : gameboy.cpu  ,
                   mmu : gameboy.mmu });
 
-        gameboy.CheckInterrupts();
+        gameboy.HandleInterrupts();
 
 
         if (will_break) {
@@ -104,7 +127,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
                                            fileReader.onload = function (e) {
                                                let buff = new Buffer(fileReader.result as ArrayBuffer);
 
-                                               gb = new Gameboy(buff,false);
+                                               gb = new Gameboy(buff,true);
 
                                            }
                                            fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);

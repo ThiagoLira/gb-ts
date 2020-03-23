@@ -318,6 +318,65 @@ export class GPU {
 
     }
 
+    // draw empty tiles with borders
+    public draw_full_screen_debug(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+
+        // draw background data
+        let context = screen_obj.getContext('2d');
+
+        if (context) {
+            let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
+
+            let pixels = img_data.data;
+
+            let offset_vram = 0x8000;
+
+
+            let p = 0;
+            // tilemap region 1
+            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
+
+                // which line of the 32x32 grid of tiles we are now
+                let line_of_tiles = ~~ (p /32);
+                // which tile on the horizontal line of tiles are we? (32 tiles per line)
+                let column_of_tiles = p % 32 ;
+
+
+                // draw full tile
+                for (let c = 0; c<8;c++){
+                    for (let l = 0; l<8;l++){
+
+
+                        let pixel =  (line_of_tiles*8*4*32*8)  + (column_of_tiles*8*4)  + l*4 + (8*4*32*c);
+
+
+                        let [r, g, b] = [255,255,255];
+
+                        if(c==0 || l==0 || c==7 || l==7){
+                            [r, g, b] = [0,0,0];
+                       }
+
+
+                        pixels[pixel + 0] = r;
+                        pixels[pixel + 1] = g;
+                        pixels[pixel + 2] = b;
+                        pixels[pixel + 3] = 255;
+
+
+                    }
+                }
+
+                p++
+                }
+
+
+
+
+
+            context.putImageData(img_data, 0, 0);
+
+        }
+    }
 
     public draw_full_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 
@@ -346,11 +405,12 @@ export class GPU {
 
 
                 // draw full tile
-                for (let l = 0; l<8;l++){
-                    for (let c = 0; c<8;c++){
+                for (let c = 0; c<8;c++){
+                    for (let l = 0; l<8;l++){
 
 
-                        let pixel =  (line_of_tiles*8*4*32)  + (column_of_tiles*8*4)  + c*4 + (8*4*32*l);
+
+                        let pixel =  (line_of_tiles*8*8*4*32)  + (column_of_tiles*8*4)  + l*4 + (8*4*32*c);
 
                         let pixel_color = this.tileset_data[t][c][l];
 
@@ -360,6 +420,7 @@ export class GPU {
                         pixels[pixel + 1] = g;
                         pixels[pixel + 2] = b;
                         pixels[pixel + 3] = 255;
+
 
                     }
                 }

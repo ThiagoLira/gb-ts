@@ -343,16 +343,17 @@ export class GPU {
 
 
                 // draw full tile
-                for (let c = 0; c<8;c++){
                     for (let l = 0; l<8;l++){
+                        for (let c = 0; c<8;c++){
 
+                        //offsets for tile grid Y, tile grid X, pixel column Y, pixel line X
 
-                        let pixel =  (line_of_tiles*8*4*32*8)  + (column_of_tiles*8*4)  + l*4 + (8*4*32*c);
+                        let pixel =  (line_of_tiles*8*1020) + (column_of_tiles*8*4) + l*4 + (1020*c);
 
 
                         let [r, g, b] = [255,255,255];
 
-                        if(c==0 || l==0 || c==7 || l==7){
+                        if(l==0){
                             [r, g, b] = [0,0,0];
                        }
 
@@ -410,7 +411,7 @@ export class GPU {
 
 
 
-                        let pixel =  (line_of_tiles*8*8*4*32)  + (column_of_tiles*8*4)  + l*4 + (8*4*32*c);
+                        let pixel =  (line_of_tiles*8*1020)  + (column_of_tiles*8*4)  + l*4 + (1020*c);
 
                         let pixel_color = this.tileset_data[t][c][l];
 

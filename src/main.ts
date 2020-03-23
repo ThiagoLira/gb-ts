@@ -70,7 +70,7 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
             console.log('Reached checkpoint: ' + breakpoint.toString(16));
             console.log('Will run ' + inst.help_string + " next.")
             registers_div.innerHTML = gameboy.cpu.toString();
-            //console.log(gameboy.gpu.tileset2string());
+            console.log(gameboy.gpu.tileset2string());
             console.log(gameboy.gpu.tilemap2string(gameboy.mmu));
             gameboy.gpu.draw_tiles(gameboy.mmu,screen_obj);
             gameboy.gpu.draw_full_screen(gameboy.mmu,full_screen_obj);

@@ -307,9 +307,11 @@ export class GPU {
 
             let current_position = (i + offset_vram).toString(16);
 
-            ret += " VRAM : " + current_position + " : " + mmu.vram[i].toString(16); 
+            ret += mmu.vram[i].toString();
 
-
+            if(i % 32 ==0 && i!= 0){
+                ret += '\n'
+            }
         }
 
         return ret;
@@ -337,16 +339,20 @@ export class GPU {
 
                 let t =  mmu.vram[i]
 
+                // which line of the 32x32 grid of tiles we are now
+                let line_of_tiles = ~~ (p /32);
+                // which tile on the horizontal line of tiles are we? (32 tiles per line)
+                let column_of_tiles = p % 32 ;
+
+
                 // draw full tile
                 for (let l = 0; l<8;l++){
                     for (let c = 0; c<8;c++){
 
 
-
-                        let pixel = (p * 8 % 255) + l*4 + (c + p * 8 / 255 * 8) * 640
+                        let pixel =  (line_of_tiles*8*4*32)  + (column_of_tiles*8*4)  + c*4 + (8*4*32*l);
 
                         let pixel_color = this.tileset_data[t][c][l];
-
 
                         let [r, g, b] = get_RGB(pixel_color);
 
@@ -354,7 +360,6 @@ export class GPU {
                         pixels[pixel + 1] = g;
                         pixels[pixel + 2] = b;
                         pixels[pixel + 3] = 255;
-
 
                     }
                 }

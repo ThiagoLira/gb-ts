@@ -268,33 +268,39 @@ export class GPU {
     }
 
 
-    // fetcher draws memory on the screen
-    public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+    // draw only game screen
+    // it is smaller than the full tile grid
+    // get the relevant pixels from full screen grid
+    public draw_screen(mmu: MMU, full_screen_obj: HTMLCanvasElement, small_screen_obj: HTMLCanvasElement): void {
 
-        // draw background data
-        let context = screen_obj.getContext('2d');
 
+        let context = full_screen_obj.getContext('2d');
+
+        // big screen object
         if (context) {
-            let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
-            // full pixel grid
-            let full_image = Array(255).fill(0).map(() => new Array(255))
+            let img_data = context.getImageData(0, 0, full_screen_obj.width, full_screen_obj.height);
 
             let pixels = img_data.data;
 
-            let offset_vram = 0x8000;
-            let offset_x = this.scx;
-            let offset_y = this.scy;
 
 
-            // tilemap region 1
-            for (let i = 0x9800 - offset_vram; i<= 0x9bff - offset_vram;i++){
 
 
+            let context_small = small_screen_obj.getContext('2d');
+
+            // small screen object
+            if (context_small) {
+                let img_data_small = context_small.getImageData(0, 0, small_screen_obj.width, small_screen_obj.height);
+
+                let pixels_small = img_data_small.data;
             }
 
-            context.putImageData(img_data, 0, 0);
+
+
 
         }
+
+
     }
 
     public tilemap2string(mmu: MMU){
@@ -319,6 +325,7 @@ export class GPU {
     }
 
     // draw empty tiles with borders
+    // use this to study pixel offsets
     public draw_full_screen_debug(mmu: MMU, screen_obj: HTMLCanvasElement): void {
 
         // draw background data

@@ -96,7 +96,6 @@ export class MMU {
     interrupt_enable: number = 0xF;
 
     // interrupt master enable IME
-
     ime : number = 0x0;
 
 

@@ -16,15 +16,10 @@ function mainF(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
 
 
-    gameboy.cpu.registers.pc = 0x100;
+    gameboy.cpu.registers.pc = 0x000;
+    gameboy.RunFrame(screen_obj)
 
-    let frameCount = 10;
-
-    while(frameCount > 0){
-
-        setTimeout(gameboy.RunFrame,1);
-        frameCount--;
-    }
+    //setTimeout(gameboy.RunFrame,1);
 
 
     return [breakpoint,gameboy]
@@ -42,9 +37,6 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
 
     gameboy.cpu.registers.pc = 0x0;
 
-    // force v-blank state
-    gameboy.gpu.ly = 0x90;
-
     let will_break = false;
 
     while (true) {
@@ -60,8 +52,8 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
         if(count==100){
             count = 0;
 
-            //console.log('Reached checkpoint: ' + old_pc.toString(16));
-            //console.log('Will run ' + inst.help_string + " next.")
+            console.log('Reached checkpoint: ' + old_pc.toString(16));
+            console.log('Will run ' + inst.help_string + " next.")
         }
 
         // check before running instruction
@@ -86,6 +78,8 @@ function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
         inst.op({ arg: arg,
                   cpu : gameboy.cpu  ,
                   mmu : gameboy.mmu });
+
+        gameboy.gpu.RunClocks(inst.cycles);
 
         gameboy.HandleInterrupts();
 
@@ -134,7 +128,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
 
                                           }) }
 
-if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) , gb)); }
+if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = mainF(parseInt(breakpoint_input.value) , gb)); }
 
 if (tillbreak) { tillbreak.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,gb)); }
 

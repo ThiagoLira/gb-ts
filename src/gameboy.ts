@@ -136,7 +136,14 @@ export class Gameboy {
 
     // this function should run the emulation for 1.1ms i.e. the time
     // to calculate one frame
-    RunFrame(){
+    RunFrame(screen_obj: HTMLCanvasElement){
+
+
+        let print_debug_info = true;
+
+
+        //TEMPORARY
+        let breakpoint = 0x6e
 
         let clock_count = 0;
 
@@ -145,10 +152,15 @@ export class Gameboy {
 
         while(clock_count < 70224){
 
+
             let old_pc = this.cpu.registers.pc;
 
-            // check for interrupts
-            this.HandleInterrupts();
+            if(old_pc == breakpoint){
+
+                this.gpu.draw_tiles(this.mmu,screen_obj);
+                return 0;
+            }
+
 
             let {arg,new_pc,inst} = this.FetchOpCode();
 
@@ -160,12 +172,12 @@ export class Gameboy {
 
             clock_count += inst.cycles;
 
+            // check for interrupts
+            this.HandleInterrupts();
 
             this.gpu.RunClocks(clock_count);
 
        }
-
-        // update screen
 
 
 

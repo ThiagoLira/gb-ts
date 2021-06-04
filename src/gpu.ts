@@ -29,10 +29,8 @@ export class GPU {
     modeclock: number = 0;
     // internal mode inside frame
     mode :number = 0;
-    // which line currently being drawn
-    line: number = 0;
 
-
+    // these atributes are set by MMU object
     // video registers
     // lcd control
     lcdc: number = 0x91;
@@ -47,6 +45,7 @@ export class GPU {
     scx: number = 0x0;
 
     //LCDC Y coordinate
+    // YOU CHANGED LINE VARIABLE TO THIS
     ly: number = 0x0;
 
     //ly compare
@@ -81,7 +80,7 @@ export class GPU {
     public tileset_data: number[][][] = Array(384).fill(0).map(() => new Array(8).fill(0).map(() => new Array(8).fill(0)));
 
 
-    // update gpu state by giving number of clocks elapsed on frame by CPU
+    // update gpu state by giving number of clocks elapsed on instruction by CPU
     public RunClocks(clock_count : number){
 
         this.modeclock += clock_count;
@@ -114,9 +113,9 @@ export class GPU {
             case 0:
                 if (this.modeclock >= 204) {
                     this.modeclock = 0;
-                    this.line++;
+                    this.ly++;
 
-                    if (this.line == 143) {
+                    if (this.ly == 143) {
                         // Enter vblank
                         this.mode = 1;
                         // this.canvas.putImageData(this.screen, 0, 0);
@@ -131,16 +130,24 @@ export class GPU {
             case 1:
                 if (this.modeclock >= 456) {
                     this.modeclock = 0;
-                    this.line++;
+                    this.ly++;
 
-                    if (this.line > 153) {
+                    if (this.ly > 153) {
                         // Restart scanning modes
                         this.mode = 2;
-                        this.line = 0;
+                        this.ly = 0;
                     }
                 }
                 break;
         }
+
+        // update STAT register
+        // https://gbdev.gg8.se/wiki/articles/Video_Display#INT_40_-_V-Blank_Interrupt
+        // set mode bits 0-1
+        this.stat = this.stat & this.mode;
+        // set Coincidence flag bit 2
+        (this.ly==this.lyc) ? this.stat |= 1 << 2 : this.stat &= ~(1 << 2);
+
     }
 
 

@@ -4,7 +4,7 @@ import { Registers } from "./registers"
 import { MMU } from "./mmu"
 import { InstructionConfig, InstructionGetter } from "./instructions"
 import { Gameboy } from "./gameboy"
-
+import {_base64ToBuffer} from "./utilities"
 
 let gb : Gameboy;
 let breakpoint = 0;
@@ -111,6 +111,18 @@ let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 let full_screen_obj = <HTMLCanvasElement>document.getElementById("fullscreen");
 let load_rom = <HTMLInputElement>document.getElementById("loadrom");
 
+window.onload = function () {
+        let el = <HTMLDataElement>document.getElementById("not_a_rom");
+        console.log(el)
+        if (el){
+            let buff = _base64ToBuffer(el.value)
+                if(buff){
+                    gb = new Gameboy(buff, true)
+                    console.log('Loaded rom from page!')
+                }
+        }
+
+};
 
 
 

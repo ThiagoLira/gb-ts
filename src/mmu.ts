@@ -314,7 +314,7 @@ export class MMU {
 
 
     // load some bytes on cartridge from FileReader buffer 
-    loadRomFromFile(buffArray: Buffer) {
+    loadRomFromFile(buffArray: Buffer  ) {
 
         for (let i=0; i <= buffArray.length; i=i+1){
             this.cartridge[i] = buffArray[i];

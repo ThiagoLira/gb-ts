@@ -85,17 +85,21 @@ export class Gameboy {
 
         let interruptEnable = this.mmu.interrupt_enable;
 
-
+        let interruptName = '';
+        
         let handler = 0;
 
         if ((interruptEnable & interruptFlag & (1 << 0)) != 0) {
             handler = 0x0040; // V-Blank
+            interruptName = 'V-Blank'
         }
         if ((interruptEnable & interruptFlag & (1 << 1)) != 0) {
             handler = 0x0048; // LCDC Status
+            interruptName = 'LCDC'
         }
         if ((interruptEnable & interruptFlag & (1 << 2)) != 0) {
             handler = 0x0050; // Timer Overflow
+            interruptName = 'Timer'
         }
         if ((interruptEnable & interruptFlag & (1 << 3)) != 0) {
             handler = 0x0058; // Serial Transfer
@@ -120,7 +124,7 @@ export class Gameboy {
             this.cpu.registers.sp -= 2;
 
             // jump to correct memory location
-
+            console.log('Handled interrupt' + interruptName);
             this.cpu.registers.pc = handler;
 
             return true;
@@ -136,14 +140,14 @@ export class Gameboy {
 
     // this function should run the emulation for 1.1ms i.e. the time
     // to calculate one frame
-    RunFrame(screen_obj: HTMLCanvasElement){
+    RunFrame(){
 
-
+        console.log('yo')
         let print_debug_info = true;
 
 
         //TEMPORARY
-        let breakpoint = 0x6e
+        let breakpoint = 0x93;
 
         let clock_count = 0;
 
@@ -156,8 +160,6 @@ export class Gameboy {
             let old_pc = this.cpu.registers.pc;
 
             if(old_pc == breakpoint){
-
-                this.gpu.draw_tiles(this.mmu,screen_obj);
                 return 0;
             }
 

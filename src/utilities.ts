@@ -10,6 +10,5 @@ export function _base64ToArrayBuffer(base64 : string) {
 
 export function _base64ToBuffer(base64 : string) {
     const buf = Buffer.from(base64,'base64')
-    console.log(buf)
     return buf 
 }

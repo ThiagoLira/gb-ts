@@ -12,19 +12,6 @@ let breakpoint = 0;
 
 
 
-function mainF(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
-
-
-
-    gameboy.cpu.registers.pc = 0x000;
-    gameboy.RunFrame(screen_obj)
-
-    //setTimeout(gameboy.RunFrame,1);
-
-
-    return [breakpoint,gameboy]
-
-}
 // main function runs gameboy until breakpoint is reached,
 // then returns a new breakpoint on the next instruction, plus the new gameboy state
 function main(breakpoint: number, gameboy: Gameboy) : [number,Gameboy] {
@@ -140,7 +127,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
 
                                           }) }
 
-if (btn) { btn.addEventListener("click", (e: Event) => [breakpoint,gb] = mainF(parseInt(breakpoint_input.value) , gb)); }
+
 
 if (tillbreak) { tillbreak.addEventListener("click", (e: Event) => [breakpoint,gb] = main(parseInt(breakpoint_input.value) ,gb)); }
 

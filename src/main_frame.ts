@@ -28,12 +28,20 @@ window.onload = function () {
     }
 
 
-
-    if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => 
-        {
+    let frame_and_draw = () =>{
             gb.RunFrame()
             registers_div.innerHTML = gb.cpu.toString();
             gb.gpu.draw_full_screen(gb.mmu,full_screen_obj);
+        
+    }
+
+
+    if (one_step_btn) { one_step_btn.addEventListener("click", (e: Event) => 
+        {
+            // run 50 frames
+            for (var i = 0; i < 500; i++) {
+            setTimeout(frame_and_draw,500)
+            }
         })};
        
 

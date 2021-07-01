@@ -446,12 +446,14 @@ export class GPU {
 
 
 
-            context.putImageData(img_data, 0, 0);
-            context.beginPath();
-            context.lineWidth = 1;
-            context.strokeStyle = "blue";
-            context.rect(this.scx, this.scy, 160, 144);
-            context.stroke();
+            //context.beginPath();
+            //context.lineWidth = 1;
+            //context.strokeStyle = "blue";
+            //context.rect(this.scx, this.scy, 160, 144);
+            //context.stroke();
+            //context.clip();
+            //context.translate(this.scx,this.scy);
+            context.putImageData(img_data, 0, 0,this.scx,this.scy,160,144)
         }
     }
 

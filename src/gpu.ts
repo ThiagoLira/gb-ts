@@ -274,42 +274,6 @@ export class GPU {
         }
     }
 
-
-    // draw only game screen
-    // it is smaller than the full tile grid
-    // get the relevant pixels from full screen grid
-    public draw_screen(mmu: MMU, full_screen_obj: HTMLCanvasElement, small_screen_obj: HTMLCanvasElement): void {
-
-
-        let context = full_screen_obj.getContext('2d');
-
-        // big screen object
-        if (context) {
-            let img_data = context.getImageData(0, 0, full_screen_obj.width, full_screen_obj.height);
-
-            let pixels = img_data.data;
-
-
-
-
-
-            let context_small = small_screen_obj.getContext('2d');
-
-            // small screen object
-            if (context_small) {
-                let img_data_small = context_small.getImageData(0, 0, small_screen_obj.width, small_screen_obj.height);
-
-                let pixels_small = img_data_small.data;
-            }
-
-
-
-
-        }
-
-
-    }
-
     public tilemap2string(mmu: MMU){
 
 
@@ -392,7 +356,7 @@ export class GPU {
         }
     }
 
-    public draw_full_screen(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+    public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement, draw_full: boolean = false): void {
 
         // draw background data
         let context = screen_obj.getContext('2d');
@@ -442,18 +406,13 @@ export class GPU {
                 p++
                 }
 
-
-
-
-
-            //context.beginPath();
-            //context.lineWidth = 1;
-            //context.strokeStyle = "blue";
-            //context.rect(this.scx, this.scy, 160, 144);
-            //context.stroke();
-            //context.clip();
-            //context.translate(this.scx,this.scy);
-            context.putImageData(img_data, 0, 0,this.scx,this.scy,160,144)
+            if (draw_full){
+                context.putImageData(img_data, 0, 0)
+            }
+            else{
+                // draw only part of the image on the current view from the gameboy
+                context.putImageData(img_data, 0, 0,this.scx,this.scy,160,144)
+            }
         }
     }
 

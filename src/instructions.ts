@@ -2892,6 +2892,16 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x36: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.hl, args.arg);
+                    },
+                    cycles: 8,
+                    arg_number: 1,
+                    help_string: "LD (HL),n"
+                }
+            }
 
             case 0x0:{
 

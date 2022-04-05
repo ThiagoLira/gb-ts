@@ -27,6 +27,8 @@ export class Gameboy {
 
 
 
+
+
     // fetch next instruction
     // fetch argument
     // return argument,new_pc and instruction object
@@ -131,38 +133,36 @@ export class Gameboy {
         }else{
             return false;
         }
-
-
-
-
-
     }
 
     // this function should run the emulation for 1.1ms i.e. the time
     // to calculate one frame
-    RunFrame(){
+    // ARGS:
+    //
+    // just_one_instruction(bool) : wheter to run just one instruction and stop
+    //
+    // breakpoint(int) : if != -1, if PC=breakpoint, the function halts
+    RunFrame(just_one_instruction = false, breakpoint = -1){
 
-        console.log('yo')
         let print_debug_info = true;
-
-
-        //TEMPORARY
-        let breakpoint = 0x93;
+        
+        // max clocks in a frame
+        let clock_count_MAX = 70224;
+        if (just_one_instruction){
+            clock_count_MAX = 1;
+        }
 
         let clock_count = 0;
 
-
         // one frame timing
-
-        while(clock_count < 70224){
-
+        while(clock_count < clock_count_MAX){
 
             let old_pc = this.cpu.registers.pc;
 
-            if(old_pc == breakpoint){
+            if(old_pc == breakpoint && breakpoint != -1){
+                console.log(`Emulator halted on PC==${old_pc.toString(16)}`)
                 return 0;
             }
-
 
             let {arg,new_pc,inst} = this.FetchOpCode();
 
@@ -178,11 +178,7 @@ export class Gameboy {
             this.HandleInterrupts();
 
             this.gpu.RunClocks(clock_count);
-
        }
-
-
-
     }
 
 

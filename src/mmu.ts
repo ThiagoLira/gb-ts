@@ -221,6 +221,11 @@ export class MMU {
 
     }
 
+    public interruptstate2string() : string {
+        return `IE = (${this.interrupt_enable.toString(16)}) \n
+                IF = (${this.interrupt_flag.toString(16)}) `;
+    }
+
     // return string representation of vram
     public vram2string() : string{
 

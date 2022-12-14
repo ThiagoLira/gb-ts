@@ -79,6 +79,7 @@ export class Gameboy {
     HandleInterrupts() : boolean{
 
         if(!this.mmu.ime){
+            //console.log('Interrupts not enabled!')
             return false;
         }
 
@@ -129,6 +130,8 @@ export class Gameboy {
             console.log('Handled interrupt' + interruptName);
             this.cpu.registers.pc = handler;
 
+            // set IME to 1
+            this.mmu.ime = 0x1;
             return true;
         }else{
             return false;
@@ -156,6 +159,9 @@ export class Gameboy {
 
         // one frame timing
         while(clock_count < clock_count_MAX){
+            
+            // check for interrupts
+            this.HandleInterrupts();
 
             let old_pc = this.cpu.registers.pc;
 
@@ -174,8 +180,6 @@ export class Gameboy {
 
             clock_count += inst.cycles;
 
-            // check for interrupts
-            this.HandleInterrupts();
 
             this.gpu.RunClocks(clock_count);
        }

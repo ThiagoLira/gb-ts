@@ -96,7 +96,7 @@ export class MMU {
     interrupt_enable: number = 0xF;
 
     // interrupt master enable IME
-    ime : number = 0x0;
+    ime : number = 0x1;
 
 
     getByte(address: number): number {
@@ -218,6 +218,8 @@ export class MMU {
                 break;
             case(0xFFFF == address):
                 this.interrupt_enable = val;
+                // also set IME
+                this.ime = val;
                 break;
         }
 
@@ -225,6 +227,7 @@ export class MMU {
 
     public interruptstate2string() : string {
         return `IE = (${this.interrupt_enable.toString(16)}) \n
+                IME = (${this.ime.toString(16)}) \n
                 IF = (${this.interrupt_flag.toString(16)}) `;
     }
 

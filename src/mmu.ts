@@ -139,7 +139,9 @@ export class MMU {
                 if (address == 0xFF41) { return this.gpu.stat; }
                 if (address == 0xFF42) { return this.gpu.scy; }
                 if (address == 0xFF43) { return this.gpu.scx; }
-                if (address == 0xFF44) { return this.gpu.ly; }
+                // HARDCODE THIS TO USE GB DEBUGGER
+                // if (address == 0xFF44) { return this.gpu.ly; }
+                if (address == 0xFF44) { return 0x90; }
                 if (address == 0xFF45) { return this.gpu.lyc; }
                 if (address == 0xFF46) { return this.gpu.dma; }
                 if (address == 0xFF47) { return this.gpu.bgp; }

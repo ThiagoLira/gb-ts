@@ -181,6 +181,10 @@ export class Gameboy {
        }
     }
 
-
-
+    getLog() : string {
+        // FORMAT
+        // A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD
+        let log = `A:${this.cpu.registers.a.toString(16)} F:${this.cpu.registers.f.toString(16)} B:${this.cpu.registers.b.toString(16)} C:${this.cpu.registers.c.toString(16)} D:${this.cpu.registers.d.toString(16)} E:${this.cpu.registers.e.toString(16)} H:${this.cpu.registers.h.toString(16)} L:${this.cpu.registers.l.toString(16)} SP:${this.cpu.registers.sp.toString(16)} PC:${this.cpu.registers.pc.toString(16)} PCMEM:${this.mmu.getByte(this.cpu.registers.pc).toString(16)},${this.mmu.getByte(this.cpu.registers.pc+1).toString(16)},${this.mmu.getByte(this.cpu.registers.pc+2).toString(16)},${this.mmu.getByte(this.cpu.registers.pc+3).toString(16)}`; 
+        return log.toUpperCase();
+    }
 }

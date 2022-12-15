@@ -10,13 +10,14 @@
     <canvas id="fullscreen" width="255" height="255"></canvas>
     <div id="registers"> </div>
     <div id="interrupts"> </div>
-    <button id="startbt" type="button">Start EMULATING</button>
+    <button id="manystep" type="button">Run 500 instructions</button>
     <button id="onestepbt" type="button">One Step</button>
     <button id="untilbreak" type="button">Till' breakpoint</button>
     <input id="breakpoint_input" type="text" value="0x6e"/>
     <button id="oneframebt" type="button" > One Frame</button>
     <button id="framesbt" type="button" > 500 Frames</button>
     <input type="file" id="loadrom" accept=".gb, .gbc">
+    <textarea id="log_buffer" rows="4" cols="50"></textarea>
   </body>
 
 

@@ -90,7 +90,7 @@ export class MMU {
 
 
     //IF
-    interrupt_flag: number = 0xF;
+    interrupt_flag: number = 0x0;
 
     // enables for each type of interrupt
     interrupt_enable: number = 0xF;

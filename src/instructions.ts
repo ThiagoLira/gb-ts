@@ -2903,7 +2903,7 @@ export class InstructionGetter {
                 }
             }
 
-            case 0x0:{
+            case 0x00:{
 
                 return {
                     op: function(args: op_args) {},

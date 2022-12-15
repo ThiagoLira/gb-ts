@@ -7,8 +7,8 @@ let breakpoint = 0;
 
 const DEBUG_MODE = true;
 
-let btn = document.getElementById("startbt");
 let one_step_btn = document.getElementById("onestepbt");
+let many_step_btn = <HTMLInputElement>document.getElementById("manystep");
 let tillbreak_btn = document.getElementById("untilbreak");
 let breakpoint_input = <HTMLInputElement>document.getElementById("breakpoint_input");
 let one_frame_btn = <HTMLInputElement>document.getElementById("oneframebt");
@@ -18,6 +18,7 @@ let interrupts_div = <HTMLInputElement>document.getElementById("interrupts");
 let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 let full_screen_obj = <HTMLCanvasElement>document.getElementById("fullscreen");
 let load_rom = <HTMLInputElement>document.getElementById("loadrom");
+let log_buffer = <HTMLTextAreaElement>document.getElementById("log_buffer");
 
 
 window.onload = function() {
@@ -38,9 +39,9 @@ window.onload = function() {
                 gb.RunFrame()
                 registers_div.innerHTML = gb.cpu.toString();
                 interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-                if(DEBUG_MODE){
+                if (DEBUG_MODE) {
                         let log_line = gb.getLog();
-                        console.log(log_line);
+                        log_buffer.value += log_line + '\n'
                 }
                 gb.gpu.draw_screen(gb.mmu, full_screen_obj);
 
@@ -52,6 +53,24 @@ window.onload = function() {
                         // run just one instruction with parameter 
                         // just_one_instruction
                         gb.RunFrame(true)
+                        registers_div.innerHTML = gb.cpu.toString();
+                        interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+                        gb.gpu.draw_screen(gb.mmu, full_screen_obj);
+                })
+        };
+        // run 500 instructions
+        if (many_step_btn) {
+                many_step_btn.addEventListener("click", (e: Event) => {
+                        // run just one instruction with parameter 
+                        let log_line = gb.getLog();
+                        log_buffer.value += log_line + '\n'
+                        for (var i = 0; i < 500; i++) {
+                                gb.RunFrame(true)
+                                if (DEBUG_MODE) {
+                                        let log_line = gb.getLog();
+                                        log_buffer.value += log_line + '\n'
+                                }
+                        }
                         registers_div.innerHTML = gb.cpu.toString();
                         interrupts_div.innerHTML = gb.mmu.interruptstate2string();
                         gb.gpu.draw_screen(gb.mmu, full_screen_obj);
@@ -100,6 +119,7 @@ window.onload = function() {
                                 let buff = new Buffer(fileReader.result as ArrayBuffer);
 
                                 gb = new Gameboy(buff, true);
+                                console.log('loaded gameboy with ROM provided!');
                                 if (DEBUG_MODE) {
                                         // load values that should be in memory after bootrom runs
                                         // A 	0x01
@@ -116,13 +136,15 @@ window.onload = function() {
                                         gb.cpu.registers.f = 0xB0
                                         gb.cpu.registers.b = 0x00
                                         gb.cpu.registers.c = 0x13
-                                        gb.cpu.registers.d = 0x13
+                                        gb.cpu.registers.d = 0x00
                                         gb.cpu.registers.e = 0xD8
                                         gb.cpu.registers.h = 0x01
                                         gb.cpu.registers.l = 0x4D
                                         gb.cpu.registers.sp = 0xFFFE
                                         gb.cpu.registers.pc = 0x0100
                                 }
+                                registers_div.innerHTML = gb.cpu.toString();
+                                interrupts_div.innerHTML = gb.mmu.interruptstate2string();
 
                         }
                         fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);

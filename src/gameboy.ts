@@ -145,7 +145,8 @@ export class Gameboy {
         // just_one_instruction(bool) : wheter to run just one instruction and stop
         //
         // breakpoint(int) : if != -1, if PC=breakpoint, the function halts
-        RunFrame(just_one_instruction = false, breakpoint = -1) {
+        // log_buffer(string) : string to save all logs from instructions executed on this frame 
+        RunFrame(just_one_instruction = false, breakpoint = -1, log_buffer? : string  ) {
 
                 let print_debug_info = true;
 
@@ -160,6 +161,7 @@ export class Gameboy {
                 // one frame timing
                 while (clock_count < clock_count_MAX) {
 
+                        if(log_buffer != undefined){ log_buffer = log_buffer + this.getLog() + '\n'}
                         // check for interrupts
                         this.HandleInterrupts();
 
@@ -181,9 +183,10 @@ export class Gameboy {
 
                         clock_count += inst.cycles;
 
-
+                        
                         this.gpu.RunClocks(clock_count);
                 }
+                if(log_buffer != undefined){return log_buffer};
         }
         getLog(): string {
                 // FORMAT

@@ -18,7 +18,7 @@ let interrupts_div = <HTMLInputElement>document.getElementById("interrupts");
 let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
 let full_screen_obj = <HTMLCanvasElement>document.getElementById("fullscreen");
 let load_rom = <HTMLInputElement>document.getElementById("loadrom");
-let log_buffer = <HTMLTextAreaElement>document.getElementById("log_buffer");
+let log_text_box = <HTMLTextAreaElement>document.getElementById("log_buffer");
 
 
 window.onload = function() {
@@ -36,12 +36,13 @@ window.onload = function() {
 
 
         let frame_and_draw = () => {
-                gb.RunFrame()
+                let log_buffer = undefined 
+                if(DEBUG_MODE) {log_buffer = ""}; 
+                log_buffer = gb.RunFrame(false, -1,log_buffer=log_buffer)
                 registers_div.innerHTML = gb.cpu.toString();
                 interrupts_div.innerHTML = gb.mmu.interruptstate2string();
                 if (DEBUG_MODE) {
-                        let log_line = gb.getLog();
-                        log_buffer.value += log_line + '\n'
+                        log_text_box.value += log_buffer;
                 }
                 gb.gpu.draw_screen(gb.mmu, full_screen_obj);
 
@@ -63,12 +64,12 @@ window.onload = function() {
                 many_step_btn.addEventListener("click", (e: Event) => {
                         // run just one instruction with parameter 
                         let log_line = gb.getLog();
-                        log_buffer.value += log_line + '\n'
+                        log_text_box.value += log_line + '\n'
                         for (var i = 0; i < 500; i++) {
                                 gb.RunFrame(true)
                                 if (DEBUG_MODE) {
                                         let log_line = gb.getLog();
-                                        log_buffer.value += log_line + '\n'
+                                        log_text_box.value += log_line + '\n'
                                 }
                         }
                         registers_div.innerHTML = gb.cpu.toString();

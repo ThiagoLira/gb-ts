@@ -1,3 +1,6 @@
+var Buffer = require('buffer/').Buffer
+
+
 export function _base64ToArrayBuffer(base64 : string) {
     var binary_string = window.atob(base64);
     var len = binary_string.length;

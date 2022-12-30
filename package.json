@@ -28,7 +28,7 @@
     "chai": "^4.2.0",
     "fs": "0.0.1-security",
     "html-webpack-plugin": "^4.0.0-beta.5",
-    "mocha": "^6.1.4",
+    "mocha": "^10.2.0",
     "mocha-typescript": "^1.1.17",
     "npx": "^10.2.0",
     "nyc": "^14.1.1",

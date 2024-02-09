@@ -1,5 +1,4 @@
-GB Emulador written in typescript. Ridiculously WIP for now.
-
+GB Emulador written in typescript. Very WIP, for now it just boots the Nintendo logo.
 
 ## Instalation
 

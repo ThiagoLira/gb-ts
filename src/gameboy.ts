@@ -16,7 +16,7 @@ export class Gameboy {
 
 
 
-        constructor(buff: Buffer, use_bootrom: boolean) {
+        constructor(buff: Uint8Array, use_bootrom: boolean) {
                 this.cpu = new CPU(new Registers());
 
                 this.gpu = new GPU();

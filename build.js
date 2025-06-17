@@ -12,13 +12,13 @@ async function build() {
     sourcemap: true,
     logLevel: 'info'
   });
-
   let html = fs.readFileSync('src/index_template.html', 'utf8');
   html = html.replace(
     '</body>',
     '  <script type="module" src="index.js"></script>\n</body>'
   );
   fs.writeFileSync('dist/index.html', html);
+
 }
 
 build().catch((err) => {

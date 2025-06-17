@@ -118,7 +118,7 @@ if (load_rom) { load_rom.addEventListener("change", (e: Event) =>
                                           {var fileReader = new FileReader();
 
                                            fileReader.onload = function (e) {
-                                               let buff = new Buffer(fileReader.result as ArrayBuffer);
+                                               let buff = new Uint8Array(fileReader.result as ArrayBuffer);
 
                                                gb = new Gameboy(buff,true);
 

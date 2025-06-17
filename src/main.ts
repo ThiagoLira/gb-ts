@@ -117,7 +117,7 @@ window.onload = function() {
                         var fileReader = new FileReader();
 
                         fileReader.onload = function(e) {
-                                let buff = new Buffer(fileReader.result as ArrayBuffer);
+                                let buff = new Uint8Array(fileReader.result as ArrayBuffer);
 
                                 gb = new Gameboy(buff, true);
                                 console.log('loaded gameboy with ROM provided!');

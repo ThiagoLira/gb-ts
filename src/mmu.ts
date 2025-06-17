@@ -5,7 +5,7 @@ export class MMU {
 
 
 
-    constructor( gpu: GPU,use_bootrom?: boolean,buff?: Buffer) {
+    constructor( gpu: GPU,use_bootrom?: boolean,buff?: Uint8Array) {
         // use chromium with this function for now!
 
         // debug: hard code GB logo on cartridge memory location 0x104 - 0x133
@@ -324,7 +324,7 @@ export class MMU {
 
 
     // load some bytes on cartridge from FileReader buffer 
-    loadRomFromFile(buffArray: Buffer  ) {
+    loadRomFromFile(buffArray: Uint8Array  ) {
 
         for (let i=0; i <= buffArray.length; i=i+1){
             this.cartridge[i] = buffArray[i];

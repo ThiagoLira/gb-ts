@@ -1,4 +1,5 @@
 import { CPU } from "./cpu"
+import { GameBoyBus } from "./bus"
 import { GPU } from "./gpu"
 import { MMU } from "./mmu"
 import { Registers } from "./registers"
@@ -8,6 +9,7 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 //this class should hold the complete state of the gameboy to halt and de-halt emulation
 export class Gameboy {
+        bus: GameBoyBus;
 
         cpu: CPU;
         gpu: GPU;
@@ -17,11 +19,15 @@ export class Gameboy {
 
 
         constructor(buff: Uint8Array, use_bootrom: boolean) {
-                this.cpu = new CPU(new Registers());
+                this.bus = new GameBoyBus();
+                this.cpu = new CPU(this.bus);
+                this.bus.cpu = this.cpu;
 
-                this.gpu = new GPU();
+                this.gpu = new GPU(this.bus);
+                this.bus.gpu = this.gpu;
 
-                this.mmu = new MMU(this.gpu, use_bootrom, buff);
+                this.mmu = new MMU(this.bus, use_bootrom, buff);
+                this.bus.mmu = this.mmu;
         }
 
 
@@ -78,15 +84,15 @@ export class Gameboy {
 
         HandleInterrupts(): boolean {
 
-                if (!this.mmu.ime) {
+                if (!this.bus.interrupts.IME) {
                         //console.log('Interrupts not enabled!')
                         return false;
                 }
 
 
-                let interruptFlag = this.mmu.interrupt_flag;
+                let interruptFlag = this.bus.interrupts.IF;
 
-                let interruptEnable = this.mmu.interrupt_enable;
+                let interruptEnable = this.bus.interrupts.IE;
 
                 let interruptName = '';
 
@@ -115,10 +121,11 @@ export class Gameboy {
                 if (handler != 0) {
 
                         // set IME to 0
-                        this.mmu.ime = 0;
+                        this.bus.interrupts.IME = 0;
                         // set 0xFF0F to 0
-                        // equivalent to this.mmu.interrupt_flag = 0;
+                        // equivalent to this.bus.interrupts.IF = 0;
                         this.mmu.setByte(0xFF0F, 0);
+                        this.bus.interrupts.IF = 0;
 
                         // PUSH current PC to stack
 
@@ -131,7 +138,7 @@ export class Gameboy {
                         this.cpu.registers.pc = handler;
 
                         // set IME to 1
-                        this.mmu.ime = 0x1;
+                        this.bus.interrupts.IME = 0x1;
                         return true;
                 } else {
                         return false;

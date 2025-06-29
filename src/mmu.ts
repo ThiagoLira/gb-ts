@@ -1,18 +1,21 @@
 
 import { GPU } from "./gpu"
+import { GameBoyBus } from "./bus"
 
 export class MMU {
+    bus: GameBoyBus;
 
 
 
-    constructor( gpu: GPU,use_bootrom?: boolean,buff?: Uint8Array) {
+    constructor(bus: GameBoyBus,use_bootrom?: boolean,buff?: Uint8Array) {
         // use chromium with this function for now!
 
         // debug: hard code GB logo on cartridge memory location 0x104 - 0x133
 
         // we need this reference so we can update the tiledata
         // everytime the VRAM is updated
-        this.gpu = gpu;
+        this.bus = bus;
+        this.gpu = bus.gpu;
 
         if(use_bootrom){
             this.using_bootrom = use_bootrom;
@@ -89,16 +92,6 @@ export class MMU {
     cartridge: number[] = Array(0x8000).fill(0x0);
 
 
-    //IF
-    interrupt_flag: number = 0x0;
-
-    // enables for each type of interrupt
-    interrupt_enable: number = 0xF;
-
-    // interrupt master enable IME
-    ime : number = 0x1;
-
-
     getByte(address: number): number {
 
         let address_without_offset = address;
@@ -134,7 +127,7 @@ export class MMU {
                 return this.oam[address_without_offset];
             // video related registers
             case ((0xFF4C > address) && (address >= 0xFF0F)):
-                if (address == 0xFF0F) { return this.interrupt_flag; }
+                if (address == 0xFF0F) { return this.bus.interrupts.IF; }
                 if (address == 0xFF40) { return this.gpu.lcdc; }
                 if (address == 0xFF41) { return this.gpu.stat; }
                 if (address == 0xFF42) { return this.gpu.scy; }
@@ -155,7 +148,7 @@ export class MMU {
                 return this.stack_ram[address_without_offset];
 
             case(0xFFFF == address):
-                return this.interrupt_enable ;
+                return this.bus.interrupts.IE ;
 
         }
         throw new Error('Acessing non-implemented memory location: ' + address.toString(16));
@@ -198,7 +191,7 @@ export class MMU {
                 break;
             // video related registers
             case ((0xFF80 > address) && (address >= 0xFF0F)):
-                if (address == 0xFF0F) { this.interrupt_flag = val; }
+                if (address == 0xFF0F) { this.bus.interrupts.IF = val; }
                 if (address == 0xFF40) { this.gpu.lcdc = val; }
                 if (address == 0xFF41) { this.gpu.stat = val; }
                 if (address == 0xFF42) { this.gpu.scy = val; }
@@ -217,18 +210,18 @@ export class MMU {
                 this.stack_ram[address_without_offset] = val;
                 break;
             case(0xFFFF == address):
-                this.interrupt_enable = val;
+                this.bus.interrupts.IE = val;
                 // also set IME
-                this.ime = val;
+                this.bus.interrupts.IME = val;
                 break;
         }
 
     }
 
     public interruptstate2string() : string {
-        return `IE = (${this.interrupt_enable.toString(16)}) \n
-                IME = (${this.ime.toString(16)}) \n
-                IF = (${this.interrupt_flag.toString(16)}) `;
+        return `IE = (${this.bus.interrupts.IE.toString(16)}) \n
+                IME = (${this.bus.interrupts.IME.toString(16)}) \n
+                IF = (${this.bus.interrupts.IF.toString(16)}) `;
     }
 
     // return string representation of vram

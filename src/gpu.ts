@@ -1,4 +1,6 @@
 import { MMU } from "./mmu";
+import { GameBoyBus } from "./bus";
+import { Int } from "./interrupt";
 
 
 
@@ -17,11 +19,13 @@ function get_RGB(color: number): number[] {
 
 
 export class GPU {
+    bus: GameBoyBus;
 
 
 
 
-    constructor() {
+    constructor(bus: GameBoyBus) {
+        this.bus = bus;
         this.reset();
     }
 
@@ -116,6 +120,7 @@ export class GPU {
                     this.ly++;
 
                     if (this.ly == 143) {
+                        this.bus.interrupts.request(Int.VBlank);
                         // Enter vblank
                         this.mode = 1;
                         // this.canvas.putImageData(this.screen, 0, 0);

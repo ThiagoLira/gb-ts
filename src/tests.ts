@@ -1,6 +1,7 @@
 
 import { CPU } from "./cpu"
 import { GPU } from "./gpu"
+import { GameBoyBus } from "./bus"
 import { Registers } from "./registers"
 import { MMU } from "./mmu"
 import { InstructionConfig, InstructionGetter } from "./instructions"
@@ -16,13 +17,17 @@ describe('BOOTROM', function() {
     let cpu: CPU;
     let mmu: MMU;
     let gpu: GPU;
+    let bus: GameBoyBus;
 
     beforeEach("init", function() {
 
-        gpu = new GPU();
-        cpu = new CPU(new Registers());
+        bus = new GameBoyBus();
+        gpu = new GPU(bus);
+        bus.gpu = gpu;
+        cpu = new CPU(bus);
         // load bootrom on MMU
-        mmu = new MMU(gpu  );
+        mmu = new MMU(bus);
+        bus.mmu = mmu;
 
     });
 
@@ -69,13 +74,17 @@ describe('logic instructions', function() {
     let cpu: CPU;
     let mmu: MMU;
     let gpu: GPU;
+    let bus: GameBoyBus;
 
     beforeEach("init", function() {
 
-        gpu = new GPU();
-        cpu = new CPU(new Registers());
+        bus = new GameBoyBus();
+        gpu = new GPU(bus);
+        bus.gpu = gpu;
+        cpu = new CPU(bus);
         // load bootrom on MMU
-        mmu = new MMU(gpu);
+        mmu = new MMU(bus);
+        bus.mmu = mmu;
 
     });
 
@@ -153,13 +162,17 @@ describe('other instructions', function() {
     let cpu: CPU;
     let mmu: MMU;
     let gpu: GPU;
+    let bus: GameBoyBus;
 
     beforeEach("init", function() {
 
-        cpu = new CPU(new Registers());
-        gpu = new GPU();
+        bus = new GameBoyBus();
+        cpu = new CPU(bus);
+        gpu = new GPU(bus);
+        bus.gpu = gpu;
         // load bootrom on MMU
-        mmu = new MMU( gpu);
+        mmu = new MMU(bus);
+        bus.mmu = mmu;
 
     });
 

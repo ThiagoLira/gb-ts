@@ -1,4 +1,5 @@
 import { CPU } from "./cpu"
+import { GameBoyBus } from "./bus"
 import { GPU } from "./gpu"
 import { MMU } from "./mmu"
 import { Registers } from "./registers"
@@ -8,6 +9,7 @@ import { InstructionConfig, InstructionGetter } from "./instructions"
 
 //this class should hold the complete state of the gameboy to halt and de-halt emulation
 export class Gameboy {
+        bus: GameBoyBus;
 
         cpu: CPU;
         gpu: GPU;
@@ -17,11 +19,15 @@ export class Gameboy {
 
 
         constructor(buff: Uint8Array, use_bootrom: boolean) {
-                this.cpu = new CPU(new Registers());
+                this.bus = new GameBoyBus();
+                this.cpu = new CPU(this.bus);
+                this.bus.cpu = this.cpu;
 
-                this.gpu = new GPU();
+                this.gpu = new GPU(this.bus);
+                this.bus.gpu = this.gpu;
 
-                this.mmu = new MMU(this.gpu, use_bootrom, buff);
+                this.mmu = new MMU(this.bus, use_bootrom, buff);
+                this.bus.mmu = this.mmu;
         }
 
 
@@ -78,15 +84,15 @@ export class Gameboy {
 
         HandleInterrupts(): boolean {
 
-                if (!this.mmu.ime) {
+                if (!this.bus.interrupts.IME) {
                         //console.log('Interrupts not enabled!')
                         return false;
                 }
 
 
-                let interruptFlag = this.mmu.interrupt_flag;
+                let interruptFlag = this.bus.interrupts.IF;
 
-                let interruptEnable = this.mmu.interrupt_enable;
+                let interruptEnable = this.bus.interrupts.IE;
 
                 let interruptName = '';
 
@@ -111,14 +117,14 @@ export class Gameboy {
                         handler = 0x0060; // Hi-Lo of P10-P13
                 }
 
-
                 if (handler != 0) {
 
                         // set IME to 0
-                        this.mmu.ime = 0;
+                        this.bus.interrupts.IME = 0;
                         // set 0xFF0F to 0
-                        // equivalent to this.mmu.interrupt_flag = 0;
+                        // equivalent to this.bus.interrupts.IF = 0;
                         this.mmu.setByte(0xFF0F, 0);
+                        this.bus.interrupts.IF = 0;
 
                         // PUSH current PC to stack
 
@@ -131,7 +137,7 @@ export class Gameboy {
                         this.cpu.registers.pc = handler;
 
                         // set IME to 1
-                        this.mmu.ime = 0x1;
+                        this.bus.interrupts.IME = 0x1;
                         return true;
                 } else {
                         return false;
@@ -157,11 +163,13 @@ export class Gameboy {
                 }
 
                 let clock_count = 0;
-
                 // one frame timing
                 while (clock_count < clock_count_MAX) {
 
-                        if(log_buffer != undefined){ log_buffer = log_buffer + this.getLog() + '\n'}
+			if (log_buffer !== undefined) {
+			    log_buffer = (log_buffer + this.getLog() + '\n').trim().split('\n').slice(-50).join('\n') + '\n';
+			}
+
                         // check for interrupts
                         this.HandleInterrupts();
 
@@ -169,7 +177,7 @@ export class Gameboy {
 
                         if (old_pc == breakpoint && breakpoint != -1) {
                                 console.log(`Emulator halted on PC==${old_pc.toString(16)}`)
-                                return 0;
+                                return 0; 
                         }
 
                         let { arg, new_pc, inst } = this.FetchOpCode();
@@ -183,15 +191,16 @@ export class Gameboy {
 
                         clock_count += inst.cycles;
 
-                        
-                        this.gpu.RunClocks(clock_count);
+
+                        this.gpu.RunClocks(inst.cycles);
                 }
                 if(log_buffer != undefined){return log_buffer};
         }
         getLog(): string {
                 // FORMAT
                 // A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD
-                let log = `A:${this.cpu.registers.a.toString(16).padStart(2,'0')} F:${this.cpu.registers.f.toString(16).padStart(2,'0')} B:${this.cpu.registers.b.toString(16).padStart(2,'0')} C:${this.cpu.registers.c.toString(16).padStart(2,'0')} D:${this.cpu.registers.d.toString(16).padStart(2,'0')} E:${this.cpu.registers.e.toString(16).padStart(2,'0')} H:${this.cpu.registers.h.toString(16).padStart(2,'0')} L:${this.cpu.registers.l.toString(16).padStart(2,'0')} SP:${this.cpu.registers.sp.toString(16).padStart(4,'0')} PC:${this.cpu.registers.pc.toString(16).padStart(4,'0')} PCMEM:${this.mmu.getByte(this.cpu.registers.pc).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 1).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 2).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 3).toString(16).padStart(2,'0')}`;
+                let log = `LY:${this.mmu.getByte(0xFF44)} A:${this.cpu.registers.a.toString(16).padStart(2,'0')} F:${this.cpu.registers.f.toString(16).padStart(2,'0')} B:${this.cpu.registers.b.toString(16).padStart(2,'0')} C:${this.cpu.registers.c.toString(16).padStart(2,'0')} D:${this.cpu.registers.d.toString(16).padStart(2,'0')} E:${this.cpu.registers.e.toString(16).padStart(2,'0')} H:${this.cpu.registers.h.toString(16).padStart(2,'0')} L:${this.cpu.registers.l.toString(16).padStart(2,'0')} SP:${this.cpu.registers.sp.toString(16).padStart(4,'0')} PC:${this.cpu.registers.pc.toString(16).padStart(4,'0')} PCMEM:${this.mmu.getByte(this.cpu.registers.pc).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 1).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 2).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 3).toString(16).padStart(2,'0')}`;
+
                 return log.toUpperCase();
         }
 }

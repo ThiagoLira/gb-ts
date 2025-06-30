@@ -1,4 +1,5 @@
 import { Registers } from "./registers"
+import { GameBoyBus } from "./bus"
 
 
 
@@ -16,6 +17,7 @@ export class CPU {
     state = State.running;
 
     registers: Registers;
+    bus: GameBoyBus;
 
     reset_carry_flag() {
         this.registers.f &= ~(1 << 4)
@@ -49,9 +51,9 @@ export class CPU {
         this.registers.f |= 1 << 7
     }
 
-    constructor(registers: Registers) {
-
-        this.registers = registers;
+    constructor(bus: GameBoyBus) {
+        this.bus = bus;
+        this.registers = new Registers();
     }
 
     // reset CPU

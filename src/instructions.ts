@@ -2874,7 +2874,7 @@ export class InstructionGetter {
                 return {
                     op: function(args: op_args) {
                         // interrupt master enable
-                        args.mmu.ime = 0x0;
+                        args.mmu.bus.interrupts.IME = 0x0;
                     },
                     cycles: 4,
                     arg_number: 0,
@@ -2884,7 +2884,7 @@ export class InstructionGetter {
             case 0xFB: {
                 return {
                     op: function(args: op_args) {
-                        args.mmu.ime = 0x1;
+                        args.mmu.bus.interrupts.IME = 0x1;
                     },
                     cycles: 4,
                     arg_number: 0,

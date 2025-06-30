@@ -121,6 +121,8 @@ export class GPU {
 
                     if (this.ly == 143) {
                         this.bus.interrupts.request(Int.VBlank);
+			console.log("Requesting VBLANK from gpu....");
+			console.log(this.bus.interrupts);
                         // Enter vblank
                         this.mode = 1;
                         // this.canvas.putImageData(this.screen, 0, 0);

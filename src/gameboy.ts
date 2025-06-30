@@ -117,7 +117,6 @@ export class Gameboy {
                         handler = 0x0060; // Hi-Lo of P10-P13
                 }
 
-
                 if (handler != 0) {
 
                         // set IME to 0
@@ -164,11 +163,13 @@ export class Gameboy {
                 }
 
                 let clock_count = 0;
-
                 // one frame timing
                 while (clock_count < clock_count_MAX) {
 
-                        if(log_buffer != undefined){ log_buffer = log_buffer + this.getLog() + '\n'}
+			if (log_buffer !== undefined) {
+			    log_buffer = (log_buffer + this.getLog() + '\n').trim().split('\n').slice(-50).join('\n') + '\n';
+			}
+
                         // check for interrupts
                         this.HandleInterrupts();
 
@@ -176,7 +177,7 @@ export class Gameboy {
 
                         if (old_pc == breakpoint && breakpoint != -1) {
                                 console.log(`Emulator halted on PC==${old_pc.toString(16)}`)
-                                return 0;
+                                return 0; 
                         }
 
                         let { arg, new_pc, inst } = this.FetchOpCode();
@@ -190,15 +191,16 @@ export class Gameboy {
 
                         clock_count += inst.cycles;
 
-                        
-                        this.gpu.RunClocks(clock_count);
+
+                        this.gpu.RunClocks(inst.cycles);
                 }
                 if(log_buffer != undefined){return log_buffer};
         }
         getLog(): string {
                 // FORMAT
                 // A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD
-                let log = `A:${this.cpu.registers.a.toString(16).padStart(2,'0')} F:${this.cpu.registers.f.toString(16).padStart(2,'0')} B:${this.cpu.registers.b.toString(16).padStart(2,'0')} C:${this.cpu.registers.c.toString(16).padStart(2,'0')} D:${this.cpu.registers.d.toString(16).padStart(2,'0')} E:${this.cpu.registers.e.toString(16).padStart(2,'0')} H:${this.cpu.registers.h.toString(16).padStart(2,'0')} L:${this.cpu.registers.l.toString(16).padStart(2,'0')} SP:${this.cpu.registers.sp.toString(16).padStart(4,'0')} PC:${this.cpu.registers.pc.toString(16).padStart(4,'0')} PCMEM:${this.mmu.getByte(this.cpu.registers.pc).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 1).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 2).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 3).toString(16).padStart(2,'0')}`;
+                let log = `LY:${this.mmu.getByte(0xFF44)} A:${this.cpu.registers.a.toString(16).padStart(2,'0')} F:${this.cpu.registers.f.toString(16).padStart(2,'0')} B:${this.cpu.registers.b.toString(16).padStart(2,'0')} C:${this.cpu.registers.c.toString(16).padStart(2,'0')} D:${this.cpu.registers.d.toString(16).padStart(2,'0')} E:${this.cpu.registers.e.toString(16).padStart(2,'0')} H:${this.cpu.registers.h.toString(16).padStart(2,'0')} L:${this.cpu.registers.l.toString(16).padStart(2,'0')} SP:${this.cpu.registers.sp.toString(16).padStart(4,'0')} PC:${this.cpu.registers.pc.toString(16).padStart(4,'0')} PCMEM:${this.mmu.getByte(this.cpu.registers.pc).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 1).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 2).toString(16).padStart(2,'0')},${this.mmu.getByte(this.cpu.registers.pc + 3).toString(16).padStart(2,'0')}`;
+
                 return log.toUpperCase();
         }
 }

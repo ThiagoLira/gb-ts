@@ -152,7 +152,7 @@ export class Gameboy {
 	//
 	// breakpoint(int) : if != -1, if PC=breakpoint, the function halts
 	// log_buffer(string) : string to save all logs from instructions executed on this frame 
-	RunFrame(just_one_instruction = false, breakpoint = -1, log_buffer?: string) {
+	RunFrame(just_one_instruction = false, breakpoint = -1, log_buffer: string) {
 
 		let print_debug_info = true;
 
@@ -165,6 +165,20 @@ export class Gameboy {
 		let clock_count = 0;
 		// one frame timing
 		while (clock_count < clock_count_MAX) {
+
+
+			//// THIS IS DISGUSTING
+			let log_line = this.getLog();
+			log_buffer += log_line + '\n';
+
+			let current_lines = log_buffer.split('\n');
+			if (current_lines.length > 50) {
+				current_lines = current_lines.slice(current_lines.length - 50);
+			}
+
+			log_buffer = current_lines.join('\n') + '\n';
+			////
+
 
 			// check for interrupts
 			this.HandleInterrupts();

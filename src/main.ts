@@ -36,27 +36,14 @@ window.onload = function() {
 
 
 	let frame_and_draw = () => {
-		let log_buffer = undefined
-		if (DEBUG_MODE) { log_buffer = "" };
+		let log_buffer = ""
 		log_buffer = gb.RunFrame(false, -1, log_buffer = log_buffer)
 		registers_div.innerHTML = gb.cpu.toString();
 		interrupts_div.innerHTML = gb.mmu.interruptstate2string();
 		if (DEBUG_MODE) {
-			let log_line = gb.getLog();
-			let current_lines = log_text_box.value.split('\n');
-
-			// Add the new line
-			current_lines.push(log_line);
-
-			// If there are more than 50 lines, remove the oldest one(s)
-			if (current_lines.length > 50) {
-				current_lines = current_lines.slice(current_lines.length - 50);
-			}
-
-			// Join the lines back together and update the textbox
-			log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
+			log_text_box.value = log_buffer;
 		}
-		gb.gpu.draw_screen(gb.mmu, full_screen_obj);
+		gb.gpu.draw_frame_buffer(full_screen_obj);
 
 	}
 

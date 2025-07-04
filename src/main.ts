@@ -23,135 +23,169 @@ let log_text_box = <HTMLTextAreaElement>document.getElementById("log_buffer");
 
 window.onload = function() {
 
-        // first load this, which is totally not a base64 encoded ROM
-        let el = <HTMLDataElement>document.getElementById("not_a_rom");
-        console.log(el)
-        if (el) {
-                let buff = _base64ToBuffer(el.value)
-                if (buff) {
-                        gb = new Gameboy(buff, true)
-                        console.log('Loaded (not) rom from page!')
-                }
-        }
+	// first load this, which is totally not a base64 encoded ROM
+	let el = <HTMLDataElement>document.getElementById("not_a_rom");
+	console.log(el)
+	if (el) {
+		let buff = _base64ToBuffer(el.value)
+		if (buff) {
+			gb = new Gameboy(buff, true)
+			console.log('Loaded (not) rom from page!')
+		}
+	}
 
 
-        let frame_and_draw = () => {
-                let log_buffer = undefined 
-                if(DEBUG_MODE) {log_buffer = ""}; 
-                log_buffer = gb.RunFrame(false, -1,log_buffer=log_buffer)
-                registers_div.innerHTML = gb.cpu.toString();
-                interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-                if (DEBUG_MODE) {
-                        log_text_box.value += log_buffer;
-                }
-                gb.gpu.draw_screen(gb.mmu, full_screen_obj);
+	let frame_and_draw = () => {
+		let log_buffer = undefined
+		if (DEBUG_MODE) { log_buffer = "" };
+		log_buffer = gb.RunFrame(false, -1, log_buffer = log_buffer)
+		registers_div.innerHTML = gb.cpu.toString();
+		interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+		if (DEBUG_MODE) {
+			let log_line = gb.getLog();
+			let current_lines = log_text_box.value.split('\n');
 
-        }
+			// Add the new line
+			current_lines.push(log_line);
 
-        // run one instruction
-        if (one_step_btn) {
-                one_step_btn.addEventListener("click", (e: Event) => {
-                        // run just one instruction with parameter 
-                        // just_one_instruction
-                        gb.RunFrame(true)
-                        registers_div.innerHTML = gb.cpu.toString();
-                        interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-                        gb.gpu.draw_screen(gb.mmu, full_screen_obj);
-                })
-        };
-        // run 500 instructions
-        if (many_step_btn) {
-                many_step_btn.addEventListener("click", (e: Event) => {
-                        // run just one instruction with parameter 
-                        let log_line = gb.getLog();
-                        log_text_box.value += log_line + '\n'
-                        for (var i = 0; i < 500; i++) {
-                                gb.RunFrame(true)
-                                if (DEBUG_MODE) {
-                                        let log_line = gb.getLog();
-                                        log_text_box.value += log_line + '\n'
-                                }
-                        }
-                        registers_div.innerHTML = gb.cpu.toString();
-                        interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-                        gb.gpu.draw_screen(gb.mmu, full_screen_obj);
-                })
-        };
+			// If there are more than 50 lines, remove the oldest one(s)
+			if (current_lines.length > 50) {
+				current_lines = current_lines.slice(current_lines.length - 50);
+			}
 
-        // run until breakpoint OR ONE FRAME
-        if (tillbreak_btn) {
-                tillbreak_btn.addEventListener("click", (e: Event) => {
-                        //parse breakpoint
-                        let bpt = parseInt(breakpoint_input.value)
+			// Join the lines back together and update the textbox
+			log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
+		}
+		gb.gpu.draw_screen(gb.mmu, full_screen_obj);
 
-                        // run just one instruction with parameter 
-                        // just_one_instruction
-                        gb.RunFrame(false, bpt)
-                        registers_div.innerHTML = gb.cpu.toString();
-                        interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-                        gb.gpu.draw_screen(gb.mmu, full_screen_obj);
-                })
-        };
+	}
 
-        // run one frame
-        if (one_frame_btn) {
-                one_frame_btn.addEventListener("click", (e: Event) => {
-                        // run 1 frames
-                        setTimeout(frame_and_draw, 16)
-                })
-        };
+	// run one instruction
+	if (one_step_btn) {
+		one_step_btn.addEventListener("click", (e: Event) => {
+			// run just one instruction with parameter 
+			// just_one_instruction
+			gb.RunFrame(true)
+			registers_div.innerHTML = gb.cpu.toString();
+			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+			gb.gpu.draw_frame_buffer(full_screen_obj);
+			let log_line = gb.getLog();
+			let current_lines = log_text_box.value.split('\n');
+			console.log(log_line);
+			// Add the new line
+			current_lines.push(log_line);
 
-        // run 500 frames
-        if (run_500_frames_btn) {
-                run_500_frames_btn.addEventListener("click", (e: Event) => {
-                        // run 500 frames
-                        for (var i = 0; i < 500; i++) {
-                                setTimeout(frame_and_draw, 16)
-                        }
-                })
-        };
+			// If there are more than 50 lines, remove the oldest one(s)
+			if (current_lines.length > 50) {
+				current_lines = current_lines.slice(current_lines.length - 50);
+			}
 
-        if (load_rom) {
+			// Join the lines back together and update the textbox
+			log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
+		})
+	};
+	// run 500 instructions
+	if (many_step_btn) {
+		many_step_btn.addEventListener("click", (e: Event) => {
+			// run just one instruction with parameter 
+			for (var i = 0; i < 500; i++) {
+				gb.RunFrame(true)
+				if (DEBUG_MODE) {
+					let log_line = gb.getLog();
+					let current_lines = log_text_box.value.split('\n');
+					console.log(log_line);
+					// Add the new line
+					current_lines.push(log_line);
 
-                load_rom.addEventListener("change", (e: Event) => {
-                        var fileReader = new FileReader();
+					// If there are more than 50 lines, remove the oldest one(s)
+					if (current_lines.length > 50) {
+						current_lines = current_lines.slice(current_lines.length - 50);
+					}
 
-                        fileReader.onload = function(e) {
-                                let buff = new Uint8Array(fileReader.result as ArrayBuffer);
+					// Join the lines back together and update the textbox
+					log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
+				}
+			}
+			registers_div.innerHTML = gb.cpu.toString();
+			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+			gb.gpu.draw_frame_buffer(full_screen_obj);
+		})
+	};
 
-                                gb = new Gameboy(buff, true);
-                                console.log('loaded gameboy with ROM provided!');
-                                if (DEBUG_MODE) {
-                                        // load values that should be in memory after bootrom runs
-                                        // A 	0x01
-                                        // F 	0xB0 (or CH-Z if managing flags individually)
-                                        // B 	0x00
-                                        // C 	0x13
-                                        // D 	0x13
-                                        // E 	0xD8
-                                        // H 	0x01
-                                        // L 	0x4D
-                                        // SP 	0xFFFE
-                                        // PC 	0x0100
-                                        gb.cpu.registers.a = 0x01
-                                        gb.cpu.registers.f = 0xB0
-                                        gb.cpu.registers.b = 0x00
-                                        gb.cpu.registers.c = 0x13
-                                        gb.cpu.registers.d = 0x00
-                                        gb.cpu.registers.e = 0xD8
-                                        gb.cpu.registers.h = 0x01
-                                        gb.cpu.registers.l = 0x4D
-                                        gb.cpu.registers.sp = 0xFFFE
-                                        gb.cpu.registers.pc = 0x0100
-                                }
-                                registers_div.innerHTML = gb.cpu.toString();
-                                interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+	// run until breakpoint OR ONE FRAME
+	if (tillbreak_btn) {
+		tillbreak_btn.addEventListener("click", (e: Event) => {
+			//parse breakpoint
+			let bpt = parseInt(breakpoint_input.value)
 
-                        }
-                        fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);
+			// run just one instruction with parameter 
+			// just_one_instruction
+			gb.RunFrame(false, bpt)
+			registers_div.innerHTML = gb.cpu.toString();
+			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+			gb.gpu.draw_screen(gb.mmu, full_screen_obj);
+		})
+	};
 
-                })
-        }
+	// run one frame
+	if (one_frame_btn) {
+		one_frame_btn.addEventListener("click", (e: Event) => {
+			// run 1 frames
+			setTimeout(frame_and_draw, 16)
+		})
+	};
+
+	// run 500 frames
+	if (run_500_frames_btn) {
+		run_500_frames_btn.addEventListener("click", (e: Event) => {
+			// run 500 frames
+			for (var i = 0; i < 500; i++) {
+				setTimeout(frame_and_draw, 16)
+			}
+		})
+	};
+
+	if (load_rom) {
+
+		load_rom.addEventListener("change", (e: Event) => {
+			var fileReader = new FileReader();
+
+			fileReader.onload = function(e) {
+				let buff = new Uint8Array(fileReader.result as ArrayBuffer);
+
+				gb = new Gameboy(buff, true);
+				console.log('loaded gameboy with ROM provided!');
+				if (DEBUG_MODE) {
+					// load values that should be in memory after bootrom runs
+					// A 	0x01
+					// F 	0xB0 (or CH-Z if managing flags individually)
+					// B 	0x00
+					// C 	0x13
+					// D 	0x13
+					// E 	0xD8
+					// H 	0x01
+					// L 	0x4D
+					// SP 	0xFFFE
+					// PC 	0x0100
+					gb.cpu.registers.a = 0x01
+					gb.cpu.registers.f = 0xB0
+					gb.cpu.registers.b = 0x00
+					gb.cpu.registers.c = 0x13
+					gb.cpu.registers.d = 0x00
+					gb.cpu.registers.e = 0xD8
+					gb.cpu.registers.h = 0x01
+					gb.cpu.registers.l = 0x4D
+					gb.cpu.registers.sp = 0xFFFE
+					gb.cpu.registers.pc = 0x0100
+				}
+				registers_div.innerHTML = gb.cpu.toString();
+				interrupts_div.innerHTML = gb.mmu.interruptstate2string();
+
+			}
+			fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);
+
+		})
+	}
 
 
 

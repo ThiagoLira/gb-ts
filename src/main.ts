@@ -45,6 +45,7 @@ function runInstructions(count: number): void {
     refreshUI();
     if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
   }
+
 }
 
 function runFrames(count: number): void {
@@ -95,6 +96,7 @@ window.onload = () => {
   untilBreakBtn?.addEventListener("click", () => {
     parseBreakpoint();
     runUntilBreakpoint();
+
   });
 
   oneFrameBtn?.addEventListener("click", () => {
@@ -106,6 +108,7 @@ window.onload = () => {
     parseBreakpoint();
     const count = framesInput ? parseInt(framesInput.value, 10) || 0 : 0;
     if (count > 0) runFrames(count);
+
   });
 
   loadRomInput?.addEventListener("change", () => {

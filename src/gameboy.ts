@@ -13,8 +13,11 @@ export class Gameboy {
 
 	cpu: CPU;
 	gpu: GPU;
-	mmu: MMU;
-	getter = InstructionGetter;
+        mmu: MMU;
+        getter = InstructionGetter;
+
+        // stores the last 50 executed instruction logs
+        logBuffer: string[] = [];
 
 
 
@@ -150,34 +153,28 @@ export class Gameboy {
 	//
 	// just_one_instruction(bool) : wheter to run just one instruction and stop
 	//
-	// breakpoint(int) : if != -1, if PC=breakpoint, the function halts
-	// log_buffer(string) : string to save all logs from instructions executed on this frame 
-	RunFrame(just_one_instruction = false, breakpoint = -1, log_buffer: string) {
+        // breakpoint(int) : if != -1, if PC=breakpoint, the function halts
+        // The last 50 executed instructions are stored internally and returned
+        // at the end of the call
+        RunFrame(just_one_instruction = false, breakpoint = -1): string {
 
-		let print_debug_info = true;
+                let print_debug_info = true;
 
-		// max clocks in a frame
-		let clock_count_MAX = 70224;
-		if (just_one_instruction) {
-			clock_count_MAX = 1;
-		}
+                // max clocks in a frame
+                let clock_count_MAX = 70224;
+                if (just_one_instruction) {
+                        clock_count_MAX = 1;
+                }
 
-		let clock_count = 0;
-		// one frame timing
-		while (clock_count < clock_count_MAX) {
+                let clock_count = 0;
+                // one frame timing
+                while (clock_count < clock_count_MAX) {
 
-
-			//// THIS IS DISGUSTING
-			let log_line = this.getLog();
-			log_buffer += log_line + '\n';
-
-			let current_lines = log_buffer.split('\n');
-			if (current_lines.length > 50) {
-				current_lines = current_lines.slice(current_lines.length - 50);
-			}
-
-			log_buffer = current_lines.join('\n') + '\n';
-			////
+                        const log_line = this.getLog();
+                        this.logBuffer.push(log_line);
+                        if (this.logBuffer.length > 50) {
+                                this.logBuffer.shift();
+                        }
 
 
 			// check for interrupts
@@ -185,10 +182,10 @@ export class Gameboy {
 
 			let old_pc = this.cpu.registers.pc;
 
-			if (old_pc == breakpoint && breakpoint != -1) {
-				console.log(`Emulator halted on PC==${old_pc.toString(16)}`)
-				return 0;
-			}
+                        if (old_pc == breakpoint && breakpoint != -1) {
+                                console.log(`Emulator halted on PC==${old_pc.toString(16)}`)
+                                return this.logBuffer.join('\n');
+                        }
 
 			let { arg, new_pc, inst } = this.FetchOpCode();
 
@@ -202,9 +199,11 @@ export class Gameboy {
 			clock_count += inst.cycles;
 
 
-			this.gpu.RunClocks(inst.cycles);
-		}
-	}
+                        this.gpu.RunClocks(inst.cycles);
+                }
+
+                return this.logBuffer.join('\n');
+        }
 	getLog(): string {
 		// FORMAT
 		// A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD

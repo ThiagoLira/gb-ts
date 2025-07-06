@@ -11,7 +11,8 @@ const manyStepBtn = document.getElementById("step-many-btn") as HTMLButtonElemen
 const untilBreakBtn = document.getElementById("run-until-break-btn") as HTMLButtonElement | null;
 const breakpointInput = document.getElementById("breakpoint-input") as HTMLInputElement | null;
 const oneFrameBtn = document.getElementById("frame-btn") as HTMLButtonElement | null;
-const manyFramesBtn = document.getElementById("frame-many-btn") as HTMLButtonElement | null;
+const runFramesBtn = document.getElementById("run-frames-btn") as HTMLButtonElement | null;
+const framesInput = document.getElementById("frames-input") as HTMLInputElement | null;
 const registersDiv = document.getElementById("registers") as HTMLDivElement | null;
 const interruptsDiv = document.getElementById("interrupts") as HTMLDivElement | null;
 const screenCanvas = document.getElementById("fullscreen") as HTMLCanvasElement | null;
@@ -26,14 +27,9 @@ function parseBreakpoint(): void {
   breakpoint = isNaN(num) ? -1 : num;
 }
 
-function appendLog(line: string): void {
+function updateLog(buffer: string): void {
   if (!DEBUG_MODE || !logBox) return;
-  const lines = logBox.value.split("\n").filter((l) => l.length > 0);
-  lines.push(line);
-  if (lines.length > 50) {
-    lines.splice(0, lines.length - 50);
-  }
-  logBox.value = lines.join("\n");
+  logBox.value = buffer;
 }
 
 function refreshUI(): void {
@@ -44,19 +40,31 @@ function refreshUI(): void {
 
 function runInstructions(count: number): void {
   for (let i = 0; i < count; i++) {
-    gb.RunFrame(true, breakpoint);
-    appendLog(gb.getLog());
+    const log = gb.RunFrame(true, breakpoint);
+    updateLog(log);
+    refreshUI();
     if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
   }
-  refreshUI();
+
 }
 
 function runFrames(count: number): void {
   for (let i = 0; i < count; i++) {
-    gb.RunFrame(false, breakpoint);
+    const log = gb.RunFrame(false, breakpoint);
+    updateLog(log);
+    refreshUI();
     if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
   }
-  refreshUI();
+}
+
+function runUntilBreakpoint(): void {
+  if (breakpoint === -1) return;
+  while (gb.cpu.registers.pc !== breakpoint) {
+    const log = gb.RunFrame(false, breakpoint);
+    updateLog(log);
+    refreshUI();
+    if (gb.cpu.registers.pc === breakpoint) break;
+  }
 }
 
 function loadRomFromBuffer(buff: Uint8Array): void {
@@ -87,7 +95,8 @@ window.onload = () => {
 
   untilBreakBtn?.addEventListener("click", () => {
     parseBreakpoint();
-    runFrames(1);
+    runUntilBreakpoint();
+
   });
 
   oneFrameBtn?.addEventListener("click", () => {
@@ -95,9 +104,11 @@ window.onload = () => {
     runFrames(1);
   });
 
-  manyFramesBtn?.addEventListener("click", () => {
+  runFramesBtn?.addEventListener("click", () => {
     parseBreakpoint();
-    runFrames(500);
+    const count = framesInput ? parseInt(framesInput.value, 10) || 0 : 0;
+    if (count > 0) runFrames(count);
+
   });
 
   loadRomInput?.addEventListener("change", () => {

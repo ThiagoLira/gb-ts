@@ -1,180 +1,113 @@
-
-import { Gameboy } from "./gameboy"
-import { _base64ToBuffer } from "./utilities"
+import { Gameboy } from "./gameboy";
+import { _base64ToBuffer } from "./utilities";
 
 let gb: Gameboy;
-let breakpoint = 0;
-
+let breakpoint = -1;
 const DEBUG_MODE = true;
 
-let one_step_btn = document.getElementById("onestepbt");
-let many_step_btn = <HTMLInputElement>document.getElementById("manystep");
-let tillbreak_btn = document.getElementById("untilbreak");
-let breakpoint_input = <HTMLInputElement>document.getElementById("breakpoint_input");
-let one_frame_btn = <HTMLInputElement>document.getElementById("oneframebt");
-let run_500_frames_btn = <HTMLInputElement>document.getElementById("framesbt");
-let registers_div = <HTMLInputElement>document.getElementById("registers");
-let interrupts_div = <HTMLInputElement>document.getElementById("interrupts");
-let screen_obj = <HTMLCanvasElement>document.getElementById("screen");
-let full_screen_obj = <HTMLCanvasElement>document.getElementById("fullscreen");
-let load_rom = <HTMLInputElement>document.getElementById("loadrom");
-let log_text_box = <HTMLTextAreaElement>document.getElementById("log_buffer");
+// DOM references
+const stepBtn = document.getElementById("step-btn") as HTMLButtonElement | null;
+const manyStepBtn = document.getElementById("step-many-btn") as HTMLButtonElement | null;
+const untilBreakBtn = document.getElementById("run-until-break-btn") as HTMLButtonElement | null;
+const breakpointInput = document.getElementById("breakpoint-input") as HTMLInputElement | null;
+const oneFrameBtn = document.getElementById("frame-btn") as HTMLButtonElement | null;
+const manyFramesBtn = document.getElementById("frame-many-btn") as HTMLButtonElement | null;
+const registersDiv = document.getElementById("registers") as HTMLDivElement | null;
+const interruptsDiv = document.getElementById("interrupts") as HTMLDivElement | null;
+const screenCanvas = document.getElementById("fullscreen") as HTMLCanvasElement | null;
+const loadRomInput = document.getElementById("rom-loader") as HTMLInputElement | null;
+const logBox = document.getElementById("log-box") as HTMLTextAreaElement | null;
 
+function parseBreakpoint(): void {
+  if (!breakpointInput) return;
+  const value = breakpointInput.value.trim();
+  const num = value.startsWith("0x") || value.startsWith("0X") ?
+    parseInt(value, 16) : parseInt(value, 10);
+  breakpoint = isNaN(num) ? -1 : num;
+}
 
-window.onload = function() {
+function appendLog(line: string): void {
+  if (!DEBUG_MODE || !logBox) return;
+  const lines = logBox.value.split("\n").filter((l) => l.length > 0);
+  lines.push(line);
+  if (lines.length > 50) {
+    lines.splice(0, lines.length - 50);
+  }
+  logBox.value = lines.join("\n");
+}
 
-	// first load this, which is totally not a base64 encoded ROM
-	let el = <HTMLDataElement>document.getElementById("not_a_rom");
-	console.log(el)
-	if (el) {
-		let buff = _base64ToBuffer(el.value)
-		if (buff) {
-			gb = new Gameboy(buff, true)
-			console.log('Loaded (not) rom from page!')
-		}
-	}
+function refreshUI(): void {
+  if (registersDiv) registersDiv.innerHTML = gb.cpu.toString();
+  if (interruptsDiv) interruptsDiv.innerHTML = gb.mmu.interruptstate2string();
+  if (screenCanvas) gb.gpu.draw_frame_buffer(screenCanvas);
+}
 
+function runInstructions(count: number): void {
+  for (let i = 0; i < count; i++) {
+    gb.RunFrame(true, breakpoint);
+    appendLog(gb.getLog());
+    if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
+  }
+  refreshUI();
+}
 
-	let frame_and_draw = () => {
-		let log_buffer = ""
-		log_buffer = gb.RunFrame(false, -1, log_buffer = log_buffer)
-		registers_div.innerHTML = gb.cpu.toString();
-		interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-		if (DEBUG_MODE) {
-			log_text_box.value = log_buffer;
-		}
-		gb.gpu.draw_frame_buffer(full_screen_obj);
+function runFrames(count: number): void {
+  for (let i = 0; i < count; i++) {
+    gb.RunFrame(false, breakpoint);
+    if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
+  }
+  refreshUI();
+}
 
-	}
+function loadRomFromBuffer(buff: Uint8Array): void {
+  gb = new Gameboy(buff, true);
+}
 
-	// run one instruction
-	if (one_step_btn) {
-		one_step_btn.addEventListener("click", (e: Event) => {
-			// run just one instruction with parameter 
-			// just_one_instruction
-			gb.RunFrame(true)
-			registers_div.innerHTML = gb.cpu.toString();
-			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-			gb.gpu.draw_frame_buffer(full_screen_obj);
-			let log_line = gb.getLog();
-			let current_lines = log_text_box.value.split('\n');
-			console.log(log_line);
-			// Add the new line
-			current_lines.push(log_line);
+window.onload = () => {
+  // Load embedded ROM if present
+  const romData = document.getElementById("not_a_rom") as HTMLDataElement | null;
+  if (romData) {
+    const buff = _base64ToBuffer(romData.value);
+    gb = new Gameboy(buff, true);
+    console.log("Loaded (not) rom from page!");
+  }
 
-			// If there are more than 50 lines, remove the oldest one(s)
-			if (current_lines.length > 50) {
-				current_lines = current_lines.slice(current_lines.length - 50);
-			}
+  breakpointInput?.addEventListener("change", parseBreakpoint);
+  parseBreakpoint();
 
-			// Join the lines back together and update the textbox
-			log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
-		})
-	};
-	// run 500 instructions
-	if (many_step_btn) {
-		many_step_btn.addEventListener("click", (e: Event) => {
-			// run just one instruction with parameter 
-			for (var i = 0; i < 500; i++) {
-				gb.RunFrame(true)
-				if (DEBUG_MODE) {
-					let log_line = gb.getLog();
-					let current_lines = log_text_box.value.split('\n');
-					console.log(log_line);
-					// Add the new line
-					current_lines.push(log_line);
+  stepBtn?.addEventListener("click", () => {
+    parseBreakpoint();
+    runInstructions(1);
+  });
 
-					// If there are more than 50 lines, remove the oldest one(s)
-					if (current_lines.length > 50) {
-						current_lines = current_lines.slice(current_lines.length - 50);
-					}
+  manyStepBtn?.addEventListener("click", () => {
+    parseBreakpoint();
+    runInstructions(50);
+  });
 
-					// Join the lines back together and update the textbox
-					log_text_box.value = current_lines.join('\n') + '\n'; // Add a newline at the end for consistent spacing
-				}
-			}
-			registers_div.innerHTML = gb.cpu.toString();
-			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-			gb.gpu.draw_frame_buffer(full_screen_obj);
-		})
-	};
+  untilBreakBtn?.addEventListener("click", () => {
+    parseBreakpoint();
+    runFrames(1);
+  });
 
-	// run until breakpoint OR ONE FRAME
-	if (tillbreak_btn) {
-		tillbreak_btn.addEventListener("click", (e: Event) => {
-			//parse breakpoint
-			let bpt = parseInt(breakpoint_input.value)
+  oneFrameBtn?.addEventListener("click", () => {
+    parseBreakpoint();
+    runFrames(1);
+  });
 
-			// run just one instruction with parameter 
-			// just_one_instruction
-			gb.RunFrame(false, bpt)
-			registers_div.innerHTML = gb.cpu.toString();
-			interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-			gb.gpu.draw_screen(gb.mmu, full_screen_obj);
-		})
-	};
+  manyFramesBtn?.addEventListener("click", () => {
+    parseBreakpoint();
+    runFrames(500);
+  });
 
-	// run one frame
-	if (one_frame_btn) {
-		one_frame_btn.addEventListener("click", (e: Event) => {
-			// run 1 frames
-			setTimeout(frame_and_draw, 16)
-		})
-	};
-
-	// run 500 frames
-	if (run_500_frames_btn) {
-		run_500_frames_btn.addEventListener("click", (e: Event) => {
-			// run 500 frames
-			for (var i = 0; i < 500; i++) {
-				setTimeout(frame_and_draw, 16)
-			}
-		})
-	};
-
-	if (load_rom) {
-
-		load_rom.addEventListener("change", (e: Event) => {
-			var fileReader = new FileReader();
-
-			fileReader.onload = function(e) {
-				let buff = new Uint8Array(fileReader.result as ArrayBuffer);
-
-				gb = new Gameboy(buff, true);
-				console.log('loaded gameboy with ROM provided!');
-				if (DEBUG_MODE) {
-					// load values that should be in memory after bootrom runs
-					// A 	0x01
-					// F 	0xB0 (or CH-Z if managing flags individually)
-					// B 	0x00
-					// C 	0x13
-					// D 	0x13
-					// E 	0xD8
-					// H 	0x01
-					// L 	0x4D
-					// SP 	0xFFFE
-					// PC 	0x0100
-					gb.cpu.registers.a = 0x01
-					gb.cpu.registers.f = 0xB0
-					gb.cpu.registers.b = 0x00
-					gb.cpu.registers.c = 0x13
-					gb.cpu.registers.d = 0x00
-					gb.cpu.registers.e = 0xD8
-					gb.cpu.registers.h = 0x01
-					gb.cpu.registers.l = 0x4D
-					gb.cpu.registers.sp = 0xFFFE
-					gb.cpu.registers.pc = 0x0100
-				}
-				registers_div.innerHTML = gb.cpu.toString();
-				interrupts_div.innerHTML = gb.mmu.interruptstate2string();
-
-			}
-			fileReader.readAsArrayBuffer((load_rom.files as FileList)[0]);
-
-		})
-	}
-
-
-
-
+  loadRomInput?.addEventListener("change", () => {
+    if (!loadRomInput.files || loadRomInput.files.length === 0) return;
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      const buff = new Uint8Array(fileReader.result as ArrayBuffer);
+      loadRomFromBuffer(buff);
+      refreshUI();
+    };
+    fileReader.readAsArrayBuffer(loadRomInput.files[0]);
+  });
 };

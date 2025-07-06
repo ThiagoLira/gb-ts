@@ -20,105 +20,110 @@ const loadRomInput = document.getElementById("rom-loader") as HTMLInputElement |
 const logBox = document.getElementById("log-box") as HTMLTextAreaElement | null;
 
 function parseBreakpoint(): void {
-  if (!breakpointInput) return;
-  const value = breakpointInput.value.trim();
-  const num = value.startsWith("0x") || value.startsWith("0X") ?
-    parseInt(value, 16) : parseInt(value, 10);
-  breakpoint = isNaN(num) ? -1 : num;
+	if (!breakpointInput) return;
+	const value = breakpointInput.value.trim();
+	const num = value.startsWith("0x") || value.startsWith("0X") ?
+		parseInt(value, 16) : parseInt(value, 10);
+	breakpoint = isNaN(num) ? -1 : num;
 }
 
 function updateLog(buffer: string): void {
-  if (!DEBUG_MODE || !logBox) return;
-  logBox.value = buffer;
+	if (!DEBUG_MODE || !logBox) return;
+	logBox.value = buffer;
 }
 
 function refreshUI(): void {
-  if (registersDiv) registersDiv.innerHTML = gb.cpu.toString();
-  if (interruptsDiv) interruptsDiv.innerHTML = gb.mmu.interruptstate2string();
-  if (screenCanvas) gb.gpu.draw_frame_buffer(screenCanvas);
+	if (registersDiv) registersDiv.innerHTML = gb.cpu.toString();
+	if (interruptsDiv) interruptsDiv.innerHTML = gb.mmu.interruptstate2string();
+	if (screenCanvas) gb.gpu.draw_frame_buffer(screenCanvas);
 }
 
 function runInstructions(count: number): void {
-  for (let i = 0; i < count; i++) {
-    const log = gb.RunFrame(true, breakpoint);
-    updateLog(log);
-    refreshUI();
-    if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
-  }
+	for (let i = 0; i < count; i++) {
+		const log = gb.RunFrame(true, breakpoint);
+		updateLog(log);
+		refreshUI();
+		if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
+	}
 
+}
+
+
+let RunFrameWrapper = function() {
+	const log = gb.RunFrame(false, breakpoint);
+	updateLog(log);
+	refreshUI();
 }
 
 function runFrames(count: number): void {
-  for (let i = 0; i < count; i++) {
-    const log = gb.RunFrame(false, breakpoint);
-    updateLog(log);
-    refreshUI();
-    if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
-  }
+	for (let i = 0; i < count; i++) {
+		setTimeout(RunFrameWrapper, 16);
+		if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
+	}
 }
 
 function runUntilBreakpoint(): void {
-  if (breakpoint === -1) return;
-  while (gb.cpu.registers.pc !== breakpoint) {
-    const log = gb.RunFrame(false, breakpoint);
-    updateLog(log);
-    refreshUI();
-    if (gb.cpu.registers.pc === breakpoint) break;
-  }
+	if (breakpoint === -1) return;
+	while (gb.cpu.registers.pc !== breakpoint) {
+		const log = gb.RunFrame(false, breakpoint);
+		updateLog(log);
+		refreshUI();
+		if (gb.cpu.registers.pc === breakpoint) break;
+	}
 }
 
 function loadRomFromBuffer(buff: Uint8Array): void {
-  gb = new Gameboy(buff, true);
+	gb = new Gameboy(buff, true);
 }
 
 window.onload = () => {
-  // Load embedded ROM if present
-  const romData = document.getElementById("not_a_rom") as HTMLDataElement | null;
-  if (romData) {
-    const buff = _base64ToBuffer(romData.value);
-    gb = new Gameboy(buff, true);
-    console.log("Loaded (not) rom from page!");
-  }
+	// Load embedded ROM if present
+	const romData = document.getElementById("not_a_rom") as HTMLDataElement | null;
+	if (romData) {
+		const buff = _base64ToBuffer(romData.value);
+		gb = new Gameboy(buff, true);
+		console.log("Loaded (not) rom from page!");
+	}
 
-  breakpointInput?.addEventListener("change", parseBreakpoint);
-  parseBreakpoint();
+	breakpointInput?.addEventListener("change", parseBreakpoint);
+	parseBreakpoint();
 
-  stepBtn?.addEventListener("click", () => {
-    parseBreakpoint();
-    runInstructions(1);
-  });
+	stepBtn?.addEventListener("click", () => {
+		parseBreakpoint();
+		runInstructions(1);
+	});
 
-  manyStepBtn?.addEventListener("click", () => {
-    parseBreakpoint();
-    runInstructions(50);
-  });
+	manyStepBtn?.addEventListener("click", () => {
+		parseBreakpoint();
+		runInstructions(50);
+	});
 
-  untilBreakBtn?.addEventListener("click", () => {
-    parseBreakpoint();
-    runUntilBreakpoint();
+	untilBreakBtn?.addEventListener("click", () => {
+		parseBreakpoint();
+		runUntilBreakpoint();
 
-  });
+	});
 
-  oneFrameBtn?.addEventListener("click", () => {
-    parseBreakpoint();
-    runFrames(1);
-  });
+	oneFrameBtn?.addEventListener("click", () => {
+		parseBreakpoint();
+		runFrames(1);
+	});
 
-  runFramesBtn?.addEventListener("click", () => {
-    parseBreakpoint();
-    const count = framesInput ? parseInt(framesInput.value, 10) || 0 : 0;
-    if (count > 0) runFrames(count);
+	runFramesBtn?.addEventListener("click", () => {
+		parseBreakpoint();
+		const count = framesInput ? parseInt(framesInput.value, 10) || 0 : 0;
+		if (count > 0) runFrames(count);
 
-  });
+	});
 
-  loadRomInput?.addEventListener("change", () => {
-    if (!loadRomInput.files || loadRomInput.files.length === 0) return;
-    const fileReader = new FileReader();
-    fileReader.onload = () => {
-      const buff = new Uint8Array(fileReader.result as ArrayBuffer);
-      loadRomFromBuffer(buff);
-      refreshUI();
-    };
-    fileReader.readAsArrayBuffer(loadRomInput.files[0]);
-  });
+	loadRomInput?.addEventListener("change", () => {
+		if (!loadRomInput.files || loadRomInput.files.length === 0) return;
+		const fileReader = new FileReader();
+		fileReader.onload = () => {
+			const buff = new Uint8Array(fileReader.result as ArrayBuffer);
+			loadRomFromBuffer(buff);
+			refreshUI();
+		};
+		fileReader.readAsArrayBuffer(loadRomInput.files[0]);
+	});
 };

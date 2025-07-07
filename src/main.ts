@@ -49,18 +49,32 @@ function runInstructions(count: number): void {
 }
 
 
+
 let RunFrameWrapper = function() {
 	const log = gb.RunFrame(false, breakpoint);
 	updateLog(log);
 	refreshUI();
 }
+// A helper function that creates a promise-based delay
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-function runFrames(count: number): void {
+// Mark the function as async
+async function runFrames(count: number): Promise<void> {
 	for (let i = 0; i < count; i++) {
-		setTimeout(RunFrameWrapper, 16);
-		if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) break;
+		// Run the frame logic
+		RunFrameWrapper();
+
+		// Now, check the breakpoint condition
+		if (gb.cpu.registers.pc === breakpoint && breakpoint !== -1) {
+			break; // Stop the loop if the breakpoint is hit
+		}
+
+		// Wait for 16ms before the next iteration
+		await delay(16);
 	}
 }
+
+
 
 function runUntilBreakpoint(): void {
 	if (breakpoint === -1) return;

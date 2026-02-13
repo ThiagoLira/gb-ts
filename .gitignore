@@ -1,3 +1,5 @@
 node_modules/
 lib/
 dist/
+SameBoy/
+test_bootrom.gb

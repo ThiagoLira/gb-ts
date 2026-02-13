@@ -2,7 +2,9 @@
   "name": "gb-ts",
   "version": "1.0.0",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "dev": "node build.js --watch",
+    "serve": "npx serve dist -l 3000"
   },
   "devDependencies": {
     "esbuild": "^0.19.11",

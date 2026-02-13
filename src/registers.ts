@@ -18,7 +18,7 @@ export class Registers {
     // default value for program counter and stack counter
     // remember those two values are *adresses*
     public pc: number = 0x00;
-    public sp: number = 0xfffe;
+    public sp: number = 0x0000;
 
 
 

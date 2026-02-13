@@ -1,5 +1,4 @@
 import { CPU } from "./cpu"
-import { RegisterSet } from "./registerset"
 import { MMU } from "./mmu"
 import { Gameboy } from "./gameboy"
 

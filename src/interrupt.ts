@@ -9,7 +9,7 @@ export enum Int {
 export class InterruptController {
     IE: number = 0;
     IF: number = 0;
-    IME: number = 1;
+    IME: number = 0;
 
     request(i: Int) {
         this.IF |= 1 << i;

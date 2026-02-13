@@ -37,7 +37,7 @@ export class GPU {
 	// these atributes are set by MMU object
 	// video registers
 	// lcd control
-	lcdc: number = 0x91;
+	lcdc: number = 0x00;
 
 	// lcdc status
 	stat: number = 0x0;
@@ -58,7 +58,7 @@ export class GPU {
 	dma: number = 0x0;
 
 	// Background Color Pallete
-	bgp: number = 0xFC;
+	bgp: number = 0x00;
 
 	bp0: number = 0xff;
 	bp1: number = 0xff;
@@ -390,78 +390,43 @@ export class GPU {
 		}
 	}
 
-	public draw_screen(mmu: MMU, screen_obj: HTMLCanvasElement, draw_full: boolean = false): void {
-
-		// draw background data
+	// Blit the 160x144 framebuffer (produced by render_scan) to canvas
+	public draw_screen(screen_obj: HTMLCanvasElement): void {
 		let context = screen_obj.getContext('2d');
+		if (context) {
+			const img_data = context.createImageData(160, 144);
+			img_data.data.set(this.framebuffer);
+			context.putImageData(img_data, 0, 0);
+		}
+	}
 
+	// Debug: render the full 256x256 BG tilemap from VRAM
+	public draw_tilemap(mmu: MMU, screen_obj: HTMLCanvasElement): void {
+		let context = screen_obj.getContext('2d');
 		if (context) {
 			let img_data = context.getImageData(0, 0, screen_obj.width, screen_obj.height);
-
 			let pixels = img_data.data;
-
-			let offset_vram = 0x8000;
-
+			const row_stride = screen_obj.width * 4;
 
 			let p = 0;
-			// tilemap region 1
-			for (let i = 0x9800 - offset_vram; i <= 0x9bff - offset_vram; i++) {
-
-
-				let t = mmu.vram[i]
-
-				// which line of the 32x32 grid of tiles we are now
+			for (let i = 0x1800; i <= 0x1bff; i++) {
+				let t = mmu.vram[i];
 				let line_of_tiles = ~~(p / 32);
-				// which tile on the horizontal line of tiles are we? (32 tiles per line)
 				let column_of_tiles = p % 32;
 
-
-				// draw full tile
 				for (let c = 0; c < 8; c++) {
 					for (let l = 0; l < 8; l++) {
-
-
-
-						let pixel = (line_of_tiles * 8 * 1020) + (column_of_tiles * 8 * 4) + l * 4 + (1020 * c);
-
-						let pixel_color = this.tileset_data[t][c][l];
-
-						let [r, g, b] = get_RGB(pixel_color);
-
+						let pixel = (line_of_tiles * 8 + c) * row_stride + (column_of_tiles * 8 + l) * 4;
+						let [r, g, b] = get_RGB(this.tileset_data[t][c][l]);
 						pixels[pixel + 0] = r;
 						pixels[pixel + 1] = g;
 						pixels[pixel + 2] = b;
 						pixels[pixel + 3] = 255;
-
-
 					}
 				}
-
-				p++
+				p++;
 			}
 
-			if (draw_full) {
-				context.putImageData(img_data, 0, 0)
-			}
-			else {
-				// draw only part of the image on the current view from the gameboy
-				context.putImageData(img_data, 0, 0, this.scx, this.scy, 160, 144)
-			}
-		}
-	}
-
-	public draw_frame_buffer(screen_obj: HTMLCanvasElement) {
-
-		let context = screen_obj.getContext('2d');
-
-		if (context) {
-			// 1. Create a new ImageData object with the dimensions of the Game Boy screen.
-			const img_data = context.createImageData(160, 144);
-
-			// 2. Copy your framebuffer data into the ImageData's data buffer.
-			img_data.data.set(this.framebuffer);
-
-			// 3. Draw the completed image onto the canvas at position (0,0).
 			context.putImageData(img_data, 0, 0);
 		}
 	}

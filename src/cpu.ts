@@ -15,6 +15,7 @@ export class CPU {
 
 
     state = State.running;
+    halted = false;
 
     registers: Registers;
     bus: GameBoyBus;

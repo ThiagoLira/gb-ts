@@ -87,8 +87,12 @@ export class Gameboy {
 
 	HandleInterrupts(): boolean {
 
+		// HALT wakes up when any interrupt is pending (IE & IF), even if IME=0
+		if (this.cpu.halted && (this.bus.interrupts.IE & this.bus.interrupts.IF & 0x1F)) {
+			this.cpu.halted = false;
+		}
+
 		if (!this.bus.interrupts.IME) {
-			//console.log('Interrupts not enabled!')
 			return false;
 		}
 
@@ -179,6 +183,13 @@ export class Gameboy {
 
 			// check for interrupts
 			this.HandleInterrupts();
+
+			// HALT: advance clocks without executing instructions
+			if (this.cpu.halted) {
+				clock_count += 4;
+				this.gpu.RunClocks(4);
+				continue;
+			}
 
 			let old_pc = this.cpu.registers.pc;
 

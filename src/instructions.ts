@@ -1444,8 +1444,59 @@ export class InstructionGetter {
                 }
             }
 
+            case 0x07: {
+                return {
+                    op: function(args: op_args) {
+                        let a = args.cpu.registers.a;
+                        let carry = (a >> 7) & 1;
+                        args.cpu.registers.a = ((a << 1) | carry) & 0xFF;
+                        args.cpu.registers.f = carry ? 0x10 : 0;
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "RLCA"
+                }
+            }
+            case 0x0F: {
+                return {
+                    op: function(args: op_args) {
+                        let a = args.cpu.registers.a;
+                        let carry = a & 1;
+                        args.cpu.registers.a = ((a >> 1) | (carry << 7)) & 0xFF;
+                        args.cpu.registers.f = carry ? 0x10 : 0;
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "RRCA"
+                }
+            }
             case 0x17: {
-                return OpTemplate.RL('a');
+                return {
+                    op: function(args: op_args) {
+                        let a = args.cpu.registers.a;
+                        let oldCarry = (args.cpu.registers.f >> 4) & 1;
+                        let newCarry = (a >> 7) & 1;
+                        args.cpu.registers.a = ((a << 1) | oldCarry) & 0xFF;
+                        args.cpu.registers.f = newCarry ? 0x10 : 0;
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "RLA"
+                }
+            }
+            case 0x1F: {
+                return {
+                    op: function(args: op_args) {
+                        let a = args.cpu.registers.a;
+                        let oldCarry = (args.cpu.registers.f >> 4) & 1;
+                        let newCarry = a & 1;
+                        args.cpu.registers.a = ((a >> 1) | (oldCarry << 7)) & 0xFF;
+                        args.cpu.registers.f = newCarry ? 0x10 : 0;
+                    },
+                    cycles: 4,
+                    arg_number: 0,
+                    help_string: "RRA"
+                }
             }
 
             case 0x1E: {
@@ -1828,15 +1879,49 @@ export class InstructionGetter {
             case 0x6F: {
                 return OpTemplate.LDr1r2("l", "a");
             }
-            // case 0x70: { };
-            // case 0x71: { };
-            // case 0x72: { };
-            // case 0x73: { };
-            // case 0x74: { };
-            // case 0x75: { };
+            case 0x70: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.b); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),B"
+                }
+            }
+            case 0x71: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.c); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),C"
+                }
+            }
+            case 0x72: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.d); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),D"
+                }
+            }
+            case 0x73: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.e); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),E"
+                }
+            }
+            case 0x74: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.h); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),H"
+                }
+            }
+            case 0x75: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.cpu.registers.l); },
+                    cycles: 8, arg_number: 0, help_string: "LD (HL),L"
+                }
+            }
 
-
-            // case 0x36: { };
+            case 0x36: {
+                return {
+                    op: function(args: op_args) { args.mmu.setByte(args.cpu.registers.hl, args.arg); },
+                    cycles: 12, arg_number: 1, help_string: "LD (HL),n"
+                }
+            }
 
             case 0x3A: {
                 return {
@@ -2156,18 +2241,14 @@ export class InstructionGetter {
 
             case 0xC4: {
 
-
                 return {
                     op: function(args: op_args) {
-
                         let will_call = !args.cpu.registers.zero_flag;
-
                         if (will_call) {
                             // (sp - 1) <- PCh (sp - 2) <- PCl
-                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
-                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
                             args.cpu.registers.sp -= 2;
-                            // pc <- arg
                             args.cpu.registers.pc = args.arg
                         }
                     },
@@ -2175,23 +2256,16 @@ export class InstructionGetter {
                     arg_number: 2,
                     help_string: "CALL NZ"
                 }
-
-
             }
 
             case 0xCC: {
-
                 return {
                     op: function(args: op_args) {
-
                         let will_call = args.cpu.registers.zero_flag;
-
                         if (will_call) {
-                            // (sp - 1) <- PCh (sp - 2) <- PCl
-                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
-                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
                             args.cpu.registers.sp -= 2;
-                            // pc <- arg
                             args.cpu.registers.pc = args.arg
                         }
                     },
@@ -2199,23 +2273,16 @@ export class InstructionGetter {
                     arg_number: 2,
                     help_string: "CALL Z"
                 }
-
-
             }
 
             case 0xD4: {
-
                 return {
                     op: function(args: op_args) {
-
                         let will_call = !args.cpu.registers.carry_flag;
-
                         if (will_call) {
-                            // (sp - 1) <- PCh (sp - 2) <- PCl
-                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
-                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
                             args.cpu.registers.sp -= 2;
-                            // pc <- arg
                             args.cpu.registers.pc = args.arg
                         }
                     },
@@ -2223,23 +2290,16 @@ export class InstructionGetter {
                     arg_number: 2,
                     help_string: "CALL NC"
                 }
-
-
             }
 
             case 0xDC: {
-
                 return {
                     op: function(args: op_args) {
-
                         let will_call = args.cpu.registers.carry_flag;
-
                         if (will_call) {
-                            // (sp - 1) <- PCh (sp - 2) <- PCl
-                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc & 0xFF);
-                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                            args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
                             args.cpu.registers.sp -= 2;
-                            // pc <- arg
                             args.cpu.registers.pc = args.arg
                         }
                     },
@@ -2257,7 +2317,7 @@ export class InstructionGetter {
                         // pcl  (SP), pch  (SP+1), SPSP+2
                         let low_byte = args.mmu.getByte(args.cpu.registers.sp);
                         let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
-                        let res = (high_byte << 4) | low_byte;
+                        let res = (high_byte << 8) | low_byte;
                         args.cpu.registers.pc = res;
                         args.cpu.registers.sp += 2;
                     },
@@ -2459,8 +2519,8 @@ export class InstructionGetter {
                 return {
                     op: function(args: op_args) {
                         var a = args.cpu.registers.a;
-                        args.cpu.registers.a += args.arg
-                        OpTemplate.SetFlagsAddition(a, args.arg, args);
+                        args.cpu.registers.a -= args.arg;
+                        OpTemplate.SetFlagsSubtraction(a, args.arg, args);
                     },
                     cycles: 8,
                     arg_number: 1,
@@ -2891,16 +2951,6 @@ export class InstructionGetter {
                 }
             }
 
-            case 0x36: {
-                return {
-                    op: function(args: op_args) {
-                        args.mmu.setByte(args.cpu.registers.hl, args.arg);
-                    },
-                    cycles: 8,
-                    arg_number: 1,
-                    help_string: "LD (HL),n"
-                }
-            }
 
             case 0x00:{
 
@@ -2914,6 +2964,360 @@ export class InstructionGetter {
 
 
 
+            }
+
+            // ADD HL, rr
+            case 0x09: {
+                return {
+                    op: function(args: op_args) {
+                        let hl = args.cpu.registers.hl;
+                        let val = args.cpu.registers.bc;
+                        let result = hl + val;
+                        args.cpu.registers.f &= 0x80; // preserve Z, clear N/H/C
+                        if ((hl & 0xFFF) + (val & 0xFFF) > 0xFFF) args.cpu.registers.f |= 0x20; // H
+                        if (result > 0xFFFF) args.cpu.registers.f |= 0x10; // C
+                        args.cpu.registers.hl = result & 0xFFFF;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADD HL,BC"
+                }
+            }
+            case 0x19: {
+                return {
+                    op: function(args: op_args) {
+                        let hl = args.cpu.registers.hl;
+                        let val = args.cpu.registers.de;
+                        let result = hl + val;
+                        args.cpu.registers.f &= 0x80;
+                        if ((hl & 0xFFF) + (val & 0xFFF) > 0xFFF) args.cpu.registers.f |= 0x20;
+                        if (result > 0xFFFF) args.cpu.registers.f |= 0x10;
+                        args.cpu.registers.hl = result & 0xFFFF;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADD HL,DE"
+                }
+            }
+            case 0x29: {
+                return {
+                    op: function(args: op_args) {
+                        let hl = args.cpu.registers.hl;
+                        let result = hl + hl;
+                        args.cpu.registers.f &= 0x80;
+                        if ((hl & 0xFFF) + (hl & 0xFFF) > 0xFFF) args.cpu.registers.f |= 0x20;
+                        if (result > 0xFFFF) args.cpu.registers.f |= 0x10;
+                        args.cpu.registers.hl = result & 0xFFFF;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADD HL,HL"
+                }
+            }
+            case 0x39: {
+                return {
+                    op: function(args: op_args) {
+                        let hl = args.cpu.registers.hl;
+                        let val = args.cpu.registers.sp;
+                        let result = hl + val;
+                        args.cpu.registers.f &= 0x80;
+                        if ((hl & 0xFFF) + (val & 0xFFF) > 0xFFF) args.cpu.registers.f |= 0x20;
+                        if (result > 0xFFFF) args.cpu.registers.f |= 0x10;
+                        args.cpu.registers.hl = result & 0xFFFF;
+                    },
+                    cycles: 8,
+                    arg_number: 0,
+                    help_string: "ADD HL,SP"
+                }
+            }
+
+            // Conditional returns
+            case 0xC0: {
+                return {
+                    op: function(args: op_args) {
+                        if (!args.cpu.registers.zero_flag) {
+                            let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                            let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                            args.cpu.registers.pc = (high_byte << 8) | low_byte;
+                            args.cpu.registers.sp += 2;
+                        }
+                    },
+                    cycles: 20,
+                    arg_number: 0,
+                    help_string: "RET NZ"
+                }
+            }
+
+            case 0xC8: {
+                return {
+                    op: function(args: op_args) {
+                        if (args.cpu.registers.zero_flag) {
+                            let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                            let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                            args.cpu.registers.pc = (high_byte << 8) | low_byte;
+                            args.cpu.registers.sp += 2;
+                        }
+                    },
+                    cycles: 20,
+                    arg_number: 0,
+                    help_string: "RET Z"
+                }
+            }
+
+            case 0xD0: {
+                return {
+                    op: function(args: op_args) {
+                        if (!args.cpu.registers.carry_flag) {
+                            let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                            let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                            args.cpu.registers.pc = (high_byte << 8) | low_byte;
+                            args.cpu.registers.sp += 2;
+                        }
+                    },
+                    cycles: 20,
+                    arg_number: 0,
+                    help_string: "RET NC"
+                }
+            }
+
+            case 0xD8: {
+                return {
+                    op: function(args: op_args) {
+                        if (args.cpu.registers.carry_flag) {
+                            let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                            let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                            args.cpu.registers.pc = (high_byte << 8) | low_byte;
+                            args.cpu.registers.sp += 2;
+                        }
+                    },
+                    cycles: 20,
+                    arg_number: 0,
+                    help_string: "RET C"
+                }
+            }
+
+            // RETI - return and enable interrupts
+            case 0xD9: {
+                return {
+                    op: function(args: op_args) {
+                        let low_byte = args.mmu.getByte(args.cpu.registers.sp);
+                        let high_byte = args.mmu.getByte(args.cpu.registers.sp + 1);
+                        args.cpu.registers.pc = (high_byte << 8) | low_byte;
+                        args.cpu.registers.sp += 2;
+                        args.mmu.bus.interrupts.IME = 1;
+                    },
+                    cycles: 16,
+                    arg_number: 0,
+                    help_string: "RETI"
+                }
+            }
+
+            // RST instructions - push PC and jump to fixed address
+            case 0xC7: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x00;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $00"
+                }
+            }
+            case 0xCF: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x08;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $08"
+                }
+            }
+            case 0xD7: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x10;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $10"
+                }
+            }
+            case 0xDF: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x18;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $18"
+                }
+            }
+            case 0xE7: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x20;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $20"
+                }
+            }
+            case 0xEF: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x28;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $28"
+                }
+            }
+            case 0xF7: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x30;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $30"
+                }
+            }
+            case 0xFF: {
+                return {
+                    op: function(args: op_args) {
+                        args.mmu.setByte(args.cpu.registers.sp - 1, args.cpu.registers.pc >> 8);
+                        args.mmu.setByte(args.cpu.registers.sp - 2, args.cpu.registers.pc & 0xFF);
+                        args.cpu.registers.sp -= 2;
+                        args.cpu.registers.pc = 0x38;
+                    },
+                    cycles: 16, arg_number: 0, help_string: "RST $38"
+                }
+            }
+
+            // CPL - complement A (flip all bits)
+            case 0x2F: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.a = (~args.cpu.registers.a) & 0xFF;
+                        args.cpu.registers.f |= 0x60; // set N and H
+                    },
+                    cycles: 4, arg_number: 0, help_string: "CPL"
+                }
+            }
+
+            // DAA - decimal adjust A
+            case 0x27: {
+                return {
+                    op: function(args: op_args) {
+                        let a = args.cpu.registers.a;
+                        let f = args.cpu.registers.f;
+                        let correction = 0;
+                        let carry = false;
+
+                        if (f & 0x20) { // H flag
+                            correction |= 0x06;
+                        }
+                        if (f & 0x10) { // C flag
+                            correction |= 0x60;
+                            carry = true;
+                        }
+
+                        if (f & 0x40) { // N flag (after subtraction)
+                            a -= correction;
+                        } else { // after addition
+                            if ((a & 0x0F) > 0x09) correction |= 0x06;
+                            if (a > 0x99) { correction |= 0x60; carry = true; }
+                            a += correction;
+                        }
+
+                        a &= 0xFF;
+                        args.cpu.registers.a = a;
+                        // Z flag, preserve N, clear H, set C if carry
+                        args.cpu.registers.f = (args.cpu.registers.f & 0x40) | (a === 0 ? 0x80 : 0) | (carry ? 0x10 : 0);
+                    },
+                    cycles: 4, arg_number: 0, help_string: "DAA"
+                }
+            }
+
+            // SCF - set carry flag
+            case 0x37: {
+                return {
+                    op: function(args: op_args) {
+                        args.cpu.registers.f = (args.cpu.registers.f & 0x80) | 0x10; // preserve Z, clear N/H, set C
+                    },
+                    cycles: 4, arg_number: 0, help_string: "SCF"
+                }
+            }
+
+            // CCF - complement carry flag
+            case 0x3F: {
+                return {
+                    op: function(args: op_args) {
+                        let c = (args.cpu.registers.f & 0x10) ? 0 : 0x10; // flip C
+                        args.cpu.registers.f = (args.cpu.registers.f & 0x80) | c; // preserve Z, clear N/H
+                    },
+                    cycles: 4, arg_number: 0, help_string: "CCF"
+                }
+            }
+
+            // HALT - halt CPU until interrupt
+            case 0x76: {
+                return {
+                    op: function(args: op_args) {
+                        // For now, just skip ahead to avoid infinite loop
+                        // A proper implementation would wait for an interrupt
+                        args.cpu.halted = true;
+                    },
+                    cycles: 4, arg_number: 0, help_string: "HALT"
+                }
+            }
+
+            // STOP
+            case 0x10: {
+                return {
+                    op: function(args: op_args) {
+                        // STOP is a 2-byte opcode; skip the next byte
+                        args.cpu.registers.pc += 1;
+                    },
+                    cycles: 4, arg_number: 0, help_string: "STOP"
+                }
+            }
+
+            // ADD SP, n (signed immediate)
+            case 0xE8: {
+                return {
+                    op: function(args: op_args) {
+                        let val = args.arg > 127 ? args.arg - 256 : args.arg; // sign extend
+                        let sp = args.cpu.registers.sp;
+                        let result = sp + val;
+                        args.cpu.registers.f = 0; // clear all flags
+                        if ((sp & 0xF) + (args.arg & 0xF) > 0xF) args.cpu.registers.f |= 0x20; // H
+                        if ((sp & 0xFF) + (args.arg & 0xFF) > 0xFF) args.cpu.registers.f |= 0x10; // C
+                        args.cpu.registers.sp = result & 0xFFFF;
+                    },
+                    cycles: 16, arg_number: 1, help_string: "ADD SP,n"
+                }
+            }
+
+            // SBC A, n (immediate)
+            case 0xDE: {
+                return {
+                    op: function(args: op_args) {
+                        var a = args.cpu.registers.a;
+                        var n = args.arg + args.cpu.registers.carry_flag;
+                        args.cpu.registers.a -= n;
+                        OpTemplate.SetFlagsSubtraction(a, n, args);
+                    },
+                    cycles: 8, arg_number: 1, help_string: "SBC A,#"
+                }
             }
 
         }

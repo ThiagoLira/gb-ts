@@ -89,6 +89,9 @@ export class MMU {
 	// RAM on top of memory usually used for the stack
 	stack_ram: number[] = Array(0x7F).fill(0x0);
 
+	// external RAM (cartridge RAM / battery-backed SRAM) 8kb
+	eram: number[] = Array(0x2000).fill(0x0);
+
 	// 32kb cartridge
 	cartridge: number[] = Array(0x8000).fill(0x0);
 
@@ -114,6 +117,10 @@ export class MMU {
 			case ((0xA000 > address) && (address >= 0x8000)):
 				address_without_offset = address - 0x8000;
 				return this.vram[address_without_offset];
+			// external ram (cartridge RAM)
+			case ((0xC000 > address) && (address >= 0xA000)):
+				address_without_offset = address - 0xA000;
+				return this.eram[address_without_offset];
 			// iram
 			case ((0xE000 > address) && (address >= 0xC000)):
 				address_without_offset = address - 0xC000
@@ -122,10 +129,13 @@ export class MMU {
 			case ((0xFE00 > address) && (address >= 0xE000)):
 				address_without_offset = address - 0xE000;
 				return this.echo_iram[address_without_offset];
-			// oam
-			case ((0xFF0F > address) && (address >= 0xFE00)):
+			// oam ($FE00-$FE9F)
+			case ((0xFEA0 > address) && (address >= 0xFE00)):
 				address_without_offset = address - 0xFE00;
 				return this.oam[address_without_offset];
+			// unusable memory ($FEA0-$FEFF) and I/O registers ($FF00-$FF0E)
+			case ((0xFF0F > address) && (address >= 0xFEA0)):
+				return 0xFF;
 			// video related registers
 			case ((0xFF4C > address) && (address >= 0xFF0F)):
 				if (address == 0xFF0F) { return this.bus.interrupts.IF; }
@@ -133,9 +143,13 @@ export class MMU {
 				if (address == 0xFF41) { return this.gpu.stat; }
 				if (address == 0xFF42) { return this.gpu.scy; }
 				if (address == 0xFF43) { return this.gpu.scx; }
-				// HARDCODE THIS TO USE GB DEBUGGER
-				// if (address == 0xFF44) { return 0x90; }
-				if (address == 0xFF44) { return this.gpu.ly; }
+				// Line 153 quirk: LY reads as 0 after first ~4 T-cycles of line 153
+				if (address == 0xFF44) {
+					if (this.gpu.ly == 153 && this.gpu.modeclock >= 4) {
+						return 0;
+					}
+					return this.gpu.ly;
+				}
 				if (address == 0xFF45) { return this.gpu.lyc; }
 				if (address == 0xFF46) { return this.gpu.dma; }
 				if (address == 0xFF47) { return this.gpu.bgp; }
@@ -143,6 +157,10 @@ export class MMU {
 				if (address == 0xFF49) { return this.gpu.bp1; }
 				if (address == 0xFF4A) { return this.gpu.wy; }
 				if (address == 0xFF4B) { return this.gpu.wx; }
+				return 0xFF; // unhandled I/O in video register range
+			// I/O registers gap ($FF4C-$FF7F) - return 0xFF for unimplemented
+			case ((0xFF80 > address) && (address >= 0xFF4C)):
+				return 0xFF;
 			// stack
 			case ((0xFFFF > address) && (address >= 0xFF80)):
 				address_without_offset = address - 0xFF80;
@@ -164,16 +182,22 @@ export class MMU {
 			// boot rom range
 			case (address < 0x100):
 				throw new Error('Trying to write on bootrom');
+			// cartridge ROM writes (MBC commands) - silently ignore
+			case ((0x8000 > address) && (address >= 0x100)):
+				break;
 			//vram
 			case ((0xA000 > address) && (address >= 0x8000)):
 				address_without_offset = address - 0x8000;
 				//update tile data
-				//
-
 				if (address <= 0x97ff) {
 					this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
 				}
 				this.vram[address_without_offset] = val;
+				break;
+			// external ram (cartridge RAM)
+			case ((0xC000 > address) && (address >= 0xA000)):
+				address_without_offset = address - 0xA000;
+				this.eram[address_without_offset] = val;
 				break;
 			// iram
 			case ((0xE000 > address) && (address >= 0xC000)):
@@ -185,10 +209,13 @@ export class MMU {
 				address_without_offset = address - 0xE000;
 				this.echo_iram[address_without_offset] = val;
 				break;
-			// OAM
-			case ((0xFF0F > address) && (address >= 0xFE00)):
+			// OAM ($FE00-$FE9F)
+			case ((0xFEA0 > address) && (address >= 0xFE00)):
 				address_without_offset = address - 0xFE00;
 				this.oam[address_without_offset] = val;
+				break;
+			// unusable memory ($FEA0-$FEFF) and I/O registers ($FF00-$FF0E) - ignore writes
+			case ((0xFF0F > address) && (address >= 0xFEA0)):
 				break;
 			// video related registers
 			case ((0xFF80 > address) && (address >= 0xFF0F)):
@@ -205,6 +232,8 @@ export class MMU {
 				if (address == 0xFF49) { this.gpu.bp1 = val; }
 				if (address == 0xFF4A) { this.gpu.wy = val; }
 				if (address == 0xFF4B) { this.gpu.wx = val; }
+				// Bootrom unmap: writing non-zero to $FF50 disables the bootrom
+				if (address == 0xFF50 && val !== 0) { this.using_bootrom = false; }
 				break;
 			case ((0xFFFF > address) && (address >= 0xFF80)):
 				address_without_offset = address - 0xFF80;

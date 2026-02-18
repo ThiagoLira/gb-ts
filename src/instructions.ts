@@ -68,7 +68,10 @@ export class OpTemplate {
         return {
             op: function(args: op_args) {
                 // if reg is "af" reg[0] is "a" and reg[1] is "f"
-                args.cpu.registers[reg[1]] = args.mmu.getByte(args.cpu.registers.sp);
+                let lo = args.mmu.getByte(args.cpu.registers.sp);
+                // On real GB, lower nibble of F is always 0 (not wired)
+                if (reg === 'af') lo &= 0xF0;
+                args.cpu.registers[reg[1]] = lo;
                 args.cpu.registers[reg[0]] = args.mmu.getByte(args.cpu.registers.sp + 1);
                 args.cpu.registers.sp += 2;
             },
@@ -82,22 +85,20 @@ export class OpTemplate {
     // call AFTER summation to check and set flags 
     static SetFlagsAddition(reg_a_before: number, n: number, args: op_args) {
 
-        // check overflow 7-th bit
+        // Addition always clears N, start fresh
+        args.cpu.registers.f = 0;
+
+        // check overflow 8-th bit (carry)
         if (args.cpu.registers.a > 255) {
-            // set C
-            args.cpu.registers.f = 0x10;
-            // if value was greater than 0xff throw away extra bits
+            args.cpu.registers.f |= 0x10; // set C
             args.cpu.registers.a &= 255;
         }
         if (args.cpu.registers.a == 0) {
-            // set Z
-            args.cpu.registers.f |= 0x80;
+            args.cpu.registers.f |= 0x80; // set Z
         }
-        // check carry on 3-th bit
-        if ((n + reg_a_before) & 0x10) {
-            //set H
-            args.cpu.registers.f |= 0x20;
-
+        // half-carry: carry from bit 3 to bit 4
+        if (((reg_a_before & 0xF) + (n & 0xF)) > 0xF) {
+            args.cpu.registers.f |= 0x20; // set H
         }
 
 
@@ -148,14 +149,12 @@ export class OpTemplate {
     // call AFTER summation to check and set flags 
     static SetFlagsSubtraction(reg_a_before: number, n: number, args: op_args) {
 
-        // set subtraction flag
+        // set subtraction flag, clear everything else
         args.cpu.registers.f = 0x40;
 
-        // check borrow 
+        // check borrow
         if (args.cpu.registers.a < 0) {
-            // set C
-            args.cpu.registers.f = 0x10;
-            // if value was less than 0 let's not be negative 
+            args.cpu.registers.f |= 0x10; // set C (preserve N!)
             args.cpu.registers.a &= 255;
         }
 
@@ -1960,7 +1959,7 @@ export class InstructionGetter {
 
             case 0xE0: {
                 return {
-                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + TwoComplementConvert(args.arg), args.cpu.registers.a); },
+                    op: function(args: op_args) { args.mmu.setByte(0xFF00 + (args.arg & 0xFF), args.cpu.registers.a); },
                     cycles: 12,
                     arg_number: 1,
                     help_string: "LDH (n),A"
@@ -1970,7 +1969,7 @@ export class InstructionGetter {
 
             case 0xF0: {
                 return {
-                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + TwoComplementConvert(args.arg)); },
+                    op: function(args: op_args) { args.cpu.registers.a = args.mmu.getByte(0xFF00 + (args.arg & 0xFF)); },
                     cycles: 12,
                     arg_number: 1,
                     help_string: "LDH A,(n)"
@@ -2506,8 +2505,8 @@ export class InstructionGetter {
                     op: function(args: op_args) {
                         var a = args.cpu.registers.a;
                         var n = args.mmu.getByte(args.cpu.registers.hl);
-                        args.cpu.registers.a += args.mmu.getByte(args.cpu.registers.hl);
-                        OpTemplate.SetFlagsAddition(a, n, args);
+                        args.cpu.registers.a -= n;
+                        OpTemplate.SetFlagsSubtraction(a, n, args);
                     },
                     cycles: 8,
                     arg_number: 0,

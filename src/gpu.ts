@@ -91,6 +91,9 @@ export class GPU {
 
 		this.modeclock += clock_count;
 
+		let prevMode = this.mode;
+		let prevLy = this.ly;
+
 		switch (this.mode) {
 			// OAM read mode, scanline active
 			case 2:
@@ -121,11 +124,8 @@ export class GPU {
 
 					if (this.ly == 144) {
 						this.bus.interrupts.request(Int.VBlank);
-						console.log("Requesting VBLANK from gpu....");
-						console.log(this.bus.interrupts);
 						// Enter vblank
 						this.mode = 1;
-						// this.canvas.putImageData(this.screen, 0, 0);
 					}
 					else {
 						this.mode = 2;
@@ -149,11 +149,25 @@ export class GPU {
 		}
 
 		// update STAT register
-		// https://gbdev.gg8.se/wiki/articles/Video_Display#INT_40_-_V-Blank_Interrupt
-		// set mode bits 0-1
-		this.stat = this.stat & this.mode;
+		// set mode bits 0-1 (preserve upper bits 2-7)
+		this.stat = (this.stat & 0xFC) | (this.mode & 0x03);
 		// set Coincidence flag bit 2
-		(this.ly == this.lyc) ? this.stat |= 1 << 2 : this.stat &= ~(1 << 2);
+		let lycMatch = (this.ly == this.lyc);
+		lycMatch ? this.stat |= 1 << 2 : this.stat &= ~(1 << 2);
+
+		// Fire STAT interrupt (INT $48) when any enabled STAT source triggers.
+		// STAT bit 3 = Mode 0 (HBlank) interrupt source
+		// STAT bit 4 = Mode 1 (VBlank) interrupt source
+		// STAT bit 5 = Mode 2 (OAM) interrupt source
+		// STAT bit 6 = LYC=LY coincidence interrupt source
+		let statIRQ = false;
+		if ((this.stat & (1 << 3)) && this.mode === 0 && prevMode !== 0) statIRQ = true;
+		if ((this.stat & (1 << 4)) && this.mode === 1 && prevMode !== 1) statIRQ = true;
+		if ((this.stat & (1 << 5)) && this.mode === 2 && prevMode !== 2) statIRQ = true;
+		if ((this.stat & (1 << 6)) && lycMatch && (this.ly !== prevLy || prevMode !== this.mode)) statIRQ = true;
+		if (statIRQ) {
+			this.bus.interrupts.request(Int.LCDStat);
+		}
 
 	}
 

@@ -2,8 +2,19 @@
 import { GPU } from "./gpu"
 import { GameBoyBus } from "./bus"
 
+export type WatchpointHit = {
+	address: number;
+	value: number;
+	oldValue: number;
+};
+
 export class MMU {
 	bus: GameBoyBus;
+
+	// Memory watchpoints: address -> { value filter (-1 = any), callback }
+	watchpoints: Map<number, { value: number }> = new Map();
+	// Set by RunFrame loop when a watchpoint fires
+	lastWatchHit: WatchpointHit | null = null;
 
 
 
@@ -69,9 +80,6 @@ export class MMU {
 	];
 
 
-	// rom has 32 kbs
-	rom: number[] = [];
-
 	// vram has 8kbs
 	vram: number[] = Array(0x2000).fill(0xFF);
 
@@ -92,7 +100,15 @@ export class MMU {
 	// external RAM (cartridge RAM / battery-backed SRAM) 8kb
 	eram: number[] = Array(0x2000).fill(0x0);
 
-	// 32kb cartridge
+	// Full ROM data (up to 8MB for MBC5)
+	rom: Uint8Array = new Uint8Array(0);
+
+	// MBC5 state
+	romBank: number = 1;      // selected ROM bank for $4000-$7FFF (1-511)
+	ramBank: number = 0;      // selected RAM bank for $A000-$BFFF (0-15)
+	ramEnabled: boolean = false;
+
+	// Legacy: first 32KB view for bootrom logo patching
 	cartridge: number[] = Array(0x8000).fill(0x0);
 
 
@@ -101,18 +117,22 @@ export class MMU {
 		let address_without_offset = address;
 		switch (true) {
 
-			// boot rom range
+			// boot rom range ($0000-$00FF)
 			case (0x100 > address):
 				if (this.using_bootrom) {
 					return this.bios[address_without_offset];
 				}
 				else {
-					// cartridge also maps 0 til 0x100 addresses
-					return this.cartridge[address_without_offset]
+					// ROM bank 0 (always first 16KB)
+					return this.rom[address_without_offset] ?? 0xFF;
 				}
-			// cartridge
-			case (0x8000 > address) && (address >= 0x100):
-				return this.cartridge[address_without_offset];
+			// ROM bank 0 ($0100-$3FFF) — always first 16KB
+			case (0x4000 > address) && (address >= 0x100):
+				return this.rom[address_without_offset] ?? 0xFF;
+			// ROM switchable bank ($4000-$7FFF) — MBC5 bank select
+			case (0x8000 > address) && (address >= 0x4000):
+				const bankOffset = this.romBank * 0x4000 + (address - 0x4000);
+				return this.rom[bankOffset] ?? 0xFF;
 			//vram
 			case ((0xA000 > address) && (address >= 0x8000)):
 				address_without_offset = address - 0x8000;
@@ -175,15 +195,39 @@ export class MMU {
 
 	setByte(address: number, val: number): void {
 
+		// Check watchpoints
+		if (this.watchpoints.size > 0) {
+			const wp = this.watchpoints.get(address);
+			if (wp && (wp.value === -1 || wp.value === val)) {
+				// Read old value (try/catch in case address is write-only)
+				let oldVal = -1;
+				try { oldVal = this.getByte(address); } catch {}
+				this.lastWatchHit = { address, value: val, oldValue: oldVal };
+			}
+		}
 
 		let address_without_offset = address;
 		switch (true) {
 
-			// boot rom range
-			case (address < 0x100):
-				throw new Error('Trying to write on bootrom');
-			// cartridge ROM writes (MBC commands) - silently ignore
-			case ((0x8000 > address) && (address >= 0x100)):
+			// MBC5 registers ($0000-$7FFF)
+			case (address < 0x2000):
+				// RAM enable: $0A in lower nibble = enable, else disable
+				this.ramEnabled = (val & 0x0F) === 0x0A;
+				break;
+			case (address < 0x3000):
+				// ROM bank low 8 bits
+				this.romBank = (this.romBank & 0x100) | val;
+				break;
+			case (address < 0x4000):
+				// ROM bank bit 8
+				this.romBank = (this.romBank & 0xFF) | ((val & 0x01) << 8);
+				break;
+			case (address < 0x6000):
+				// RAM bank select (0-15)
+				this.ramBank = val & 0x0F;
+				break;
+			case (address < 0x8000):
+				// $6000-$7FFF: unused in MBC5
 				break;
 			//vram
 			case ((0xA000 > address) && (address >= 0x8000)):
@@ -241,8 +285,7 @@ export class MMU {
 				break;
 			case (0xFFFF == address):
 				this.bus.interrupts.IE = val;
-				// also set IME
-				this.bus.interrupts.IME = val;
+				// IME is NOT set here — only EI, DI, and RETI control IME
 				break;
 		}
 
@@ -346,14 +389,15 @@ export class MMU {
 	}
 
 
-	// load some bytes on cartridge from FileReader buffer 
+	// load some bytes on cartridge from FileReader buffer
 	loadRomFromFile(buffArray: Uint8Array) {
+		// Store full ROM for bank switching
+		this.rom = new Uint8Array(buffArray);
 
-		for (let i = 0; i <= buffArray.length; i = i + 1) {
+		// Also populate legacy cartridge array (first 32KB) for bootrom compatibility
+		for (let i = 0; i < Math.min(buffArray.length, 0x8000); i++) {
 			this.cartridge[i] = buffArray[i];
 		}
-
-
 	}
 
 

@@ -5,7 +5,18 @@ import { MMU } from "./mmu"
 import { Registers } from "./registers"
 import { InstructionConfig, InstructionGetter } from "./instructions"
 
-
+export type TraceEntry = {
+	pc: number;
+	opcode: number;
+	a: number; f: number; b: number; c: number;
+	d: number; e: number; h: number; l: number;
+	sp: number;
+	ly: number;
+	ime: number;
+	ie: number;
+	if_: number;
+	help: string;
+};
 
 //this class should hold the complete state of the gameboy to halt and de-halt emulation
 export class Gameboy {
@@ -18,6 +29,10 @@ export class Gameboy {
 
         // stores the last 50 executed instruction logs
         logBuffer: string[] = [];
+
+        // Instruction trace ring buffer (last 200 instructions)
+        traceBuffer: TraceEntry[] = [];
+        traceMax: number = 5000;
 
 
 
@@ -104,47 +119,47 @@ export class Gameboy {
 		let interruptName = '';
 
 		let handler = 0;
+		let interruptBit = -1;
 
+		// Priority: VBlank > LCDC > Timer > Serial > Joypad
+		// Use else-if so highest priority wins
 		if ((interruptEnable & interruptFlag & (1 << 0)) != 0) {
 			handler = 0x0040; // V-Blank
+			interruptBit = 0;
 			interruptName = 'V-Blank'
-		}
-		if ((interruptEnable & interruptFlag & (1 << 1)) != 0) {
+		} else if ((interruptEnable & interruptFlag & (1 << 1)) != 0) {
 			handler = 0x0048; // LCDC Status
+			interruptBit = 1;
 			interruptName = 'LCDC'
-		}
-		if ((interruptEnable & interruptFlag & (1 << 2)) != 0) {
+		} else if ((interruptEnable & interruptFlag & (1 << 2)) != 0) {
 			handler = 0x0050; // Timer Overflow
+			interruptBit = 2;
 			interruptName = 'Timer'
-		}
-		if ((interruptEnable & interruptFlag & (1 << 3)) != 0) {
+		} else if ((interruptEnable & interruptFlag & (1 << 3)) != 0) {
 			handler = 0x0058; // Serial Transfer
-		}
-		if ((interruptEnable & interruptFlag & (1 << 4)) != 0) {
+			interruptBit = 3;
+		} else if ((interruptEnable & interruptFlag & (1 << 4)) != 0) {
 			handler = 0x0060; // Hi-Lo of P10-P13
+			interruptBit = 4;
 		}
 
 		if (handler != 0) {
 
-			// set IME to 0
+			// set IME to 0 — stays 0 until RETI re-enables it
 			this.bus.interrupts.IME = 0;
-			// set 0xFF0F to 0
-			// equivalent to this.bus.interrupts.IF = 0;
-			this.mmu.setByte(0xFF0F, 0);
-			this.bus.interrupts.IF = 0;
+
+			// clear ONLY the specific interrupt flag bit, not all flags
+			this.bus.interrupts.IF &= ~(1 << interruptBit);
+			this.mmu.setByte(0xFF0F, this.bus.interrupts.IF);
 
 			// PUSH current PC to stack
-
 			this.mmu.setByte(this.cpu.registers.sp - 1, this.cpu.registers.pc >> 8);
 			this.mmu.setByte(this.cpu.registers.sp - 2, this.cpu.registers.pc & 0xFF);
 			this.cpu.registers.sp -= 2;
 
-			// jump to correct memory location
-			console.log('Handled interrupt' + interruptName);
+			// jump to handler — IME remains 0, handler must use RETI to re-enable
 			this.cpu.registers.pc = handler;
 
-			// set IME to 1
-			this.bus.interrupts.IME = 0x1;
 			return true;
 		} else {
 			return false;
@@ -200,6 +215,24 @@ export class Gameboy {
 
 			let { arg, new_pc, inst } = this.FetchOpCode();
 
+			// Record trace BEFORE executing
+			const r = this.cpu.registers;
+			this.traceBuffer.push({
+				pc: old_pc,
+				opcode: this.mmu.getByte(old_pc),
+				a: r.a, f: r.f, b: r.b, c: r.c,
+				d: r.d, e: r.e, h: r.h, l: r.l,
+				sp: r.sp,
+				ly: this.gpu.ly,
+				ime: this.bus.interrupts.IME,
+				ie: this.bus.interrupts.IE,
+				if_: this.bus.interrupts.IF,
+				help: inst.help_string,
+			});
+			if (this.traceBuffer.length > this.traceMax) {
+				this.traceBuffer.shift();
+			}
+
 			this.cpu.registers.pc = new_pc;
 			inst.op({
 				arg: arg,
@@ -209,8 +242,12 @@ export class Gameboy {
 
 			clock_count += inst.cycles;
 
-
                         this.gpu.RunClocks(inst.cycles);
+
+			// Check if a watchpoint fired during this instruction
+			if (this.mmu.lastWatchHit) {
+				return this.logBuffer.join('\n');
+			}
                 }
 
                 return this.logBuffer.join('\n');

@@ -375,14 +375,94 @@ window.onload = () => {
       parseBreakpoint();
       return breakpoint;
     },
+    mbc() {
+      if (!gb) return null;
+      return { romBank: gb.mmu.romBank, ramBank: gb.mmu.ramBank, ramEnabled: gb.mmu.ramEnabled, romSize: gb.mmu.rom.length };
+    },
     state() {
       return {
         registers: this.registers(),
         flags: this.flags(),
         gpu: this.gpu(),
         interrupts: this.interrupts(),
+        mbc: this.mbc(),
         status: statusSpan.textContent,
       };
+    },
+    // --- Memory watchpoints ---
+    // Watch writes to an address. value=-1 means any write, otherwise triggers only on that value.
+    watchMem(addr: number, value = -1) {
+      if (!gb) return 'no rom';
+      gb.mmu.watchpoints.set(addr, { value });
+      return `watching 0x${addr.toString(16)}` + (value === -1 ? ' (any write)' : ` (value=0x${value.toString(16)})`);
+    },
+    unwatchMem(addr: number) {
+      if (!gb) return 'no rom';
+      gb.mmu.watchpoints.delete(addr);
+      return `unwatched 0x${addr.toString(16)}`;
+    },
+    clearWatches() {
+      if (!gb) return 'no rom';
+      gb.mmu.watchpoints.clear();
+      return 'all watches cleared';
+    },
+    // Run until a watchpoint fires or maxFrames reached. Returns the watch hit + trace.
+    runUntilWatch(maxFrames = 10000) {
+      if (!gb) return null;
+      gb.mmu.lastWatchHit = null;
+      for (let i = 0; i < maxFrames; i++) {
+        gb.RunFrame(false, -1);
+        if (gb.mmu.lastWatchHit) {
+          const hit = gb.mmu.lastWatchHit;
+          gb.mmu.lastWatchHit = null;
+          const r = gb.cpu.registers;
+          return {
+            hit: {
+              address: '0x' + hit.address.toString(16),
+              value: '0x' + hit.value.toString(16),
+              oldValue: '0x' + hit.oldValue.toString(16),
+            },
+            frame: i,
+            state: this.state(),
+            trace: this.trace(30),
+          };
+        }
+      }
+      return { hit: null, msg: 'no watchpoint hit in ' + maxFrames + ' frames' };
+    },
+    // Get the last N trace entries (instruction history)
+    trace(n = 50) {
+      if (!gb) return null;
+      const buf = gb.traceBuffer;
+      const entries = buf.slice(-n);
+      return entries.map((t: any) =>
+        `PC=${t.pc.toString(16).padStart(4,'0')} [${t.opcode.toString(16).padStart(2,'0')}] ${t.help.padEnd(16)} ` +
+        `A=${t.a.toString(16).padStart(2,'0')} F=${t.f.toString(16).padStart(2,'0')} ` +
+        `BC=${((t.b<<8)|t.c).toString(16).padStart(4,'0')} DE=${((t.d<<8)|t.e).toString(16).padStart(4,'0')} ` +
+        `HL=${((t.h<<8)|t.l).toString(16).padStart(4,'0')} SP=${t.sp.toString(16).padStart(4,'0')} ` +
+        `LY=${t.ly} IME=${t.ime} IE=${t.ie.toString(16)} IF=${t.if_.toString(16)}`
+      );
+    },
+    // Run until watch, returning just the compact trace (for large searches)
+    runUntilWatchCompact(maxFrames = 10000) {
+      if (!gb) return null;
+      gb.mmu.lastWatchHit = null;
+      for (let i = 0; i < maxFrames; i++) {
+        gb.RunFrame(false, -1);
+        if (gb.mmu.lastWatchHit) {
+          const hit = gb.mmu.lastWatchHit;
+          gb.mmu.lastWatchHit = null;
+          return {
+            addr: '0x' + hit.address.toString(16),
+            val: '0x' + hit.value.toString(16),
+            old: '0x' + hit.oldValue.toString(16),
+            frame: i,
+            pc: '0x' + gb.cpu.registers.pc.toString(16),
+            sp: '0x' + gb.cpu.registers.sp.toString(16),
+          };
+        }
+      }
+      return null;
     },
   };
 };

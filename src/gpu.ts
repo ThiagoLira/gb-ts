@@ -194,9 +194,10 @@ export class GPU {
 			const tile_map_index = (tile_row_in_map * 32) + tile_col_in_map;
 			const tile_index_from_vram = this.bus.mmu.vram[tile_map_base - 0x8000 + tile_map_index];
 
-			// 9. Get the color from your tileset_data
-			const color_value = this.tileset_data[tile_index_from_vram][pixel_row_in_tile][pixel_col_in_tile];
-			const [r, g, b] = get_RGB(color_value);
+			// 9. Get the color from your tileset_data, apply BGP palette
+			const raw_color = this.tileset_data[tile_index_from_vram][pixel_row_in_tile][pixel_col_in_tile];
+			const shade = (this.bgp >> (raw_color * 2)) & 3;
+			const [r, g, b] = get_RGB(shade);
 
 			// 10. Calculate the position in your new framebuffer and set the pixel
 			const frame_buffer_pos = (this.ly * 160 + x) * 4;
@@ -248,20 +249,20 @@ export class GPU {
 
 	// this function is called when some byte is written on the VRAM
 	// it should then update the tiles object on the gpu for fast drawing of the background
-	// address is a index on vram object, not the actual memory
-	public update_tiles(address_without_offset: number, val: number, val_at_next_addr: number) {
+	// address is a index on vram object, not the actual memory (vram must already be updated)
+	public update_tiles(address_without_offset: number) {
+		// Align to even address — each tile row is a 2-byte pair (low, high)
+		const base = address_without_offset & ~1;
+		const tile = (base >> 4) & 511;
+		const y = (base >> 1) & 7;
 
-		let tile = (address_without_offset >> 4) & 511;
-		let y = (address_without_offset >> 1) & 7;
+		const low_byte = this.bus.mmu.vram[base];
+		const high_byte = this.bus.mmu.vram[base + 1];
 
 		for (let b = 0; b < 8; b += 1) {
-			let bit1 = (val >> b) & 1;
-			let bit2 = (val_at_next_addr >> b) & 1;
-
-			// I don't know why but reversing the index here fixes the tiles being reversed on the x axis
-			this.tileset_data[tile][y][7 - b] = (bit1 ? 1 : 0) +
-				(bit2 ? 2 : 0)
-
+			const bit1 = (low_byte >> b) & 1;
+			const bit2 = (high_byte >> b) & 1;
+			this.tileset_data[tile][y][7 - b] = bit1 + (bit2 << 1);
 		}
 	}
 
@@ -298,17 +299,19 @@ export class GPU {
 
 			let pixels = img_data.data;
 
-			// for each tile on memory
+			// 20 tiles per row, 15 rows = 300 tiles
+			const tiles_per_row = 20;
+			const row_stride = screen_obj.width * 4;
 			for (let p = 0; p < 300; p++) {
-				for (let l = 7; l >= 0; l--) {
-					for (let c = 7; c >= 0; c--) {
+				const tile_col = p % tiles_per_row;
+				const tile_row = ~~(p / tiles_per_row);
+				for (let c = 0; c < 8; c++) {
+					for (let l = 0; l < 8; l++) {
+						const px = tile_col * 8 + l;
+						const py = tile_row * 8 + c;
+						const pixel = py * row_stride + px * 4;
 
-						let pixel = (p * 8 % 160) + l * 4 + (c + p * 8 / 160 * 8) * 640
-
-
-						let pixel_color = this.tileset_data[p][c][l];
-						let [r, g, b] = get_RGB(pixel_color);
-
+						let [r, g, b] = get_RGB(this.tileset_data[p][c][l]);
 						pixels[pixel + 0] = r;
 						pixels[pixel + 1] = g;
 						pixels[pixel + 2] = b;

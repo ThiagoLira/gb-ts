@@ -20,6 +20,7 @@ const runUntilBreakBtn = $("run-until-break-btn") as HTMLButtonElement;
 const stepCountInput = $("step-count") as HTMLInputElement;
 const breakpointInput = $("breakpoint-input") as HTMLInputElement;
 const loadRomInput = $("rom-loader") as HTMLInputElement;
+const disableIOCb = $("disable-io-cb") as HTMLInputElement;
 
 const screenCanvas = $("screen-canvas") as HTMLCanvasElement;
 const bgMapCanvas = $("bg-map-canvas") as HTMLCanvasElement;
@@ -134,6 +135,10 @@ function refreshUI(): void {
   renderDebugCanvases();
 }
 
+function refreshScreenOnly(): void {
+  renderScreen();
+}
+
 function updateLog(log: string): void {
   if (!log) return;
   const lines = log.split("\n");
@@ -147,34 +152,29 @@ function parseBreakpoint(): void {
   breakpoint = parseAddr(breakpointInput.value);
 }
 
+
+function noUI(): boolean { return disableIOCb.checked; }
+
 function stepOne(): void {
   if (!gb) { setStatus("No ROM loaded"); return; }
-  const log = gb.RunFrame(true, breakpoint);
-  updateLog(log);
-  refreshUI();
+  const log = gb.RunFrame(true, -1);
+  if (noUI()) { refreshScreenOnly(); } else { updateLog(log); refreshUI(); }
   setStatus(`Stepped — PC=${hex16(gb.cpu.registers.pc)}`);
 }
 
 function stepMany(count: number): void {
   if (!gb) { setStatus("No ROM loaded"); return; }
   for (let i = 0; i < count; i++) {
-    const log = gb.RunFrame(true, breakpoint);
-    updateLog(log);
-    if (breakpoint !== -1 && gb.cpu.registers.pc === breakpoint) {
-      refreshUI();
-      setStatus(`Hit breakpoint at ${hex16(breakpoint)} after ${i + 1} steps`);
-      return;
-    }
+    gb.RunFrame(true, -1);
   }
-  refreshUI();
+  if (noUI()) refreshScreenOnly(); else refreshUI();
   setStatus(`Stepped ${count} — PC=${hex16(gb.cpu.registers.pc)}`);
 }
 
 function runOneFrame(): void {
   if (!gb) { setStatus("No ROM loaded"); return; }
-  const log = gb.RunFrame(false, breakpoint);
-  updateLog(log);
-  refreshUI();
+  const log = gb.RunFrame(false, -1);
+  if (noUI()) { refreshScreenOnly(); } else { updateLog(log); refreshUI(); }
   setStatus(`Frame done — PC=${hex16(gb.cpu.registers.pc)}`);
 }
 
@@ -186,17 +186,17 @@ async function runFrames(): Promise<void> {
   setStatus("Running...");
   let frameCount = 0;
   while (isRunning) {
-    const log = gb.RunFrame(false, breakpoint);
-    updateLog(log);
-    refreshUI();
+    gb.RunFrame(false, -1);
     frameCount++;
-    if (breakpoint !== -1 && gb.cpu.registers.pc === breakpoint) {
-      isRunning = false;
-      setStatus(`Hit breakpoint at ${hex16(breakpoint)} after ${frameCount} frames`);
-      return;
+    if (noUI()) {
+      refreshScreenOnly();
+      if (frameCount % 100 === 0) await delay(0);
+    } else {
+      refreshUI();
+      await delay(16);
     }
-    await delay(16);
   }
+  refreshUI();
   setStatus(`Stopped after ${frameCount} frames — PC=${hex16(gb.cpu.registers.pc)}`);
 }
 
@@ -207,8 +207,7 @@ async function runUntilBreakpoint(): Promise<void> {
   setStatus(`Running to ${hex16(breakpoint)}...`);
   let frameCount = 0;
   while (isRunning) {
-    const log = gb.RunFrame(false, breakpoint);
-    updateLog(log);
+    gb.RunFrame(false, breakpoint);
     frameCount++;
     if (gb.cpu.registers.pc === breakpoint) {
       isRunning = false;
@@ -216,7 +215,10 @@ async function runUntilBreakpoint(): Promise<void> {
       setStatus(`Hit breakpoint at ${hex16(breakpoint)} after ${frameCount} frames`);
       return;
     }
-    if (frameCount % 10 === 0) {
+    if (noUI()) {
+      refreshScreenOnly();
+      if (frameCount % 100 === 0) await delay(0);
+    } else if (frameCount % 10 === 0) {
       refreshUI();
       await delay(0);
     }
@@ -233,7 +235,7 @@ function stopExecution(): void {
 function resetEmulator(): void {
   isRunning = false;
   if (!currentRom) { setStatus("No ROM to reset"); return; }
-  gb = new Gameboy(currentRom, true);
+  gb = new Gameboy(currentRom, false);
   logBox.value = "";
   memDump.textContent = "";
   refreshUI();
@@ -271,12 +273,13 @@ function inspectMemory(): void {
 }
 
 // --- ROM loading ---
-function loadRom(buff: Uint8Array): void {
+function loadRom(buff: Uint8Array, use_bootrom = false): void {
   currentRom = buff;
-  gb = new Gameboy(buff, true);
+  gb = new Gameboy(buff, use_bootrom);
   refreshUI();
   setStatus("ROM loaded — Ready");
 }
+(window as any).loadRom = loadRom;
 
 // --- Event binding ---
 window.onload = () => {
@@ -285,16 +288,16 @@ window.onload = () => {
   if (romData) {
     const buff = _base64ToBuffer(romData.value);
     currentRom = buff;
-    gb = new Gameboy(buff, true);
+    gb = new Gameboy(buff, false);
     refreshUI();
-    setStatus("Embedded ROM loaded");
-    console.log("Loaded embedded ROM");
+    setStatus("Embedded ROM loaded (no bootrom)");
+    console.log("Loaded embedded ROM (skip bootrom)");
   }
 
-  stepBtn.addEventListener("click", () => { parseBreakpoint(); stepOne(); });
-  stepManyBtn.addEventListener("click", () => { parseBreakpoint(); stepMany(parseInt(stepCountInput.value, 10) || 50); });
-  frameBtn.addEventListener("click", () => { parseBreakpoint(); runOneFrame(); });
-  runBtn.addEventListener("click", () => { parseBreakpoint(); runFrames(); });
+  stepBtn.addEventListener("click", () => { stepOne(); });
+  stepManyBtn.addEventListener("click", () => { stepMany(parseInt(stepCountInput.value, 10) || 50); });
+  frameBtn.addEventListener("click", () => { runOneFrame(); });
+  runBtn.addEventListener("click", () => { runFrames(); });
   stopBtn.addEventListener("click", stopExecution);
   resetBtn.addEventListener("click", resetEmulator);
   runUntilBreakBtn.addEventListener("click", () => { parseBreakpoint(); runUntilBreakpoint(); });
@@ -315,8 +318,8 @@ window.onload = () => {
   document.addEventListener("keydown", (e) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
     switch (e.key) {
-      case "s": parseBreakpoint(); stepOne(); break;
-      case "f": parseBreakpoint(); runOneFrame(); break;
+      case "s": stepOne(); break;
+      case "f": runOneFrame(); break;
       case "Escape": stopExecution(); break;
     }
   });
@@ -357,12 +360,10 @@ window.onload = () => {
       return bytes.map((b: number) => b < 0 ? "??" : b.toString(16).toUpperCase().padStart(2, "0")).join(" ");
     },
     step(n = 1) {
-      parseBreakpoint();
       if (n === 1) stepOne(); else stepMany(n);
       return this.state();
     },
     frame(n = 1) {
-      parseBreakpoint();
       for (let i = 0; i < n; i++) runOneFrame();
       return this.state();
     },

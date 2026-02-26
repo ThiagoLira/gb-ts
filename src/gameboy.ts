@@ -46,6 +46,55 @@ export class Gameboy {
 
 		this.mmu = new MMU(this.bus, use_bootrom, buff);
 		this.bus.mmu = this.mmu;
+
+		if (!use_bootrom) {
+			this.initPostBootromState();
+		}
+	}
+
+	// Set registers and IO to the state the DMG bootrom leaves them in
+	initPostBootromState() {
+		const r = this.cpu.registers;
+		r.a = 0x01; r.f = 0xB0;
+		r.b = 0x00; r.c = 0x13;
+		r.d = 0x00; r.e = 0xD8;
+		r.h = 0x01; r.l = 0x4D;
+		r.sp = 0xFFFE;
+		r.pc = 0x0100;
+
+		// IO registers post-bootrom
+		this.mmu.setByte(0xFF05, 0x00); // TIMA
+		this.mmu.setByte(0xFF06, 0x00); // TMA
+		this.mmu.setByte(0xFF07, 0x00); // TAC
+		this.mmu.setByte(0xFF10, 0x80); // NR10
+		this.mmu.setByte(0xFF11, 0xBF); // NR11
+		this.mmu.setByte(0xFF12, 0xF3); // NR12
+		this.mmu.setByte(0xFF14, 0xBF); // NR14
+		this.mmu.setByte(0xFF16, 0x3F); // NR21
+		this.mmu.setByte(0xFF17, 0x00); // NR22
+		this.mmu.setByte(0xFF19, 0xBF); // NR24
+		this.mmu.setByte(0xFF1A, 0x7F); // NR30
+		this.mmu.setByte(0xFF1B, 0xFF); // NR31
+		this.mmu.setByte(0xFF1C, 0x9F); // NR32
+		this.mmu.setByte(0xFF1E, 0xBF); // NR33
+		this.mmu.setByte(0xFF20, 0xFF); // NR41
+		this.mmu.setByte(0xFF21, 0x00); // NR42
+		this.mmu.setByte(0xFF22, 0x00); // NR43
+		this.mmu.setByte(0xFF23, 0xBF); // NR44
+		this.mmu.setByte(0xFF24, 0x77); // NR50
+		this.mmu.setByte(0xFF25, 0xF3); // NR51
+		this.mmu.setByte(0xFF26, 0xF1); // NR52
+
+		this.mmu.setByte(0xFF40, 0x91); // LCDC — LCD on, BG on
+		this.mmu.setByte(0xFF42, 0x00); // SCY
+		this.mmu.setByte(0xFF43, 0x00); // SCX
+		this.mmu.setByte(0xFF45, 0x00); // LYC
+		this.mmu.setByte(0xFF47, 0xFC); // BGP
+		this.mmu.setByte(0xFF48, 0xFF); // OBP0
+		this.mmu.setByte(0xFF49, 0xFF); // OBP1
+		this.mmu.setByte(0xFF4A, 0x00); // WY
+		this.mmu.setByte(0xFF4B, 0x00); // WX
+		this.mmu.setByte(0xFFFF, 0x00); // IE
 	}
 
 

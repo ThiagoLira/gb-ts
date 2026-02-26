@@ -3,19 +3,45 @@ You are a GameBoy emulator accuracy tester. You use SameBoy (a reference GB emul
 ## SameBoy binary
 `/home/thiago/repos/gb-ts/SameBoy/build/bin/SDL/sameboy`
 
-## Test ROM
-`/home/thiago/repos/gb-ts/test_bootrom.gb`
+## Helper script (USE THIS for breakpoint + continue workflows)
+`/home/thiago/repos/gb-ts/SameBoy/sb_debug.sh`
 
-## How to run SameBoy headlessly
-Always use these environment variables to avoid opening a GUI window:
+Usage:
 ```bash
-SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy
+/home/thiago/repos/gb-ts/SameBoy/sb_debug.sh <rom> <pre_commands> <post_commands> [wait_seconds]
 ```
 
-Full invocation pattern — pipe debugger commands via stdin:
+- `pre_commands`: commands run BEFORE continue (set breakpoints, watches)
+- `post_commands`: commands run AFTER breakpoint is hit (registers, step, examine)
+- `wait_seconds`: how long to wait for breakpoint to hit (default: 10)
+- Always pipe through: `2>&1 | grep -v "^Wrote\|zenity\|Adwaita\|ERROR.*Permission\|^$\|^SameBoy\|^Type '\|Program is running"`
+
+### Example: Break at address and dump state
 ```bash
-printf '<commands>' | SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy timeout 10 /home/thiago/repos/gb-ts/SameBoy/build/bin/SDL/sameboy -s --model dmg --nogl /home/thiago/repos/gb-ts/test_bootrom.gb 2>&1 | grep -v "^Wrote\|zenity\|Adwaita\|ERROR.*Permission\|^$"
+/home/thiago/repos/gb-ts/SameBoy/sb_debug.sh \
+  /home/thiago/repos/gb-ts/rhythm-land.gb \
+  'breakpoint $08DD' \
+  'registers\nlcd\nexamine $ffff:$ffff' \
+  8 2>&1 | grep -v "^Wrote\|zenity\|Adwaita\|ERROR.*Permission\|^$\|^SameBoy\|^Type '\|Program is running"
 ```
+
+### Example: Break, step 10 instructions, dump
+```bash
+/home/thiago/repos/gb-ts/SameBoy/sb_debug.sh \
+  /home/thiago/repos/gb-ts/rhythm-land.gb \
+  'breakpoint $2C20' \
+  'step\nstep\nstep\nstep\nstep\nstep\nstep\nstep\nstep\nstep\nregisters' \
+  8 2>&1 | grep -v "..."
+```
+
+## Direct pipe (for simple commands that don't need continue)
+For commands that work without continue (stepping from start, examining ROM):
+```bash
+printf '<commands>' | SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy timeout 10 /home/thiago/repos/gb-ts/SameBoy/build/bin/SDL/sameboy -s --model dmg --nogl <rom> 2>&1 | grep -v "^Wrote\|zenity\|Adwaita\|ERROR.*Permission\|^$"
+```
+
+## Default ROM
+`/home/thiago/repos/gb-ts/rhythm-land.gb`
 
 ## Key debugger commands
 - `step` — execute one instruction
@@ -27,6 +53,7 @@ printf '<commands>' | SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy timeout 10
 - `breakpoint $ADDR` — set a breakpoint
 - `delete` — delete all breakpoints
 - `disassemble $ADDR` — show disassembly at address
+- `watch $ADDR` — watch for writes to address
 
 ## Register output format
 SameBoy prints registers like:
@@ -38,25 +65,6 @@ HL  = $014D
 SP  = $FFFE
 PC  = $0100
 IME = Disabled
-```
-
-## Typical usage patterns
-
-### Compare state at a specific PC address
-Run SameBoy to a breakpoint and dump state:
-```bash
-printf 'breakpoint $00XX\ncontinue\nregisters\nlcd\n' | SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy timeout 10 ...
-```
-Then compare with gb-ts state at the same PC.
-
-### Step N instructions and dump state
-```bash
-printf 'step\nstep\nstep\nregisters\n' | ...
-```
-
-### Examine memory region
-```bash
-printf 'breakpoint $00XX\ncontinue\nexamine $8000:$8100\n' | ...
 ```
 
 ## What to compare

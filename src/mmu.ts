@@ -28,11 +28,7 @@ export class MMU {
 		this.bus = bus;
 		this.gpu = bus.gpu;
 
-		if (use_bootrom) {
-			this.using_bootrom = use_bootrom;
-		} else {
-			this.using_bootrom = true;
-		}
+		this.using_bootrom = !!use_bootrom;
 
 
 		if (this.using_bootrom) {
@@ -232,11 +228,11 @@ export class MMU {
 			//vram
 			case ((0xA000 > address) && (address >= 0x8000)):
 				address_without_offset = address - 0x8000;
+				this.vram[address_without_offset] = val;
 				//update tile data
 				if (address <= 0x97ff) {
-					this.gpu.update_tiles(address_without_offset, val, this.vram[address_without_offset + 1]);
+					this.gpu.update_tiles(address_without_offset);
 				}
-				this.vram[address_without_offset] = val;
 				break;
 			// external ram (cartridge RAM)
 			case ((0xC000 > address) && (address >= 0xA000)):
